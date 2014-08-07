@@ -29,7 +29,7 @@ class Factors extends CActiveRecord
             "value"=>Yii::t("model", "Значение множителя"),
             "is_double"=>Yii::t("model", "Дробное"),
             "is_unsigned"=>Yii::t("model", "Целое"),
-            
+            "default_factor"=>Yii::t("model", "Значение по умолчанию")
         );
     }
     

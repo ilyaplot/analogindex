@@ -21,7 +21,11 @@ class CharacteristicsCatalog extends CActiveRecord
     
     public function relations()
     {
-        return parent::relations();
+        return array(
+            "name"=>array(self::HAS_ONE, "CharacteristicsCatalogNames", "catalog",
+                "condition"=>"lang = '".Yii::app()->language."'",
+            ),
+        );
     }
     
     public function attributeLabels()

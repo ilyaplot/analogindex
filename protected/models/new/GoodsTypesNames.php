@@ -1,8 +1,8 @@
 <?php
 /**
- * Описания брендов
+ * Названия типов товаров
  */
-class BrandsDescriptions extends CActiveRecord
+class GoodsTypesNames extends CActiveRecord
 {
     public static function model($className = __CLASS__) 
     {
@@ -15,7 +15,7 @@ class BrandsDescriptions extends CActiveRecord
     
     public function tableName() 
     {
-        return "{{brands_descriptions}}";
+        return "{{goods_types_names}}";
     }
     
     public function relations()
@@ -26,9 +26,9 @@ class BrandsDescriptions extends CActiveRecord
     public function attributeLabels()
     {
         return array(
-            "brand"=>Yii::t("model", "Производитель"),
+            "type"=>Yii::t("model", "Тип товара"),
+            "name"=>Yii::t("model", "Наименование"),
             "lang"=>Yii::t("model", "Код языка"),
-            "description"=>Yii::t("model", "Описание"),
         );
     }
 }

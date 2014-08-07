@@ -20,13 +20,16 @@ class GoodsTypes extends CActiveRecord
     
     public function relations()
     {
-        return parent::relations();
+        return array(
+            "name"=>array(self::HAS_ONE, "GoodsTypesNames", "type",
+                "condition" => "lang = '".Yii::app()->language."'",
+            ),
+        );
     }
     
     public function attributeLabels()
     {
         return array(
-            "name"=>Yii::t("model", "Название"),
             "link"=>Yii::t("model", "Ссылка"),
         );
     }

@@ -20,7 +20,10 @@ class Images extends CActiveRecord
     
     public function relations()
     {
-        return parent::relations();
+        return array(
+            "file_data"=>array(self::BELONGS_TO, "Files", "file"),
+            "resized"=>array(self::HAS_MANY, "ImagesResized", "image"),
+        );
     }
     
     public function attributeLabels()

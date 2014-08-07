@@ -20,7 +20,9 @@ class GoodsImages extends CActiveRecord
     
     public function relations()
     {
-        return parent::relations();
+        return array(
+            "image_data"=>array(self::BELONGS_TO, "Images", "image"),
+        );
     }
     
     public function attributeLabels()

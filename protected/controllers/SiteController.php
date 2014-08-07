@@ -111,21 +111,14 @@ class SiteController extends Controller
     
     public function actionTest()
     {
-        
-        $searchCriteria = new stdClass();
-        $searchCriteria->select = '*';
-        $searchCriteria->query = '@model '.Yii::app()->search->EscapeString('Nokia Lumia 520');
-        $searchCriteria->from = 'opitions_index';
-        $searchCriteria->paginator = null;
-        $srch = Yii::App()->search;
-        $srch->SetMaxQueryTime(300);
-        $srch->setMatchMode(SPH_MATCH_EXTENDED2);
-        $srch->SetRankingMode(SPH_RANK_SPH04);
-        $resArray = $srch->searchRaw($searchCriteria); 
-        $result = array_keys($resArray['matches']);
-        $result = array_reverse($result);
-        $sql = "select p.model, p.content, p.title, u.url from irecommend_pages p inner join irecommend_urls u on p.url = u.id where p.id in (".implode(',', $result).") order by field(p.id, ".implode(',', $result).")";
-        var_dump(Yii::app()->db->createCommand($sql)->queryAll());
+        $brands = Brands::model()->findAll();
+        foreach ($brands as $brand)
+        {
+            foreach($brand->goods as $goods)
+            {
+                echo $brand->description->description . " " .$brand->name." ".$goods->name."<br>".PHP_EOL;
+            }
+        }
     }
 }
 

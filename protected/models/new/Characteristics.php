@@ -20,7 +20,11 @@ class Characteristics extends CActiveRecord {
 
     public function relations()
     {
-        return parent::relations();
+        return array(
+            "name"=>array(self::HAS_ONE, "CharacteristicsNames", "characteristic",
+               "condition"=>"lang = '".Yii::app()->language."'", 
+            ),
+        );
     }
     
     public function attributeLabels()

@@ -20,7 +20,11 @@ class GoodsModifications extends CActiveRecord
     
     public function relations()
     {
-        return parent::relations();
+        return array(
+            "comment"=>array(self::HAS_ONE, "ModificationsComments", "modification",
+               "condition"=>"lang = '" .Yii::app()->language."'", 
+            ),
+        );
     }
     
     public function attributeLabels()

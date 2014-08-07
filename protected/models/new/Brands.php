@@ -20,7 +20,12 @@ class Brands extends CActiveRecord
     
     public function relations()
     {
-        return parent::relations();
+        return array(
+            "goods"=>array(self::HAS_MANY, "Goods", "brand"),
+            "description"=>array(self::HAS_ONE, "BrandsDescriptions", "brand", 
+                "condition"=>"lang = '".Yii::app()->language. "'",
+            ),
+        );
     }
     
     public function attributeLabels()
