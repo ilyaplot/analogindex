@@ -524,6 +524,18 @@ CREATE TABLE IF NOT EXISTS `ai_videos` (
   KEY `goods` (`goods`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Видео для товаров' AUTO_INCREMENT=1 ;
 
+--
+-- Структура таблицы `ai_brands_synonims`
+--
+
+CREATE TABLE IF NOT EXISTS `ai_brands_synonims` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `brand` int(10) unsigned NOT NULL,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `brand` (`brand`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Синонимы брендов для парсинга' AUTO_INCREMENT=1 ;
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

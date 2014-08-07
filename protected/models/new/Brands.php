@@ -25,6 +25,7 @@ class Brands extends CActiveRecord
             "description"=>array(self::HAS_ONE, "BrandsDescriptions", "brand", 
                 "on"=>"lang = '".Yii::app()->language. "'",
             ),
+            "synonims"=>array(self::HAS_MANY, "BrandsSynonims", "brand"),
         );
     }
     
