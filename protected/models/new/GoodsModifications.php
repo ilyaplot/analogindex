@@ -22,7 +22,7 @@ class GoodsModifications extends CActiveRecord
     {
         return array(
             "comment"=>array(self::HAS_ONE, "ModificationsComments", "modification",
-               "condition"=>"lang = '" .Yii::app()->language."'", 
+               "on"=>"lang = '" .Yii::app()->language."'", 
             ),
         );
     }

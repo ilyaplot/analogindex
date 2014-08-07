@@ -23,7 +23,7 @@ class CharacteristicsCatalog extends CActiveRecord
     {
         return array(
             "name"=>array(self::HAS_ONE, "CharacteristicsCatalogNames", "catalog",
-                "condition"=>"lang = '".Yii::app()->language."'",
+                "on"=>"lang = '".Yii::app()->language."'",
             ),
         );
     }

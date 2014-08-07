@@ -22,7 +22,7 @@ class GoodsTypes extends CActiveRecord
     {
         return array(
             "name"=>array(self::HAS_ONE, "GoodsTypesNames", "type",
-                "condition" => "lang = '".Yii::app()->language."'",
+                "on" => "lang = '".Yii::app()->language."'",
             ),
         );
     }

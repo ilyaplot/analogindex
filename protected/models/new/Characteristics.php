@@ -22,7 +22,7 @@ class Characteristics extends CActiveRecord {
     {
         return array(
             "name"=>array(self::HAS_ONE, "CharacteristicsNames", "characteristic",
-               "condition"=>"lang = '".Yii::app()->language."'", 
+               "on"=>"lang = '".Yii::app()->language."'", 
             ),
         );
     }
