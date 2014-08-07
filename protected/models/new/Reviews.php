@@ -20,7 +20,11 @@ class Reviews extends CActiveRecord
     
     public function relations()
     {
-        return parent::relations();
+        return array(
+            "rating"=>array(self::HAS_ONE, "RatingsReviews", "review", 
+                "select"=>"AVG(rating.value) as value",
+            )
+        );
     }
     
     public function attributeLabels()

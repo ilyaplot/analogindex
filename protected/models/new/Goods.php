@@ -40,6 +40,9 @@ class Goods extends CActiveRecord
                 "order"=>"priority desc",
                 "on"=>"lang = '".Yii::app()->language ."'",
             ),
+            "rating"=>array(self::HAS_ONE, "RatingsGoods", "goods", 
+                "select"=>"AVG(rating.value) as value",
+            )
         );
     }
     

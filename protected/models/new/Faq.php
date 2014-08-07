@@ -20,7 +20,11 @@ class Faq extends CActiveRecord
     
     public function relations()
     {
-        return parent::relations();
+        return array(
+            "rating"=>array(self::HAS_ONE, "RatingsFaq", "faq", 
+                "select"=>"AVG(rating.value) as value",
+            )
+        );
     }
     
     public function attributeLabels()

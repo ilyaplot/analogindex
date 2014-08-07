@@ -9,6 +9,10 @@ class RatingsGoods extends CActiveRecord
         return parent::model($className);
     }
     
+    public function getDbConnection() {
+        return Yii::app()->newdb;
+    }
+    
     public function tableName()
     {
         return "{{ratings_goods}}";
