@@ -111,7 +111,11 @@ class SiteController extends Controller
     
     public function actionTest()
     {
-        $brands = Brands::model()->with(array("goods"=>array("order"=>"goods.id asc")))->findAll();
+        $brands = Brands::model()->with(array(
+            "goods"=>array("order"=>"goods.id asc"),
+            "description",
+        ))->findAll();
+        
         foreach ($brands as $brand)
         {
             foreach($brand->goods as $goods)
