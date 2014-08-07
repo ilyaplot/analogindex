@@ -26,9 +26,9 @@ class SitemapCommand extends ConsoleCommand
         
         foreach ($links as &$link)
         {
-            $link = "http://analogindex.ru/pda/{$link['link']}.html";
+            $link = "/pda/{$link['link']}.html";
         }
-        $links[] = "http://analogindex.ru/index.html";
+        $links[] = "/index.html";
         $this->_createSitemap($links);
     }
     

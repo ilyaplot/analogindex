@@ -1,0 +1,3 @@
+User-agent: *
+Allow: * 
+Sitemap: http://analogindex.com/sitemap.xml.gz
