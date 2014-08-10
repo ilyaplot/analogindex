@@ -45,7 +45,7 @@
                                 'id'=>$resized->file_data->id,
                                 'name'=>$resized->file_data->name,
                                 'language'=>Language::getCurrentZone(),
-                                )); ?>" style="height:37px; width: 30px;" 
+                                )); ?>" style="height:<?php echo $resized->height?>px; width: <?php echo $resized->width?>px;" 
                                 alt="<?php echo $goods->brand_data->name." ".$goods->name ?>" />
                         <?php else :?>
                             <img src="/assets/img/photo/informers/1.png" style="height:37px; width: 30px;" alt="<?php echo $goods->brand_data->name." ".$goods->name ?>" />

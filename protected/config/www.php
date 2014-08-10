@@ -84,7 +84,7 @@ return array(
                     array('site/download', 'urlSuffix'=>''),
                 'http://analogindex.<language:\w+>/<link:[\d\w\-_]*>/img/id<id:\d+>/<filename:.*>'=>
                     array('site/download', 'urlSuffix'=>''),
-                'http://analogindex.<language:\w+>/pda/<brand:[\d\w\-_]*>/<link:[\d\w\-_]*>'=>
+                'http://analogindex.<language:\w+>/<type:[\w\d\-_]+>/<brand:[\d\w\-_]*>/<link:[\d\w\-_]*>'=>
                     array('site/goods', 'urlSuffix'=>'.html'),
                 'http://analogindex.<language:\w+>/'=>array('site/index', 'urlSuffix'=>''),
                 // Дефолтные правила. 
@@ -97,7 +97,7 @@ return array(
                     array('site/download', 'urlSuffix'=>''),
                 'http://www.analogindex.<language:\w+>/<link:[\d\w\-_]*>/img/id<id:\d+>/<filename:.*>'=>
                     array('site/download', 'urlSuffix'=>''),
-                'http://www.analogindex.<language:\w+>/pda/<brand:[\d\w\-_]*>/<link:[\d\w\-_]*>'=>
+                'http://www.analogindex.<language:\w+>/<type:[\w\d\-_]+>/<brand:[\d\w\-_]*>/<link:[\d\w\-_]*>'=>
                     array('site/goods', 'urlSuffix'=>'.html'),
                 'http://www.analogindex.<language:\w+>/'=>array('site/index', 'urlSuffix'=>''),
                 // Дефолтные правила. 

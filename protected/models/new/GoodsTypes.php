@@ -27,6 +27,9 @@ class GoodsTypes extends CActiveRecord
             "goods"=>array(self::HAS_MANY, "Goods", "type", 
                 "on"=>"goods.is_modification = false"
             ),
+            "page_goods"=>array(self::HAS_ONE, "Goods", "type",
+                "joinType"=>"INNER JOIN",
+            ),
         );
     }
     

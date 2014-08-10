@@ -7,5 +7,4 @@ return array(
     'Отзывы' => 'Comments',
     'Рейтинги' => 'Ratings',
     'Написать отзыв'=>'Leave a comment',
-    'Обзор телефона'=>'Phone review',
 );

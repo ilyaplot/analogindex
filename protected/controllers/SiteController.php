@@ -10,15 +10,41 @@ class SiteController extends Controller
         $this->render("index");
     }
     
-    public function actionGoods($link)
+    public function actionGoods($language, $type, $brand, $link)
     {
         if ($link == 'www')
             Yii::app ()->request->redirect ("http://".str_replace("www.", "", $_SERVER['HTTP_HOST']));
         
-        $model = new GoodsModel();
-        $data = $model->getForPage($link,1);
+        $linkPattern = "~[\w\d\-_]+~";
+        if (!preg_match($linkPattern, $link) || !preg_match($linkPattern, $brand) || !preg_match($linkPattern, $type))
+            throw new CHttpException(404, Yii::t("errors", "Страница не найдена"));            
         
-        $query = "select d.name, d.rating, r.title, r.content from destinations d inner join reviews r on d.id = r.destination where d.name = :name";
+        $criteria = new CDbCriteria();
+        $criteria->limit = "1";
+        $criteria->compare("t.link", $type);
+        
+        $data = GoodsTypes::model()->with(array(
+            "name",
+            "page_goods"=>array(
+                "on"=>"page_goods.link = '{$link}'",
+            ),
+            "page_goods.brand_data"=>array(
+                "joinType"=>"INNER JOIN",
+                "on"=>"brand_data.link = '{$brand}'",
+            ),
+            "page_goods.rating",
+            "page_goods.videos",
+            "page_goods.reviews",
+            "page_goods.faq",
+            "page_goods.images",
+        ))->find($criteria);
+        
+        if (!$data)
+            throw new CHttpException(404, Yii::t("errors", "Страница не найдена"));
+        
+        $this->setPageTitle($data->page_goods->brand_data->name." ".$data->page_goods->name);
+
+        /**
         
         if (Yii::app()->language == "ru")
         {
@@ -60,6 +86,9 @@ class SiteController extends Controller
 
         $this->setPageTitle($data['manufacturer']." ".$data['name']);
         $this->render("goods", array('data'=>$data));
+         * 
+         */
+        $this->render("goods", array("data"=>$data));
     }
     
     

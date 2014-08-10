@@ -29,6 +29,7 @@ class GoodsTypesNames extends CActiveRecord
             "type"=>Yii::t("model", "Тип товара"),
             "name"=>Yii::t("model", "Наименование"),
             "lang"=>Yii::t("model", "Код языка"),
+            "video_search_string"=>Yii::t("model", "Строка printf для поиска видео"),
         );
     }
 }

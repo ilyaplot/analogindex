@@ -53,11 +53,14 @@ class ResizeCommand extends CConsoleCommand
                 }
                 echo $file->name." ".$file->size.PHP_EOL;
                 $file->save();
+                
+                $imageprops = $imagick->getImageGeometry();
+                
                 $resizedImage = new ImagesResized();
                 $resizedImage->image = $image->id;
                 $resizedImage->size = $size;
-                $resizedImage->width = $params[0];
-                $resizedImage->height = $params[1];
+                $resizedImage->width = $imageprops['width'];
+                $resizedImage->height = $imageprops['height'];
                 $resizedImage->file = $file->id;
                 $resizedImage->save();
             }

@@ -4,6 +4,9 @@
  */
 class Goods extends CActiveRecord
 {    
+    
+    public $appendVideos = 3;
+    
     public static function model($className = __CLASS__) 
     {
         return parent::model($className);
@@ -79,5 +82,28 @@ class Goods extends CActiveRecord
             "image_data.resized.file_data",
         ))->findByAttributes(array("goods"=>$this->getPrimaryKey()));
         return isset($image->image_data) ? $image->image_data : null; 
+    }
+    
+    public function getVideos()
+    {
+        $result = array();
+        foreach ($this->videos as $video)
+        {
+            $result[] = $video->getTemplate(Videos::TYPE_YOUTUBE, $video->link).PHP_EOL;
+        }
+        if (count($result) < $this->appendVideos)
+        {
+            $videoModel = new Videos();
+            $appendVideos = $videoModel->getYoutube(
+                    $this->appendVideos - count($result), 
+                    $this->type_data->name->video_search_string, 
+                    $this->brand_data->name, 
+                    $this->name);
+            foreach ($appendVideos as $video)
+            {
+                $result[] = $videoModel->getTemplate(Videos::TYPE_YOUTUBE, $video).PHP_EOL;
+            }
+        }
+        return $result;
     }
 }
