@@ -24,6 +24,9 @@ class GoodsTypes extends CActiveRecord
             "name"=>array(self::HAS_ONE, "GoodsTypesNames", "type",
                 "on" => "lang = '".Yii::app()->language."'",
             ),
+            "goods"=>array(self::HAS_MANY, "Goods", "type", 
+                "on"=>"goods.is_modification = false"
+            ),
         );
     }
     

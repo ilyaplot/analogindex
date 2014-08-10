@@ -1,8 +1,10 @@
 <?php
+/**
+ * Создает сайтмап для всего сайта
+ */
 class SitemapCommand extends ConsoleCommand
 {
     private $_sitemapDirectory;
-    private $_currentSitemap = array();
     
     public function beforeAction($action, $params)
     {
@@ -13,22 +15,22 @@ class SitemapCommand extends ConsoleCommand
             $this->Log("Папка {$this->_sitemapDirectory} не существует или недоступна для записи.");
             exit();
         }
-        //if (!file_exists($this->_sitemapDirectory."1/"))
-        //    mkdir($this->_sitemapDirectory."1/", 0777);
         date_default_timezone_set("Europe/Moscow");
         return parent::beforeAction($action, $params);
     }
     
-    public function actionPda()
+    public function actionIndex()
     {
-        $model = new GoodsModel();
-        $links = $model->getListForSitemap(1);
-        
-        foreach ($links as &$link)
+        $goods = Goods::model()->with(array("brand_data", "type_data"))->findAll();
+        $links = array(
+            "/index.html",
+        );
+        foreach ($goods as $item)
         {
-            $link = "/pda/{$link['link']}.html";
+            echo ".";
+            $links[] = "/".$item->type_data->link."/".$item->brand_data->link."/".$item->link.".html";
         }
-        $links[] = "/index.html";
+        echo PHP_EOL;
         $this->_createSitemap($links);
     }
     

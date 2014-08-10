@@ -20,7 +20,9 @@ class ImagesResized extends CActiveRecord
     
     public function relations()
     {
-        return parent::relations();
+        return array(
+            "file_data"=>array(self::BELONGS_TO, "Files", "file"),
+        );
     }
     
     public function attributeLabels()

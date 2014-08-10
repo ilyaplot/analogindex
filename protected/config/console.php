@@ -5,6 +5,7 @@ return array(
     'import'=>array(
         'application.components.*',
         'application.models.*',
+        'application.models.new.*',
         // Parsers only for console!
         'application.parsers.*',
         'application.helpers.*'
@@ -29,6 +30,15 @@ return array(
             'username' => 'analogindex',
             'password' => 'analogindex',
             'charset' => 'utf8',
+        ),
+        'newdb'=>array(
+            'connectionString' => 'mysql:host=localhost;dbname=analogindex',
+            'emulatePrepare' => true,
+            'username' => 'analogindex',
+            'password' => 'analogindex',
+            'tablePrefix' => 'ai_',
+            'charset' => 'utf8',
+            'class' => 'CDbConnection',
         ),
         'reviews'=>array(
             'connectionString' => 'mysql:host=localhost;dbname=reviews',

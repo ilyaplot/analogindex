@@ -111,17 +111,55 @@ class SiteController extends Controller
     
     public function actionTest()
     {
+        $criteria = new CDbCriteria();
+        //$criteria->order = "t.name";
         $brands = Brands::model()->with(array(
             "goods"=>array("order"=>"goods.id asc"),
             "description",
-        ))->findAll();
-        
+        ))->findAll($criteria);
+        echo "<table border = 1>";
+        echo "<tr><th>ID</th><th>link</th><th>name</th></tr>";
         foreach ($brands as $brand)
         {
+            echo "<tr>";
+            echo "<td>".$brand->id."</td>";
+            echo "<td>".$brand->link ."</td>";
+            echo "<td>".$brand->name."</td>";
+            echo "</tr>";
             foreach($brand->goods as $goods)
             {
-                echo $brand->description->description . " " .$brand->name." ".$goods->name."<br>".PHP_EOL;
+                echo "<tr><td colspan=3>{$goods->name}</td></tr>";
             }
+        }
+        echo "</table>";
+    }
+    
+    
+    public function actionTest2()
+    {
+        exit();
+        $model = new Goods();
+        $transaction = $model->getDbConnection()->beginTransaction();
+        try 
+        {
+            $model->brand_data = new Brands();
+            $model->brand_data->name = "Test";
+            $model->brand_data->link = "test";
+
+            $model->name = "Test";
+            $model->link = "test";
+            $model->type = 1;
+
+            if ($model->brand_data->save())
+            {
+                $model->brand = $model->brand_data->id;
+
+                $model->save();
+                $transaction->commit();
+            }
+        } catch (Exception $ex) {
+            $transaction->rollback();
+            throw $ex;
         }
     }
 }

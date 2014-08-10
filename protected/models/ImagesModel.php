@@ -26,7 +26,7 @@ class ImagesModel extends Model
     
     public function getForGoods($id, $type)
     {
-        $query = "SELECT i.link, i.file, f.ext FROM images_{$type} i INNER JOIN files f ON i.file = f.id WHERE i.disabled = 0 and i.goods = :id ORDER BY i.priority asc, i.id asc";
+        $query = "SELECT i.link, i.file, f.ext, f.filesize, f.mime_type FROM images_{$type} i INNER JOIN files f ON i.file = f.id WHERE i.disabled = 0 and i.goods = :id ORDER BY i.priority asc, i.id asc";
         $result = $this->sql->createCommand($query)->queryAll(true,array('id'=>$id));
         return $result;
     }

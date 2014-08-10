@@ -76,23 +76,28 @@ return array(
                 
                 
                 'http://analogindex.<language:\w+>/lang'=>'site/language',
+                
+                'http://analogindex.<language:\w+>/_image/id<id:\d+>/<name:.*>'=>
+                    array('files/image', 'urlSuffix'=>''),
+                
                 'http://analogindex.<language:\w+>/<link:[\d\w\-_]*>/img/id<id:\d+>/<filename:.*>/<size:\d+>'=>
                     array('site/download', 'urlSuffix'=>''),
                 'http://analogindex.<language:\w+>/<link:[\d\w\-_]*>/img/id<id:\d+>/<filename:.*>'=>
                     array('site/download', 'urlSuffix'=>''),
-                'http://analogindex.<language:\w+>/pda/<manufacturer:[\d\w\-_]*>/<link:[\d\w\-_]*>'=>
+                'http://analogindex.<language:\w+>/pda/<brand:[\d\w\-_]*>/<link:[\d\w\-_]*>'=>
                     array('site/goods', 'urlSuffix'=>'.html'),
                 'http://analogindex.<language:\w+>/'=>array('site/index', 'urlSuffix'=>''),
                 // Дефолтные правила. 
                 'http://analogindex.<language:\w+>/<controller:\w+>/<action:\w+>'=>'<controller>/<action>',
                 
-                
+                'http://www.analogindex.<language:\w+>/_image/id<id:\d+>/<name:.*>'=>
+                    array('files/image', 'urlSuffix'=>''),
                 'http://www.analogindex.<language:\w+>/lang'=>'site/language',
                 'http://www.analogindex.<language:\w+>/<link:[\d\w\-_]*>/img/id<id:\d+>/<filename:.*>/<size:\d+>'=>
                     array('site/download', 'urlSuffix'=>''),
                 'http://www.analogindex.<language:\w+>/<link:[\d\w\-_]*>/img/id<id:\d+>/<filename:.*>'=>
                     array('site/download', 'urlSuffix'=>''),
-                'http://www.analogindex.<language:\w+>/pda/<manufacturer:[\d\w\-_]*>/<link:[\d\w\-_]*>'=>
+                'http://www.analogindex.<language:\w+>/pda/<brand:[\d\w\-_]*>/<link:[\d\w\-_]*>'=>
                     array('site/goods', 'urlSuffix'=>'.html'),
                 'http://www.analogindex.<language:\w+>/'=>array('site/index', 'urlSuffix'=>''),
                 // Дефолтные правила. 
