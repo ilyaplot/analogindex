@@ -106,7 +106,14 @@ return array(
 
             ),
         ),
-        
+        'cache'=>array(
+            'class'=>'CMemCache',
+            'useMemcached'=>false,
+            'serializer' => false,
+            'servers' => array(
+                array('host' => 'localhost', 'port' => 11211, 'weight'=>60),
+            )
+        ),
         'storage'=>array(
             'path'=>'/inktomia/db/analogindex',
             'section'=>'newfiles',

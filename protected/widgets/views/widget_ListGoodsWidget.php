@@ -35,7 +35,8 @@
                 <div class="informer-listGoods_photo">
                     <a href="<?php echo Yii::app()->createUrl("site/goods", array(
                         'link'=>$goods->link, 
-                        'brand'=>$goods->brand_data->link, 
+                        'brand'=>$goods->brand_data->link,
+                        'type'=>$goods->type_data->link, 
                         'language'=>Yii::app()->language
                     ));?>">
                         <?php $image = $goods->getPrimaryImage(); ?>
@@ -55,7 +56,8 @@
                 <div class="informer-listGoods_desc">
                     <a href="<?php echo Yii::app()->createUrl("site/goods", array(
                         'link'=>$goods->link, 
-                        'brand'=>$goods->brand_data->link, 
+                        'brand'=>$goods->brand_data->link,
+                        'type'=>$goods->type_data->link,
                         'language'=> Language::getCurrentZone()
                     ))?>">
                         <span><?php echo $goods->brand_data->name." ".$goods->name ?></span>
