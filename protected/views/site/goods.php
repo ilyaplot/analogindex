@@ -1,6 +1,17 @@
 <?php
     $goods = $data->page_goods;
 ?>
+<script type="text/javascript">
+    /**
+     * Возвращает строку для подписи к фото на нужном языке
+     * @returns string
+     */
+    function AnalogindexLightboxLabel(a,b){
+        return"<?php echo Yii::t("main", "Фотография ")?>"+a+" <?php echo Yii::t("main", " из ")?> "+b
+    };
+</script>
+<script src="/assets/js/lightbox.js"></script>
+<link href="/assets/css/lightbox.css" rel="stylesheet" />
 <ul class="breadcrumbs breadcrumb">
     <li itemscope itemtype="http://data-vocabulary.org/Breadcrumb" itemref="breadcrumb-1">
         <a href="http://analogindex.<?php echo Language::getCurrentZone() ?>/"><?php echo Yii::t('main', 'Главная')?></a>
@@ -15,7 +26,7 @@
         <span class="divider">/</span>
     </li>
     <li class="active" itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-3">
-        <?php echo $goods->brand_data->name?> <?php echo $goods->name?>
+        <?php echo $goods->brand_data->name?> <?php echo $goods->name?> <?php echo $goods->id?>
     </li>
 </ul>
 <div class="wp_col_fix clr">
@@ -81,20 +92,7 @@
                     <?php endif; ?>
                     <div class="clear"></div>
                 </div>
-                <div class="infoGoodItem-wp-settings" id="item2">
-                    <section class="infoGoodItem_content">
-                        <h3 class="infoGoodItem-infoTitle"><?php echo Yii::t('goods', 'Характеристики')?></h3>
-                        <div class="item-set-bl">
-                            <div class="item-set-bl_title">Общие</div>
-                            <?php /** foreach ($data['characteristics'] as $characteristic): ?>
-                            <div class="item-set-bl_lineText clr">
-                                <div class="flLeft"><span><?php echo htmlspecialchars($characteristic['name']) ?></span></div>
-                                <div class="flRight"><span><?php echo htmlspecialchars($characteristic['value']) ?></span></div>
-                            </div>
-                        <?php endforeach; **/ ?>
-                        </div>
-                    </section>
-                </div>
+                <?php $this->renderPartial("_goods_ characteristics", array("goods"=>$goods))?>
                 <div class="infoGoodItem-wp-news" id="item3">
                     <section class="infoGoodItem_content">
                         <h3 class="infoGoodItem-infoTitle"><?php echo Yii::t('goods', 'Новости')?></h3>

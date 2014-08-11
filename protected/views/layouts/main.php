@@ -18,11 +18,6 @@
     <link href="/assets/css/style.css" rel="stylesheet" type="text/css">
     <link rel="shortcut icon" href="/assets/img/favicon.ico">
 
-    <!-- bxSlider -->
-    <link href="/assets/css/jquery.bxslider.css" rel="stylesheet" type="text/css">
-    <script type="text/javascript" src="/assets/js/jquery.bxslider.min.js"></script>
-    <!-- bxSlider -->
-
     <script type="text/javascript" src="/assets/js/scripts.js"></script>
 </head>
 <body>

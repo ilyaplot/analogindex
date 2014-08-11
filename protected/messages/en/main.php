@@ -11,4 +11,7 @@ return array(
     'Пользовательское предложение' => 'Use offer',
     'Обратная связь' => 'Feedback',
     '<a href="http://analogindex.com/lang.html">English version</a>' => '<a href="http://analogindex.ru/lang.html">Русская версия</a>',
+    // Для Lightbox
+    'Фотография '=>'Photo ',
+    ' из '=>' of ',
 );

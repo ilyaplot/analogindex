@@ -68,7 +68,7 @@ class Goods extends CActiveRecord
         
         $size = abs(intval($size));
         
-        $image = GoodsImages::model()->cache(60*60*24*7)->with(array(
+        $image = GoodsImages::model()->cache(60*60*24)->with(array(
             "image_data"=>array(
                 'joinType'=>'INNER JOIN',
                 'limit'=>'1',
