@@ -23,7 +23,7 @@ class SiteController extends Controller
         $criteria->limit = "1";
         $criteria->compare("t.link", $type);
         
-        $data = GoodsTypes::model()->cache(60*60*24)->with(array(
+        $data = GoodsTypes::model()->with(array(
             "name",
             "page_goods"=>array(
                 "on"=>"page_goods.link = '{$link}'",
@@ -37,6 +37,8 @@ class SiteController extends Controller
             "page_goods.reviews",
             "page_goods.faq",
             "page_goods.images",
+            "page_goods.images.image_data.resized_preview",
+            "page_goods.images.image_data.resized_list",
         ))->find($criteria);
         
         if (!$data)

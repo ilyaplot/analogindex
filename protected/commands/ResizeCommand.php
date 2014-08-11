@@ -29,7 +29,8 @@ class ResizeCommand extends CConsoleCommand
                 $width = $imageprops['width'];
                 $height = $imageprops['height'];
                 
-                $imagick->thumbnailImage($params[0], $params[1]);
+                //$imagick->thumbnailImage($params[0], $params[1]);
+                $imagick->resizeImage($params[0], $params[1], imagick::FILTER_LANCZOS, 0.9);
                 $file = new Files();
                 $file->save();
                 try
@@ -51,7 +52,7 @@ class ResizeCommand extends CConsoleCommand
                     $file->delete();
                     continue;
                 }
-                echo $file->name." ".$file->size.PHP_EOL;
+                echo $file->name." ".$file->size." ".$size." ".$image->file_data->id.PHP_EOL;
                 $file->save();
                 
                 $imageprops = $imagick->getImageGeometry();

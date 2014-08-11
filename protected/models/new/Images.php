@@ -19,8 +19,8 @@ class Images extends CActiveRecord
      */
     public static $sizes = array(
         // SIZE_CONST=>array(width, height, absolute)
-        //2=>array(100, 100, true),
-        //3=>array(200, 200, true),
+        2=>array(510, 0, false),
+        3=>array(91, 91, true),
         4=>array(30, 37, true),
         //5=>array(400, 400, false),
         //6=>array(500, 500, true),
@@ -47,6 +47,12 @@ class Images extends CActiveRecord
                 "joinType"=>'INNER JOIN',
             ),
             "resized"=>array(self::HAS_MANY, "ImagesResized", "image"),
+            "resized_preview"=>array(self::HAS_ONE, "ImagesResized", "image",
+                "on"=>"resized_preview.size = ".self::SIZE_PREVIEW,
+            ),
+            "resized_list"=>array(self::HAS_ONE, "ImagesResized", "image",
+                "on"=>"resized_list.size = ".self::SIZE_LIST,
+            ),
         );
     }
     

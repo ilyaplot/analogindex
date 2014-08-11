@@ -65,16 +65,6 @@ $(function(){
        $(this).parent().nextAll().removeClass("full");
     });
 
-    $(function(){
-      $('.item_photos_all').bxSlider({
-        mode: 'vertical',
-        slideWidth: 93,
-        minSlides: 3,
-        slideMargin: 10,
-        moveSlides: 1,
-        pager: false
-      });
-    });
 
 
     $(function(){
