@@ -44,17 +44,38 @@
   <li><a href="#faq">FAQ</a></li>
   <li><a href="#files">Файлы</a></li>
 </ul>
-<form id="form-general" action="" method="post" class="form-horizontal" onsubmit="return false;">
+<form id="form-general" action="" method="post" class="form-horizontal">
+    <input type="hidden" value="<?php echo $data->id?>" name="Goods[id]" />
     <div class="tab-content">
         <div class="tab-pane active" id="home">
             <div class="alert">
                 <strong>Внимание!</strong> 
                 При изменении типа товара, производителя или сслыки товар будет недоступен по старому адресу. <br />
             </div>
+            
+            <?php if (!empty($errors)):?>
+            <div class="alert alert-danger">
+            <?php foreach($errors as $message):?>
+            
+            <?php echo $message?><br />   
+            
+            <?php endforeach;?>
+            </div>
+            <?php endif;?>
+            
+            <?php if (!empty($success)):?>
+            <div class="alert alert-success">
+            <?php foreach($success as $message):?>
+            
+            <?php echo $message?><br />   
+            
+            <?php endforeach;?>
+            </div>
+            <?php endif;?>
             <div class="control-group">
                 <label class="control-label" for="inputBrand">Производитель</label>
                 <div class="controls">
-                    <input type="hidden" id="inputBrand" value="<?php echo $data->brand ?>">
+                    <input type="hidden" name="Goods[brand]" id="inputBrand" value="<?php echo $data->brand ?>">
                     <div id="inputBrandSpan" class="input-emulate"><?php echo $data->brand_data->name ?></div>
                     <a href="#brandModal" role="button" data-toggle="modal" id="inputBrand" class="btn btn-default" >
                         <i class="icon-edit"></i> Изменить ...
@@ -63,8 +84,8 @@
             </div>
             <div class="control-group">
                 <label class="control-label" for="inputType">Тип товара</label>
-                <div class="controls">
-                    <select name="type" id="inputType">
+                <div class="controls"> 
+                    <select name="Goods[type]" id="inputType">
                         <?php foreach ($types as $type):?>
                         <option value="<?php echo $type->id?>" <?php echo ($type->id == $data->type) ? "selected " : ''?>>
                             <?php echo $type->name->name?>
@@ -85,6 +106,30 @@
                     <input type="text" id="inputName" placeholder="Наименование" value="<?php echo $data->name?>">
                 </div>
             </div>
+            <table class="table table-bordered table-striped synonims">
+                <tr>
+                    <td><b>Синонимы:</b></td>
+                </tr>
+                <?php foreach ($data->synonims as $synonim): ?>
+                <tr>
+                    <td data-id="<?php echo $synonim->id?>">
+                                  
+                        <input type="text" name="synonims[<?php echo $synonim->id?>][name]" value="<?php echo $synonim->name?>" placeholder="Синоним"/><br />
+                        <input type="checkbox" value='1' name="synonims[<?php echo $synonim->id?>][visibled]" <?php echo ($synonim->visibled) ? "checked " : ''?>/> Отображать<br />
+                        <input type="checkbox" name="synonims[<?php echo $synonim->id?>][remove]" value="1" /> Удалить
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+                <tr>
+                    <td><b>Добавить синонимы:</b></td>
+                </tr>
+                <tr>
+                    <td>
+                        <input class="newsynonim" type="text" name="newsynonims[0]" value="" placeholder="Новый синоним"/> <br />
+                        <input type="checkbox" name="newsynonimscheck[0]" checked/> Отображать
+                    </td>
+                </tr>
+            </table>
         </div>
         <div class="tab-pane" id="images">
             <div class="alert alert-info">
@@ -168,5 +213,14 @@ $this->renderPartial("_modal_brand_change");
         });
         
         return false;
+    });
+    var synonimsCount = 1;
+    $("#home").on("change", '.newsynonim', function (){
+        $(this).removeClass("newsynonim");
+        $("table.synonims").append('<tr>'+
+            '<td><input class="newsynonim" type="text" name="newsynonims['+synonimsCount+']" value="" placeholder="Новый синоним"/> <br />'+
+            '<input type="checkbox" checked name="newsynonimscheck['+synonimsCount+']" /> Отображать</td></tr>'
+        );
+        synonimsCount++;
     });
 </script>

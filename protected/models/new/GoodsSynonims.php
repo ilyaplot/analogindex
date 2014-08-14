@@ -31,4 +31,19 @@ class GoodsSynonims extends CActiveRecord
             "visibled"=>Yii::t("model", "Отображать"),
         );
     }
+    
+    public function rules()
+    {
+        return array(
+            array('name, goods', 'required'),
+            array('name', 'length', 'min'=>1, 'max'=>255),
+            array('name', 'unique', 'caseSensitive'=>false, 'criteria'=>array(
+                'condition'=>'goods = :goods',
+                'params'=>array(
+                    'goods'=>$this->goods,
+                ),
+            )),
+            array('goods', 'exist', 'allowEmpty'=>false, 'attributeName'=>'id', 'className'=>'Goods'),
+        );
+    }
 }

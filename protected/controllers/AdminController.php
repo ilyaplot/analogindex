@@ -150,6 +150,34 @@ class AdminController extends Controller
     
     public function actionEditgoods($id)
     {
+        $errors = array();
+        $success = array();
+        $newSynonims = isset($_POST['newsynonims']) ? $_POST['newsynonims'] : null;
+        // Добавление синонимов
+        if (is_array($newSynonims))
+        {
+            foreach ($newSynonims as $key=>$synonim)
+            {
+                if (empty($synonim))
+                    continue;
+                $model = new GoodsSynonims();
+                $model->goods = isset($_POST['Goods']['id']) ? $_POST['Goods']['id'] : null;
+                $model->name = trim(htmlspecialchars($synonim));
+                $model->visibled = isset($_POST['newsynonimscheck'][$key]) ? true : false;
+                if ($model->validate())
+                {
+                    $model->save();
+                    $success[] = "Добавлен синоним {$model->name}.";
+                } else {
+                    $error = $model->getErrors();
+                    foreach ($error as $field=>$e)
+                    {
+                        $errors[] = "Произошла ошибка в поле <strong>".$model->getAttributeLabel($field)."</strong>: ". implode(", ", $e);
+                    }
+                }
+            }
+        }
+        
         $data = Goods::model()->findByPk($id);
         if (!$data)
             throw new CHttpException(404, "Товар не найден");
@@ -158,9 +186,12 @@ class AdminController extends Controller
         $typesCriteria->order = "name.name asc";
         $types = GoodsTypes::model()->with(array("name"))->findAll($typesCriteria);
         
+        
         $this->render("edit_goods", array(
             "data"=>$data,
             "types"=>$types,
+            "errors"=>$errors,
+            "success"=>$success,
         ));
     }
 }
