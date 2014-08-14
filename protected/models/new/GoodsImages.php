@@ -28,6 +28,7 @@ class GoodsImages extends CActiveRecord
     public function attributeLabels()
     {
         return array(
+            "disabled"=>Yii::t("model", "Не отображать"),
             "goods"=>Yii::t("model", "Товар"),
             "image"=>Yii::t("model", "Картинка"),
             "priority"=>Yii::t("model", "Порядок сортировки"),

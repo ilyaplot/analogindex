@@ -7,4 +7,6 @@ return array(
     'Отзывы' => 'Comments',
     'Рейтинги' => 'Ratings',
     'Написать отзыв'=>'Leave a comment',
+    'Общие'=>'General',
+    'Другие названия'=>'Other names',
 );

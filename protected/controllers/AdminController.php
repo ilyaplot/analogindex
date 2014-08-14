@@ -55,159 +55,112 @@ class AdminController extends Controller
     {
         $this->render("index");
     }
-
     
-    
-    public function actionGoods()
+    public function actionGoods($type = null, $brand=null, $search=null)
     {
-        $search = (isset($_GET['search']) && !empty($_GET['search'])) ? htmlspecialchars($_GET['search']) : null;
-        $page = isset($_GET['page']) ? abs(intval($_GET['page'])) : 1;
-        $model = new GoodsModel();
-        $count = $model->getCount($search);
-        $pages = ceil($count/50);
-        $goods = $model->getForAdmin($page, $search);
+        $filters = array(
+            "view"=>array(),
+            "controller"=>array(
+                'language'=>Yii::app()->language,
+            ),
+        );
+        $goodsCriteria = new CDbCriteria();
+        $goodsCriteria->order = "brand_data.name asc, t.name asc";
+        
+        if ($search !== null)
+        {
+            $search = trim($search);
+            $search = htmlspecialchars($search);
+            if (!empty($search))
+            {
+                $filters['controller']['search'] = $search;
+                $filters['view']['Поиск'] = $search;
+            }
+        }
+        
+        $typesCriteria = new CDbCriteria();
+        $typesCriteria->order = "name.name asc";
+        
+        $types = GoodsTypes::model()->with(array("name"))->findAll($typesCriteria);
+        
+        $brandsCriteria = new CDbCriteria();
+        $brandsCriteria->order = "t.name asc";
+        if ($brand !== null)
+        {
+            $brand = intval($brand);
+            $goodsCriteria->addCondition("t.brand = :brand");
+            $goodsCriteria->params['brand'] = $brand;
+            $brand = Brands::model()->findByPk($brand);
+            $filters["view"]["Производитель"] = $brand->name;
+            $filters["controller"]["brand"] = $brand->id;
+        }
+        if ($type !== null)
+        {
+            $type = intval($type);
+            $goodsCriteria->addCondition("t.type = :type");
+            $goodsCriteria->params['type'] = $type;
+            $type = GoodsTypes::model()->with(array("name"))->findByPk($type);
+            $filters["view"]["Тип"] = $type->name->name;
+            $filters["controller"]["type"] = $type->id;
+            $brands = Brands::model()->with(array(
+                "goods"=>array(
+                    "select"=>false,
+                    "joinType"=>"INNER JOIN",
+                    "on"=>"goods.type = :type",
+                    "params"=>array("type"=>$type->id),
+                    //"group"=>"goods.brand",
+                ),
+            ))->findAll($brandsCriteria);
+        } else {
+            $brands = Brands::model()->findAll($brandsCriteria);
+        }
+        
+        if (isset($search) && !empty($search))
+        {
+            $goodsCriteria->addCondition("CONCAT(brand_data.name, ' ', t.name) LIKE :name");
+            $goodsCriteria->params['name'] = '%'.str_replace("&nbsp;", " ", $search).'%';
+        }
+        
+        $goodsCount = $goods = Goods::model()->with(array(
+            "brand_data"=>array(
+                "joinType"=>"INNER JOIN",
+            ),
+        ))->count($goodsCriteria);
+                
+        $pages = new CPagination($goodsCount);
+        $pages->setPageSize(25);
+        $pages->applyLimit($goodsCriteria);
+        
+        $goods = Goods::model()->with(array(
+            "brand_data"=>array(
+                "joinType"=>"INNER JOIN",
+            ),
+        ))->findAll($goodsCriteria);
+        
+        
         $this->render("goods", array(
-            'goods'=>$goods, 
-            "maxPages"=>$pages, 
-            "currentPage" =>$page,
-            'search'=>$search,
+            "types"=>$types,
+            "brands"=>$brands,
+            "goods"=>$goods,
+            "goodsCount"=>$goodsCount,
+            "pages"=>$pages,
+            "filters"=>$filters,
         ));
     }
-
-    public function actionGoodsEdit($id)
+    
+    public function actionEditgoods($id)
     {
-        $model = new GoodsModel();
-        $data = $model->getForEdit($id);
+        $data = Goods::model()->findByPk($id);
         if (!$data)
             throw new CHttpException(404, "Товар не найден");
         
-        $data['videos'] = $model->sql->createCommand("select * from videos where goods = :id and lang = :lang order by priority desc")->queryAll(true, array('id'=>$id, 'lang'=>Yii::app()->language));
-        $data['youtube'] = array();
-        require_once Yii::app()->basePath.'/extensions/google-api-php-client/src/Google_Client.php';
-        require_once Yii::app()->basePath.'/extensions/google-api-php-client/src/contrib/Google_YouTubeService.php';
-        $client = new Google_Client();
-        $client->setDeveloperKey("AIzaSyCm5k_ScE8R_WiSyEBOc3xWGM9oXFg2RRI");
-        $youtube = new Google_YoutubeService($client);
-        try
-        {
-            $searchResponse = $youtube->search->listSearch('id', array(
-                'q' => $data['brand']['name']. " " .$data['goods']['name']." ".Yii::t('goods', "Обзор телефона"),
-                'maxResults' => 10,
-                'regionCode' => (Yii::app()->language == 'ru') ? 'ru' : 'us',
-            ));
-        } catch (Exception $ex) {
-            
-        }
+        $typesCriteria = new CDbCriteria();
+        $typesCriteria->order = "name.name asc";
+        $types = GoodsTypes::model()->with(array("name"))->findAll($typesCriteria);
         
-        if (isset($searchResponse['items']) && !empty($searchResponse['items']))
-        {
-            foreach ($searchResponse['items'] as $video)
-            {
-                if (isset($video['id']['videoId']))
-                    $data['youtube'][] = $video['id']['videoId'];
-            }
-        }
-        
-        
-        
-        if (Yii::app()->language == "ru")
-        {   
-            
-            $condition = "where d.name like :name";
-            $params = array('name'=>$data['brand']['name']. " " .$data['goods']['name']);
-            if ($data['synonims'])
-            {
-                foreach ($data['synonims'] as $key=>$synonim)
-                {
-                    $condition .= " OR d.name LIKE :name{$key}";
-                    $params['name'.$key] = $data['brand']['name']. " ". $synonim['name'];
-                }
-            }
-            $query = "select d.name, d.rating, r.title, r.content from destinations d inner join reviews r on d.id = r.destination {$condition}";
-            $connection = Yii::app()->reviews;
-            $data['new_reviews'] = $connection->createCommand($query)->queryAll(true, $params);
-            
-            
-            $condition = "where d.name LIKE :name";
-            $params = array('name'=>$data['brand']['name']. " " .$data['goods']['name']);
-            if ($data['synonims'])
-            {
-                foreach ($data['synonims'] as $key=>$synonim)
-                {
-                    $condition .= " OR d.name LIKE :name{$key}";
-                    $params['name'.$key] = $data['brand']['name']. " ". $synonim['name'];
-                }
-            }
-            $query = "select q.question, d.name, q.answer from qa_devices d inner join qa_relations r on r.device = d.id inner join qa_questions q on r.question = q.id {$condition} and q.answer != ''";
-            $data['new_questions'] = $connection->createCommand($query)->queryAll(true, $params);
-        } else {
-            $data['new_reviews'] = array();
-            $data['new_questions'] = array();
-        }
-        
-        $data['reviews'] = array();
-        $data['questions'] = array();
-        
-        $this->render("goodsedit",array("data"=>$data));
-    }
-
-    public function actionImages()
-    {
-        
-        $model = new GoodsModel();
-        //print("Добавление изображений приостановлено.".PHP_EOL);
-        if (isset($_POST['url']))
-        {
-            //die("Добавление изображений приостановлено.");
-            $connection = Yii::app()->db;
-            foreach ($_POST['url'] as $url)
-            {
-                $url = trim($url);
-                if (empty($url))
-                    continue;
-                
-                $connection->createCommand("insert into temp_images (image, url) values (:id, :url)")
-                    ->execute(array('id'=>$_POST['id'], 'url'=>$url));
-            }
-        }
-        $list = $model->getListNoImages(1);
-        $this->render('images', array('list'=>$list));
-    }
-    
-    public function actionCharacteristics()
-    {
-        $ru = array();
-        if (isset($_POST['ru']))
-        {
-            foreach ($_POST['ru'] as $id=>$ruitem)
-            {
-                $ruitem = trim($ruitem);
-                if (!empty($ruitem))
-                    $ru[] = array(
-                        'id'=>$id,
-                        'name'=>$ruitem,
-                    );
-            }
-        }
-        
-        $en  =array();
-        if (isset($_POST['en']))
-        {
-            foreach ($_POST['en'] as $id=>$enitem)
-            {
-                $ruitem = trim($enitem);
-                if (!empty($enitem))
-                    $en[] = array(
-                        'id'=>$id,
-                        'name'=>$enitem,
-                    );
-            }
-        }
-        
-        $model = new CharacteristicsModel();
-        if (!empty($ru) || !empty($en))
-            $model->updateTranslations(array('ru'=>$ru, 'en'=>$en));
-        $list = $model->getListForTranslations();
-        $this->render('characteristics', array('list'=>$list));
+        $this->render("edit_goods", array(
+            "data"=>$data,
+            "types"=>$types,
+        ));
     }
 }

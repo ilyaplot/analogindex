@@ -27,7 +27,7 @@ class Goods extends CActiveRecord
             "type_data"=>array(self::BELONGS_TO, "GoodsTypes", "type"),
             "brand_data"=>array(self::BELONGS_TO, "Brands", "brand"),
             "images"=>array(self::HAS_MANY, "GoodsImages", "goods", 
-                "order"=>"images.priority"
+                "order"=>"images.disabled asc, images.priority desc"
             ),
             "reviews"=>array(self::HAS_MANY, "Reviews", "goods",
                 "order"=>"priority desc", 
@@ -73,7 +73,7 @@ class Goods extends CActiveRecord
                 'joinType'=>'INNER JOIN',
                 'limit'=>'1',
                 'order'=>'t.priority desc, t.id asc',
-                'on'=>'image_data.disabled = 0',
+                'condition'=>'t.disabled = 0',
             ),
             "image_data.resized"=>array(
                 'joinType'=>'INNER JOIN',

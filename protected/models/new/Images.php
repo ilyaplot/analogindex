@@ -60,7 +60,6 @@ class Images extends CActiveRecord
     {
         return array(
             "file"=>Yii::t("model", "Файл"),
-            "disabled"=>Yii::t("model", "Не отображать"),
             "size"=>Yii::t("model", "Типовой размер"),
             "width"=>Yii::t("model", "Ширина"),
             "height"=>Yii::t("model", "Высота"),

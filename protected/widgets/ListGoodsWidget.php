@@ -8,12 +8,15 @@ class ListGoodsWidget extends CWidget
     }
     public function run() 
     {
+        $criteria = new CDbCriteria();
+        $criteria->compare("t.link", $this->type);
+        $criteria->order = "brand_data.name asc, goods.name asc";
         $data = GoodsTypes::model()->cache(60*60*3)->with(array(
             "name",
             "goods",
             "goods.brand_data",
             "goods.type_data"
-        ))->findByAttributes(array("link"=>$this->type));
+        ))->find($criteria);
         if ($data)
             $this->render("widget_ListGoodsWidget", array('data'=>$data));
     }

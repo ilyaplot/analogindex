@@ -87,6 +87,8 @@ return array(
                 'http://analogindex.<language:\w+>/<type:[\w\d\-_]+>/<brand:[\d\w\-_]*>/<link:[\d\w\-_]*>'=>
                     array('site/goods', 'urlSuffix'=>'.html'),
                 'http://analogindex.<language:\w+>/'=>array('site/index', 'urlSuffix'=>''),
+                
+
                 // Дефолтные правила. 
                 'http://analogindex.<language:\w+>/<controller:\w+>/<action:\w+>'=>'<controller>/<action>',
                 

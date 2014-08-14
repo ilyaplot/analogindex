@@ -26,7 +26,7 @@
         <span class="divider">/</span>
     </li>
     <li class="active" itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-3">
-        <?php echo $goods->brand_data->name?> <?php echo $goods->name?> <?php echo $goods->id?>
+        <?php echo $goods->brand_data->name?> <?php echo $goods->name?>
     </li>
 </ul>
 <div class="wp_col_fix clr">
@@ -40,9 +40,9 @@
                     <div class="flLeft">
                         <span class="infoGoodItem-title-2_name"><?php echo Yii::t('goods', 'Рейтинги')?>:</span>
                         <ul class="infoGoodItem-title-2_list">
-                            <li class="item1"><?php echo round(isset($goods->rating->value) ? $goods->rating->value : 0, 1)?></li>
+                            <li class="item1"></li>
                             <li class="item2"></li>
-                            <li class="item3"></li>
+                            <li class="item3"><?php echo isset($goods->rating->value) ? round($goods->rating->value,1) : '';?></li>
                         </ul>
                         <div class="clear"></div>
                     </div>

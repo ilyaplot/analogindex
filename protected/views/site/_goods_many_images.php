@@ -20,16 +20,18 @@ $(document).ready(function(){
 <div class="infoGoodItem-wp-photos_all">
     <?php foreach ($goods->images as $image): ?>
     <?php if (!isset($image->image_data->resized_preview->file_data->id)) continue;?>
-    <?php echo "preview<br />";?>
     <?php if (!isset($image->image_data->resized_list->file_data->id)) continue;?>
-    <?php echo "list<br />";?>
     <div class="slide">
-        <a title="<?php echo $goods->brand_data->name?> <?php echo $goods->name?>" href="http://www.jssor.com/img/alila/0<?php echo $i?>.jpg" data-lightbox="roadtrip">
+        <a title="<?php echo $goods->brand_data->name?> <?php echo $goods->name?>" href="<?php echo Yii::app()->createUrl("files/image", array(
+                'id'=>$image->image_data->file_data->id,
+                'name'=>$image->image_data->file_data->name,
+                'language'=>Language::getCurrentZone(),
+                )); ?>" data-lightbox="roadtrip">
             <img class="preview" src="<?php echo Yii::app()->createUrl("files/image", array(
                 'id'=>$image->image_data->resized_list->file_data->id,
                 'name'=>$image->image_data->resized_list->file_data->name,
                 'language'=>Language::getCurrentZone(),
-                )); ?>" style="height:<?php echo $image->image_data->resized_list->height?>px; width: <?php echo $image->image_data->resized_list->width?>px;" 
+                )); ?>" 
                 alt="<?php echo $goods->brand_data->name." ".$goods->name ?>" data-preview="<?php echo Yii::app()->createUrl("files/image", array(
                 'id'=>$image->image_data->resized_preview->file_data->id,
                 'name'=>$image->image_data->resized_preview->file_data->name,
