@@ -153,6 +153,10 @@ class AdminController extends Controller
         $errors = array();
         $success = array();
         $newSynonims = isset($_POST['newsynonims']) ? $_POST['newsynonims'] : null;
+        $goodsParams = isset($_POST['Goods']) ? $_POST['Goods'] : null;
+        $modificationsComments = isset($_POST['ModificationsComments']) ? $_POST['ModificationsComments'] : null; 
+        $deleteModifications = isset($_POST['DeleteModifications']) ? $_POST['DeleteModifications'] : null;
+        $newModifications = isset($_POST['newmodifications']) ? $_POST['newmodifications'] : null;
         // Добавление синонимов
         if (is_array($newSynonims))
         {
@@ -178,7 +182,124 @@ class AdminController extends Controller
             }
         }
         
+        //Комментарии модификаций
+        if (is_array($modificationsComments))
+        {
+            foreach ($modificationsComments as $commentId=>$commentText)
+            {
+                $comment = ModificationsComments::model()->findByPk($commentId);
+                if (!$comment)
+                    continue;
+                $comment->comment = htmlspecialchars(trim($commentText));
+                if (!$comment->validate())
+                {
+                    $error = $comment->getErrors();
+                    foreach ($error as $field=>$e)
+                    {
+                        $errors[] = "Произошла ошибка в поле <strong>".$comment->getAttributeLabel($field)."</strong>: ". implode(", ", $e);
+                    }
+                } else {
+                    $comment->save();
+                }
+            }
+        }
+        
         $data = Goods::model()->findByPk($id);
+        // Созранение изменений товара
+        if (is_array($goodsParams))
+        {
+            $data->type = isset($goodsParams['type']) ? $goodsParams['type'] : null;
+            $data->brand = isset($goodsParams['brand']) ? $goodsParams['brand'] : null;
+            $data->link = isset($goodsParams['link']) ? $goodsParams['link'] : null;
+            $data->name = isset($goodsParams['name']) ? $goodsParams['name'] : null;
+            $data->is_modification = isset($goodsParams['is_modification']) ? true : false;
+            if ($data->validate())
+            {
+                $data->save();
+                $success[] = "Изменения товара были сохранены.";
+             } else {
+                $error = $data->getErrors();
+                foreach ($error as $field=>$e)
+                {
+                    $errors[] = "Произошла ошибка в поле <strong>".$data->getAttributeLabel($field)."</strong>: ". implode(", ", $e);
+                }
+            }
+        }
+        
+        // Удаление модификаций
+        if (is_array($deleteModifications))
+        {
+            foreach ($deleteModifications as $deleteModification=>$tmp)
+            {
+                $modification = GoodsModifications::model()->findByAttributes(array("id"=>$deleteModification, "goods_parent"=>$id));
+                if (!$modification)
+                    continue;
+                Goods::model()->updateByPk($modification->goods_children, array('is_modification'=>true));
+                $modification->delete();
+                ModificationsComments::model()->deleteAllByAttributes(array("modification"=>$deleteModification));
+                $success[] = "Модификация была удалена.";
+            }
+        }
+        
+        // Добавление модификаций
+        if (is_array($newModifications))
+        {
+            foreach ($newModifications as $goods=>$newMod)
+            {
+                if (isset($newMod['merge']))
+                {
+                    $modification = new GoodsModifications();
+                    $modification->goods_parent = $id;
+                    $modification->goods_children = $goods;
+                    
+                    if ($modification->validate())
+                    {
+                        $modification->save();
+                        $ruComment = new ModificationsComments();
+                        $ruComment->modification = $modification->id;
+                        $ruComment->lang = 'ru';
+                        $ruComment->comment = trim(htmlspecialchars(isset($newMod['ru']) ? $newMod['ru'] : null));
+                        if ($ruComment->validate())
+                        {
+                            $ruComment->save();
+                        } else {
+                            $modification->delete();
+                            $error = $ruComment->getErrors();
+                            foreach ($error as $field=>$e)
+                            {
+                                $errors[] = "Произошла ошибка в поле <strong>".$ruComment->getAttributeLabel($field)."</strong>: ". implode(", ", $e);
+                            }
+                            continue;
+                        }
+                        $enComment = new ModificationsComments();
+                        $enComment->modification = $modification->id;
+                        $enComment->lang = 'en';
+                        $enComment->comment = trim(htmlspecialchars(isset($newMod['en']) ? $newMod['en'] : null));
+                        if ($enComment->validate())
+                        {
+                            $enComment->save();
+                        } else {
+                            $modification->delete();
+                            $error = $enComment->getErrors();
+                            foreach ($error as $field=>$e)
+                            {
+                                $errors[] = "Произошла ошибка в поле <strong>".$enComment->getAttributeLabel($field)."</strong>: ". implode(", ", $e);
+                            }
+                            continue;
+                        }
+                        Goods::model()->updateByPk($goods, array('is_modification'=>true));
+                        $success[] = "Была добавлена модификация товара.";
+                    } else {
+                        $error = $modification->getErrors();
+                        foreach ($error as $field=>$e)
+                        {
+                            $errors[] = "Произошла ошибка в поле <strong>".$modification->getAttributeLabel($field)."</strong>: ". implode(", ", $e);
+                        }
+                    }
+                }
+            }
+        }
+        
         if (!$data)
             throw new CHttpException(404, "Товар не найден");
         
@@ -193,5 +314,41 @@ class AdminController extends Controller
             "errors"=>$errors,
             "success"=>$success,
         ));
+    }
+    
+    public function actionAjaxModifications($search, $type, $exclude)
+    {
+        $criteria = new CDbCriteria();
+        $criteria->condition = 
+                "(CONCAT(brand_data.name, ' ', t.name) LIKE :search OR CONCAT(brand_data.name, ' ', synonims.name) LIKE :search) ".
+                "AND t.id NOT IN ({$exclude}) AND t.type = :type";
+        $search = trim($search);
+        $search = htmlspecialchars($search);
+        $search = str_replace("&nbsp;", " ", $search);
+        $search = "%{$search}%";
+        $criteria->params = array(
+            "search"=>$search,
+            "type"=>$type,
+        );
+        $results = Goods::model()->with("brand_data","synonims")->findAll($criteria);
+        $return = array();
+        foreach ($results as $result)
+        {
+            $synonims = array();
+            foreach ($result->synonims as $synonim)
+                $synonims[] = $synonim->name;
+            
+            $return[] = array(
+                "id"=>$result->id,
+                "name"=>$result->name,
+                "brand"=>$result->brand_data->name,
+                "synonims" => implode(", <br />", $synonims),
+            );
+            
+            
+            
+        }
+        $this->layout = "empty";
+        $this->render("_ajax_modifications", array("data"=>$return));
     }
 }

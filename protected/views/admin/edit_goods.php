@@ -39,12 +39,17 @@
   <li class="active"><a href="#home">Общее</a></li>
   <li><a href="#images">Фотографии</a></li>
   <li><a href="#characteristics">Характеристики</a></li>
+  <?php if (!$data->is_modification):?>
+  <li><a href="#modifications">Модификации</a></li>
+  <?php endif; ?>
   <li><a href="#videos">Видео</a></li>
   <li><a href="#reviews">Обзоры</a></li>
   <li><a href="#faq">FAQ</a></li>
   <li><a href="#files">Файлы</a></li>
 </ul>
-<form id="form-general" action="" method="post" class="form-horizontal">
+<?php //echo "<pre>"; var_dump($_POST); echo "</pre>";?>
+
+<form id="form-general" action="" method="post" class="form-horizontal" onkeypress="if(event.keyCode == 13) return false;">
     <input type="hidden" value="<?php echo $data->id?>" name="Goods[id]" />
     <div class="tab-content">
         <div class="tab-pane active" id="home">
@@ -97,13 +102,13 @@
             <div class="control-group">
                 <label class="control-label" for="inputLink">Ссылка</label>
                 <div class="controls">
-                    <input type="text" id="inputLink" placeholder="link" value="<?php echo $data->link?>">
+                    <input type="text" name="Goods[link]" id="inputLink" placeholder="link" value="<?php echo $data->link?>">
                 </div>
             </div>
             <div class="control-group">
                 <label class="control-label" for="inputName">Наименование</label>
                 <div class="controls">
-                    <input type="text" id="inputName" placeholder="Наименование" value="<?php echo $data->name?>">
+                    <input type="text" name='Goods[name]' id="inputName" placeholder="Наименование" value="<?php echo $data->name?>">
                 </div>
             </div>
             <table class="table table-bordered table-striped synonims">
@@ -170,6 +175,63 @@
             </table>
         </div>
         <div class="tab-pane" id="characteristics">...</div>
+        <?php if (!$data->is_modification):?>
+        <div class="tab-pane" id="modifications">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>Производитель</th>
+                        <th>Наименование</th>
+                        <th>Синонимы</th>
+                        <th>Комментарии</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($data->modifications as $modification):?>
+                    <tr>
+                        <td><?php echo $modification->children->id?></td>
+                        <td><?php echo $modification->children->brand_data->name?></td>
+                        <td><?php echo $modification->children->name ?></td>
+                        <td><?php 
+                            $synonims = array();
+                            foreach ($modification->children->synonims as $synonim)
+                                $synonims[] = $synonim['name'];
+                            echo implode(", <br>", $synonims);
+                        ?></td>
+                        <td>
+                            <td>
+                                Комментарий ru:<br />
+                                <input type="text" name="ModificationsComments[<?php echo $modification->comment_ru->id?>]" value="<?php echo $modification->comment_ru->comment?>"/><br />
+                                Комментарий en:<br />
+                                <input type="text" name="ModificationsComments[<?php echo $modification->comment_en->id?>]" value="<?php echo $modification->comment_en->comment?>"/><br />
+                            </td>
+                        </td>
+                        <td>
+                            <input type="checkbox" name="DeleteModifications[<?php echo $modification->id?>]" value="1"  />Удалить связку модификаций
+                        </td>
+                    </tr>
+                    <?php endforeach;?>
+                </tbody>
+            </table>
+            <div class="well">
+                <div class="control-group">
+                    <input <?php echo ($data->is_modification) ? "checked " : ''; ?>type="checkbox" name='Goods[is_modification]' id="inputModification" value="1"> Использовать текущий товар как модификацию (не отображать в виджетах)
+                </div>
+                <div class="control-group">
+                    <div class="input-append">
+                        <input class="span9" id="modifications-search" value="<?php echo $data->brand_data->name." ".$data->name?>" placeholder="Товар для поиска" type="text">
+                        <input class="btn" id="modifications-search-button" type="button" value="Найти" />
+                        <br />
+                    </div>
+                    <div id="modifications-results">
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
         <div class="tab-pane" id="videos">...</div>
         <div class="tab-pane" id="reviews">...</div>
         <div class="tab-pane" id="faq">...</div>
@@ -222,5 +284,30 @@ $this->renderPartial("_modal_brand_change");
             '<input type="checkbox" checked name="newsynonimscheck['+synonimsCount+']" /> Отображать</td></tr>'
         );
         synonimsCount++;
+    });
+    
+    $("#modifications-search").submit(function(){
+        return false;
+    });
+    <?php 
+        $exclude = array($data->id);
+        foreach ($data->modifications as $modification)
+            $exclude[] = $modification->goods_children;
+        $exclude = implode(", ", $exclude);
+    ?>
+    $("#modifications-search-button").click(function(){
+        var str = $("#modifications-search").val();
+        $("#modifications-results").html("<strong>Подождите, выполняется поиск...</strong>");
+        $.ajax({
+            url:'<?php echo Yii::app()->createUrl("admin/ajaxmodifications")?>',
+            data: {type:'<?php echo $data->type?>', exclude:'<?php echo $exclude?>', search:str},
+            dataType: 'html',
+            success: function(data) {
+                $("#modifications-results").html(data);
+            },
+            error: function(e) {
+                $("#modifications-results").html(e.responseText);
+            }
+        });
     });
 </script>

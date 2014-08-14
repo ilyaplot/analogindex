@@ -75,6 +75,7 @@
                         <th>id</th>
                         <th>Производитель</th>
                         <th>Наименование</th>
+                        <th>Синонимы</th>
                         <th>Тип</th>
                         <th></th>
                     </tr>
@@ -85,6 +86,12 @@
                         <td><?php echo $item->id?></td>
                         <td><?php echo $item->brand_data->name?></td>
                         <td><?php echo $item->name ?></td>
+                        <td><?php 
+                            $synonims = array();
+                            foreach ($item->synonims as $synonim)
+                                $synonims[] = $synonim['name'];
+                            echo implode(", <br>", $synonims);
+                        ?></td>
                         <td><?php echo $item->type_data->name->name ?></td>
                         <td>
                             <a class="btn btn-mini" target="_blank" href="<?php

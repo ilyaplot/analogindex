@@ -14,6 +14,9 @@ return array(
      ),
     'basePath' => dirname(__FILE__) . DIRECTORY_SEPARATOR . '..',
     'components'=>array(
+        //'request'=>array(
+          //  'enableCsrfValidation'=>true,
+        //),
         'user'=>array(
             'loginUrl'=>array('admin/login'),
         ),

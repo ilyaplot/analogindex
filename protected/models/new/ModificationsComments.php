@@ -31,4 +31,14 @@ class ModificationsComments extends CActiveRecord
             "comment"=>Yii::t("model", "Текст комментария"),
         );
     }
+    
+    public function rules() 
+    {
+        return array(
+            array('comment', 'length', 'min'=>0, 'max'=>255),
+            array('modification', 'required'),
+            array('modification', 'exists', 'allowEmpty'=>false, 'class'=>'GoodsModifications', 'attributeName'=>'id'),
+            array('lang', 'required'),
+        );
+    }
 }

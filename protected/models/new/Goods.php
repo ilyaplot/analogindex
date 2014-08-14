@@ -47,6 +47,7 @@ class Goods extends CActiveRecord
             "rating"=>array(self::HAS_ONE, "RatingsGoods", "goods", 
                 "select"=>"AVG(rating.value) as value",
             ),
+            "modifications"=>array(self::HAS_MANY, "GoodsModifications", "goods_parent"),
         );
     }
     
@@ -60,6 +61,21 @@ class Goods extends CActiveRecord
             "is_modification"=>Yii::t("model", "Модификация"),
         );
     }
+    
+    public function rules() 
+    {
+        return array(
+            array('type, name, brand, link','required'),
+            array('type, brand', 'numerical', 'integerOnly'=>true),
+            array('name, link', 'length', 'min'=>1, 'max'=>255),
+            array('type', 'exist', 'allowEmpty'=>false, 'attributeName'=>'id', 'className'=>'GoodsTypes'),
+            array('name', 'unique', 'allowEmpty'=>false),
+            array('link', 'unique', 'allowEmpty'=>false),
+            array('brand', 'exist', 'allowEmpty'=>false, 'attributeName'=>'id', 'className'=>'Brands'),
+            array('is_modification', 'boolean'),
+        );
+    }
+    
     
     public function getPrimaryImage($size = null)
     {

@@ -20,7 +20,11 @@ class GoodsSynonims extends CActiveRecord
     
     public function relations()
     {
-        return parent::relations();
+        return array(
+            'goods_data'=>array(self::BELONGS_TO, "Goods", 'goods',
+                "joinType"=>"inner join",
+            ),
+        );
     }
     
     public function attributeLabels()
