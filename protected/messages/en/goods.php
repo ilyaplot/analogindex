@@ -9,4 +9,5 @@ return array(
     'Написать отзыв'=>'Leave a comment',
     'Общие'=>'General',
     'Другие названия'=>'Other names',
+    'Связанные модели'=>'Related models',
 );

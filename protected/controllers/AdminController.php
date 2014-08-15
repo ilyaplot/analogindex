@@ -234,7 +234,7 @@ class AdminController extends Controller
                 $modification = GoodsModifications::model()->findByAttributes(array("id"=>$deleteModification, "goods_parent"=>$id));
                 if (!$modification)
                     continue;
-                Goods::model()->updateByPk($modification->goods_children, array('is_modification'=>true));
+                Goods::model()->updateByPk($modification->goods_children, array('is_modification'=>false));
                 $modification->delete();
                 ModificationsComments::model()->deleteAllByAttributes(array("modification"=>$deleteModification));
                 $success[] = "Модификация была удалена.";

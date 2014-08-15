@@ -85,7 +85,7 @@
                     <tr>
                         <td><?php echo $item->id?></td>
                         <td><?php echo $item->brand_data->name?></td>
-                        <td><?php echo $item->name ?></td>
+                        <td><?php echo ($item->is_modification) ? '<span class="label label-info">Модификация</span> ' : ''?><?php echo $item->name ?></td>
                         <td><?php 
                             $synonims = array();
                             foreach ($item->synonims as $synonim)

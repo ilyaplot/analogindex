@@ -41,6 +41,8 @@ class SiteController extends Controller
                 "on"=>"images.disabled = 0",
             ),
             "page_goods.synonims",
+            "page_goods.modifications",
+            "page_goods.modifications.children",
             "page_goods.images.image_data",
             "page_goods.images.image_data.resized_preview",
             "page_goods.images.image_data.resized_list",
