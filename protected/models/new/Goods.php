@@ -122,4 +122,42 @@ class Goods extends CActiveRecord
         }
         return $result;
     }
+    
+    public function getCharacteristics()
+    {
+        $query="select 
+                ccn.name as catalog_name, 
+                cn.name as characteristic_name,
+                gc.value as value,
+                c.formatter as formatter,
+                cn.description as characteristic_description
+            from {{goods_characteristics}} gc 
+            inner join {{characteristics}} c on gc.characteristic = c.id 
+            inner join {{characteristics_names}} cn on c.id = cn.characteristic 
+            inner join {{characteristics_catalogs}} cc on c.catalog = cc.id 
+            inner join {{characteristics_catalogs_names}} ccn on ccn.catalog = cc.id 
+            where 
+                ccn.lang=:lang
+                and gc.lang = :lang 
+                and cn.lang = :lang 
+                and gc.goods = :goods
+            order by cc.priority desc, c.priority desc";
+        $params = array("lang"=>Yii::app()->language, "goods"=>$this->getPrimaryKey());
+        
+        $result = array();
+        if (!$result = Yii::app()->cache->get("goods.characteristics".serialize($params)))
+        {
+            $connection = $this->getDbConnection();
+            $items = $connection->createCommand($query)->queryAll(true, $params);
+            if (!$items)
+                $result = array();
+            foreach ($items as $item)
+            {
+                $item['value'] = Yii::app()->format->$item['formatter']($item['value']);
+                $result[$item['catalog_name']][] = $item;
+            }
+        }
+        Yii::app()->cache->set("goods.characteristics".serialize($params), $result, 60*60*12);
+        return $result;
+    }
 }

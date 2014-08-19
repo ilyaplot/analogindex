@@ -5,6 +5,7 @@ return array(
     'sourceLanguage'=>'ru',
     'import'=>array(
         'application.components.*',
+        'application.components.formatters.*',
         'application.models.*',
         'application.models.new.*',
         // Parsers only for console!
@@ -68,6 +69,9 @@ return array(
                     'levels'=>'error, warning, trace, profile, info',
                 ),
             ),
+        ),
+        'format'=>array(
+            'class'=>'Formatter',
         ),
         'urlManager'=>array(
             'urlFormat'=>'path',

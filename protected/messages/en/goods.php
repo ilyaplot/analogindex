@@ -10,4 +10,6 @@ return array(
     'Общие'=>'General',
     'Другие названия'=>'Other names',
     'Связанные модели'=>'Related models',
+    'Доступен'=>'Available',
+    'Нелоступен'=>'Discontinued',
 );

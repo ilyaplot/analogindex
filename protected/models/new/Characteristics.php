@@ -22,19 +22,31 @@ class Characteristics extends CActiveRecord {
     {
         return array(
             "name"=>array(self::HAS_ONE, "CharacteristicsNames", "characteristic",
-               "on"=>"lang = '".Yii::app()->language."'", 
+               "on"=>"name.lang = :lang", 
+               "params"=>array("lang"=>Yii::app()->language),
             ),
+            "value"=>array(self::HAS_ONE, "GoodsCharacteristics", "characteristic", 
+                "on"=>"value.lang = :lang",
+                "params"=>array("lang"=>Yii::app()->language),
+            )
         );
     }
     
     public function attributeLabels()
     {
         return array(
-            "unit"=>Yii::t("model", "Единица измерения"),
-            "factor"=>Yii::t("model", "Множитель"),
+            "formatter"=>Yii::t("model", "Форматтер"),
             "catalog"=>Yii::t("model", "Категория"),
             "parent"=>Yii::t("model", "Родительский элемент"),
             "priotity"=>Yii::t("model", "Порядок отображения"),
         );
+    }
+    
+    public function getFormattedValue()
+    {
+        if (!isset($this->value))
+            return null;
+        $formatter = $this->formatter;
+        return Yii::app()->format->$formatter($this->value->value);
     }
 }

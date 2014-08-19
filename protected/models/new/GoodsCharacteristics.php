@@ -32,4 +32,20 @@ class GoodsCharacteristics extends CActiveRecord
             "lang"=>Yii::t("model", "Код языка"),
         );
     }
+    
+    public function rules() {
+        return array(
+            array("goods, characteristic, value, lang", 'required'),
+            array('goods, characteristic', 'numerical', 'integerOnly'=>true),
+            array('goods', 'exist', 'allowEmpty'=>false, 'attributeName'=>'id', 'className'=>'Goods'),
+            array('characteristic', 'exist', 'allowEmpty'=>false, 'attributeName'=>'id', 'className'=>'Characteristics'),
+            array('characteristic', 'unique', 'criteria'=>array(
+                'condition'=>'goods = :goods and lang = :lang',
+                'params'=>array(
+                    'goods'=>$this->goods,
+                    'lang'=>$this->lang,
+                ),
+            )),
+        );
+    }
 }

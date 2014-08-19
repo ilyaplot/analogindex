@@ -4,6 +4,8 @@ return array(
     'sourceLanguage'=>'ru',
     'import'=>array(
         'application.components.*',
+        'application.components.parsers.*',
+        'application.components.formatters.*',
         'application.models.*',
         'application.models.new.*',
         // Parsers only for console!
@@ -13,6 +15,9 @@ return array(
     //'basePath' => dirname(__FILE__) . DIRECTORY_SEPARATOR ,
     'preload'=>array('log'),
     'components'=>array(
+        'format'=>array(
+            'class'=>'Formatter',
+        ),
         'log'=>array(
             'class'=>'CLogRouter',
             'routes'=>array(
