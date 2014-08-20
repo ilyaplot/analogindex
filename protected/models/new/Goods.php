@@ -161,3 +161,22 @@ class Goods extends CActiveRecord
         return $result;
     }
 }
+/**
+ * Сравнение моделей
+ * 
+ select CONCAT(b.name, ' ', g.name), gc.value as characteristic
+from ai_goods_characteristics gc 
+inner join ai_characteristics c on gc.characteristic = c.id 
+inner join ai_characteristics_names cn on c.id = cn.characteristic 
+inner join ai_characteristics_catalogs cc on c.catalog = cc.id 
+inner join ai_characteristics_catalogs_names ccn on ccn.catalog = cc.id 
+inner join ai_goods g on gc.goods = g.id
+inner join ai_brands b on g.brand = b.id
+where 
+ccn.lang='ru'
+and gc.lang = 'ru'
+and cn.lang = 'ru'
+and c.id = 8
+and gc.value > 1*1024*1024*1024 and gc.value < 2.1*1024*1024*1024 
+order by cc.priority desc, c.priority desc;
+ */
