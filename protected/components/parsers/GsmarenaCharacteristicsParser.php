@@ -174,6 +174,8 @@ class GsmarenaCharacteristicsParser extends CharacteristicsParser
                             "touchscreen"=>"сенсорный",
                             "resistive"=>"резистивный",
                             "colors"=>"цветов",
+                            "Monochrome"=>"монохромный",
+                            "graphic"=>"графический",
                         );
                         if ($lang == 'ru')
                         {
@@ -296,6 +298,111 @@ class GsmarenaCharacteristicsParser extends CharacteristicsParser
                 "Data.Bluetooth::::(?P<bluetooth>.*)"=>array(
                     "function"=>function($matches, $lang){
                         return trim($matches['bluetooth']);
+                    }
+                )
+            ),
+            20=>array(
+                "Data.Infrared port::::(?P<irda>.*)"=>array(
+                    "function"=>function($matches, $lang){
+                        Yii::app()->language = $lang;
+                        return Yii::t("goods", "Да");
+                    }
+                )
+            ),
+            21=>array(
+                "Features.GPS::::(?P<gps>.*)"=>array(
+                    "function"=>function($matches, $lang){
+                        $replaces = array(
+                            "Yes"=>"Да",
+                            "with"=>"c",
+                            "GLONASS"=>"ГЛОНАСС",
+                        );
+                        if ($lang == 'ru')
+                        {
+                            foreach ($replaces as $from=>$to)
+                                $matches['gps'] = str_replace($from, $to, $matches['gps']);
+                        }
+                        return trim($matches['gps']);
+                    }
+                ),
+            ),
+            22=>array(
+                "Battery. ::::.*\s(?P<power>[\d\.]+)\smAh"=>array(
+                    "function"=>function($matches, $lang){
+                        Yii::app()->language = $lang;
+                        return $matches['power']." ".Yii::t("goods", "mAh");
+                    }
+                ),
+            ),
+            23=>array(
+                "Battery. ::::(?P<type>.*)\s(?P<power>[\d\.]+)\smAh"=>array(
+                    "function"=>function($matches, $lang){
+                        
+                        return trim($matches['type']);
+                    }
+                ),
+            ),
+            24=>array(
+                "Battery.Stand-by::::Up to (?P<time>[\d\.]+) h"=>array(
+                    "function"=>function($matches, $lang){
+                        
+                        return doubleval($matches['time']);
+                    }
+                )
+            ),
+            25=>array(
+                "Battery.Talk time::::Up to (?P<time>[\d\.]+) h"=>array(
+                    "function"=>function($matches, $lang){
+                        
+                        return doubleval($matches['time']);
+                    }
+                )
+            ),
+            26=>array(
+                "Camera.Primary::::.* (?P<w>[\d]+) х (?P<h>[\d]+) pixels"=>array(
+                    "function"=>function($matches, $lang){
+                        return array(
+                            intval($matches['w']),
+                            intval($matches['h']),
+                        );
+                    }
+                ),
+            ),
+            27=>array(
+                "Camera.Primary::::(?P<megapixels>[\d\.]+) MP"=>array(
+                    "function"=>function($matches, $lang){
+                        return doubleval($matches['megapixels']);
+                    }
+                ),
+            ),
+            28=>array(
+                "Camera.Primary::::.*flash.*"=>array(
+                    "function"=>function($matches, $lang){
+                        Yii::app()->language = $lang;
+                        return Yii::t("goods", "Да");
+                    }
+                ),
+            ),          
+            29=>array(
+                "Camera.Secondary::::(?P<megapixels>[\d\.]+) MP"=>array(
+                    "function"=>function($matches, $lang){
+                        return doubleval($matches['megapixels']);
+                    }
+                ),
+            ),
+            30=>array(
+                "Features.Sensors::::(?P<sensors>.*)"=>array(
+                    "function"=>function ($matches, $lang)
+                    {
+                        $sensors = array();
+                        $std = explode(",", trim($matches['sensors']));
+                        foreach ($std as $s)
+                        {
+                            if (!$s)
+                                continue;
+                            $sensors[] = trim($s);
+                        }
+                        return $sensors;
                     }
                 )
             )

@@ -8,6 +8,7 @@ return array(
         'application.components.formatters.*',
         'application.models.*',
         'application.models.new.*',
+        'application.models.sources.*',
         // Parsers only for console!
         'application.parsers.*',
         'application.helpers.*'

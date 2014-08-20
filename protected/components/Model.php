@@ -17,7 +17,7 @@ class Model extends CModel
     }
     
     
-    function mb_transliterate($string)
+    public static function mb_transliterate($string)
     { 
         $chars = array(
             "Є"=>"EH","І"=>"I","і"=>"i","№"=>"N","є"=>"eh",
@@ -39,7 +39,7 @@ class Model extends CModel
         );
  
 
-        if ($this->seems_utf8($title))
+        if (self::seems_utf8($title))
             $title = urldecode($title);
 
         $title = preg_replace('/\.+/','.',$title);
@@ -53,7 +53,7 @@ class Model extends CModel
      * @param type $str
      * @return boolean
      */
-    function seems_utf8($str) {
+    public static function seems_utf8($str) {
         $length = strlen($str);
         for ($i=0; $i < $length; $i++) {
             $c = ord($str[$i]);
@@ -72,7 +72,7 @@ class Model extends CModel
         return true;
     }
     
-    public function rus2translit($string) {
+    public static function rus2translit($string) {
 
         $converter = array(
             'а' => 'a',   'б' => 'b',   'в' => 'v',   'г' => 'g',   'д' => 'd',   'е' => 'e',
@@ -94,7 +94,7 @@ class Model extends CModel
     }
 
     public function str2url($str) {
-        $str = $this->rus2translit($str);
+        $str = self::rus2translit($str);
         $str = strtolower($str);
         $str = preg_replace('~[^a-z0-9\s-]+~u', '', $str);
         $str = preg_replace('~[\s]{1,}~u', '-', $str);

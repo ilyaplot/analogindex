@@ -716,7 +716,7 @@ section.infoGoodItem_content {
 .item-set-bl_title {
     color: #747474;
     font: bold 14px Arial, Verdana, sans-serif;
-    margin: 0 0 10px;
+    margin: 15px 0 7px;
 }
 .item-set-bl_lineText {
     color: #5d5d5d;
@@ -728,6 +728,11 @@ section.infoGoodItem_content {
     display: inline-block;
     background: #fff;
 }
+
+.item-set-bl_lineText .flLeft span {
+    font-weight: bold;
+}
+
 .item-set-bl { margin: 0 0 18px;}
 .item-set-bl:nth-last-child(2n) { margin-bottom: 35px !important; }
 .item-set-bl:last-child { margin-bottom: 0 !important; }

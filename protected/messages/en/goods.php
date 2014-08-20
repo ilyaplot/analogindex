@@ -12,4 +12,7 @@ return array(
     'Связанные модели'=>'Related models',
     'Доступен'=>'Available',
     'Нелоступен'=>'Discontinued',
+    'Да'=>'Yes',
+    'Нет'=>'No',
+    'мАч'=>'mAh',
 );
