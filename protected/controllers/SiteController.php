@@ -3,10 +3,7 @@ class SiteController extends Controller
 {
     public function actionIndex()
     {
-        $model = new GoodsModel();
         $this->setPageTitle("Analogindex");
-        //echo Yii::t('main', 'Тест');
-        //print_r($model->getWidgetList(1));
         $this->render("index");
     }
     

@@ -11,18 +11,17 @@ class DownloadCommand extends CConsoleCommand
             exit();
         }
         $html = phpQuery::newDocumentHTML($brandsPage);
-        $menu = pq($html)->find(".st-text tr td:last-child > a");
+        $menu = pq($html)->find(".st-text tr td > a");
         $brands = array();
         foreach ($menu as $menuItem)
         {
             $brands[] = "http://www.gsmarena.com/".pq($menuItem)->attr("href");
         }
-        
+        $brands = array_unique($brands);
         shuffle($brands);
         $urls = array();
         foreach ($brands as $brand)
         {
-            
             sleep(1);
             $content = $this->getContent($brand);
             if (!$content)
