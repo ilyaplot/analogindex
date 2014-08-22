@@ -2,6 +2,67 @@
 class DownloadCommand extends CConsoleCommand
 {
 
+    public function actionSmartphoneuaList($source)
+    {
+        $sources = array(
+            1=>"http://www.smartphone.ua/phones/",
+            2=>"http://www.smartphone.ua/tablet-pc/",
+            3=>"http://www.smartphone.ua/e-books/",
+        );
+        $brandsPage = $this->getContent($sources[$source]);
+        if (!$brandsPage)
+        {
+            echo "No main page. Exit.";
+            exit();
+        }
+        $html = phpQuery::newDocumentHTML($brandsPage);
+        $brands = array();
+        $menu = pq($html)->find("#firms li > a");
+        foreach ($menu as $menuItem)
+        {
+            $brands[] = pq($menuItem)->attr("href");
+        }
+        $brands = array_unique($brands);
+        shuffle($brands);
+        $urls = array();
+        foreach ($brands as $brand)
+        {
+            sleep(1);
+            $content = $this->getContent($brand);
+            if (!$content)
+            {
+                echo "ERROR download brand's page. {$brand}".PHP_EOL;
+                continue;
+            }
+            
+            $urls = array_merge($urls ,$this->_getSmartphoneuaItems($content));
+            $html = phpQuery::newDocumentHtml($content);
+            $pages = pq($html)->find("div.pages > a.digit");
+            foreach ($pages as $page)
+            {
+                sleep(1);
+                $href = pq($page)->attr("href");
+                $page = $brand.substr($href, 2, strlen($href));
+                $content = $this->getContent($page);
+                if (!$content)
+                {
+                    echo "ERROR download brand's subpage. {$page}".PHP_EOL;
+                    continue;
+                }
+                $urls = array_merge($urls, $this->_getSmartphoneuaItems($content));
+            }
+        }
+        foreach ($urls as $url)
+        {
+            $model = new SourcesSmartphoneua();
+            $model->url = $url;
+            if ($model->validate())
+                $model->save();
+            else
+                var_dump($model->getErrors());
+        }
+    }
+    
     public function actionGsmarenaList()
     {
         $brandsPage = $this->getContent("http://www.gsmarena.com/makers.php3");
@@ -88,6 +149,51 @@ class DownloadCommand extends CConsoleCommand
             $url->file = $file->id;
             $url->save();
         }
+    }
+    
+    public function actionSmartphoneua()
+    {
+        $urls = SourcesSmartphoneua::model()->findAllByAttributes(array(
+            "file"=>0
+        ));
+        foreach ($urls as $url)
+        {
+            sleep(1);
+            echo ".";
+            $content = $this->getContent($url->url);
+            if (!$content)
+            {
+                echo "Not downloaded {$url->url}";
+                continue;
+            }
+            $file = new SourcesSmartphoneuaFiles();
+            $file->save();
+            if (!$file->putFile($content))
+            {
+                echo "Not put downloaded {$url->url}";
+                $file->delete();
+                continue;
+            }
+            $file->size = $file->getFilesize();
+            $file->mime_type = $file->getMimeType();
+            $file->name = "smartphoneua.html";
+            $file->save();
+            $url->file = $file->id;
+            $url->save();
+        }
+    }
+    
+    private function _getSmartphoneuaItems($content)
+    {
+        $html = phpQuery::newDocumentHTML($content);
+        $items = pq($html)->find("#ph_list div > a.green");
+        $urls = array();
+        foreach ($items as $item)
+        {
+            $urls[] = pq($item)->attr("href");
+        }
+        
+        return array_unique($urls);
     }
     
     private function _getGsmarenaItems($content)

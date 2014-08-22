@@ -8,7 +8,6 @@
                 
         </div>
         <div class="i-informers-inlinebl">
-                <?php //$this->widget('application.widgets.ListGoodsWidget', array('limit'=>250, 'sort'=> GoodsModel::LIST_ORDER_RATING)); ?>
-                <?php //$this->widget('application.widgets.ListGoodsWidget', array()); ?>
+                <?php $this->widget('application.widgets.ListGoodsWidget', array("type"=>'e-book')); ?>
         </div>
 </div>
