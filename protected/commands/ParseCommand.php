@@ -182,6 +182,11 @@ class ParseCommand extends CConsoleCommand
             "Каталог планшетов"=>array(2, "Планшеты"),
             "Каталог электронных книг"=>array(3, "Электронные книги"),
         );
+        $type_replaces = array(
+            1=>" ",
+            2=>"Планшет ",
+            3=>"Электронная книга ",
+        );
         $type = 0;
         $brand = '';
         foreach ($crumbs as $key=>$crumb)
@@ -216,8 +221,8 @@ class ParseCommand extends CConsoleCommand
             return $this->actionSmartphoneua();
         }
         
-        $name = pq($html)->find("div.padding h1")->text();
-        $name = trim(substr($name, strlen($brand)+1, strlen($name)));
+        $name = pq($html)->find("div.padding h1")->text();   
+        $name = trim(substr($name, strlen($brand)+strlen($type_replaces[$type]), strlen($name)));
         
         if (!$brand)
         {
@@ -301,6 +306,9 @@ class ParseCommand extends CConsoleCommand
                 $task->save();
                 return $this->actionSmartphoneua();
             }
+        } else {
+            $goods->type = $type;
+            $goods->save();
         }
         
         foreach ($result as $characteristic)
