@@ -11,7 +11,7 @@ class ListGoodsWidget extends CWidget
         $criteria = new CDbCriteria();
         $criteria->compare("t.link", $this->type);
         $criteria->order = "brand_data.name asc, goods.name asc";
-        $data = GoodsTypes::model()->cache(60*60*3)->with(array(
+        $data = GoodsTypes::model()->cache(60*60*20)->with(array(
             "name",
             "goods",
             "goods.brand_data",

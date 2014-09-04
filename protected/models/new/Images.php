@@ -12,6 +12,7 @@ class Images extends CActiveRecord
     const SIZE_LIST = 3;
     const SIZE_WIDGET = 4;
     const SIZE_SEARCH = 5;
+    const SIZE_BRAND = 6;
     
     /**
      * Размеры для ресайза
@@ -20,10 +21,10 @@ class Images extends CActiveRecord
     public static $sizes = array(
         // SIZE_CONST=>array(width, height, absolute)
         2=>array(510, 0, false),
-        3=>array(91, 91, true),
+        3=>array(91, 91, false),
         4=>array(30, 37, true),
         //5=>array(400, 400, false),
-        //6=>array(500, 500, true),
+        6=>array(131, 131, true),
     );
     
     public static function model($className = __CLASS__)

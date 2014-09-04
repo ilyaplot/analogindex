@@ -22,7 +22,7 @@
         <span class="divider">/</span>
     </li>
     <li itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-2" itemref="breadcrumb-3">
-        <a href="<?php echo Yii::app()->createUrl("site/brand", array("link"=>$goods->brand_data->link)); ?>"><?php echo $data->page_goods->brand_data->name?></a>
+        <a href="<?php echo Yii::app()->createUrl("site/brand", array("link"=>$goods->brand_data->link, "language"=>Language::getCurrentZone())); ?>"><?php echo $data->page_goods->brand_data->name?></a>
         <span class="divider">/</span>
     </li>
     <li class="active" itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-3">

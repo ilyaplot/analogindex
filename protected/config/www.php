@@ -86,12 +86,15 @@ return array(
                 
                 'http://analogindex.<language:\w+>/_image/id<id:\d+>/<name:.*>'=>
                     array('files/image', 'urlSuffix'=>''),
-                
+                'http://analogindex.<language:\w+>/brand/<link:[\d\w\-_]*>/page<page:\d+>'=>
+                    array('site/brand', 'urlSuffix'=>'.html'),
+                'http://analogindex.<language:\w+>/brand/<link:[\d\w\-_]*>'=>
+                    array('site/brand', 'urlSuffix'=>'.html'),
                 'http://analogindex.<language:\w+>/<link:[\d\w\-_]*>/img/id<id:\d+>/<filename:.*>/<size:\d+>'=>
                     array('site/download', 'urlSuffix'=>''),
                 'http://analogindex.<language:\w+>/<link:[\d\w\-_]*>/img/id<id:\d+>/<filename:.*>'=>
                     array('site/download', 'urlSuffix'=>''),
-                'http://analogindex.<language:\w+>/<type:[\w\d\-_]+>/<brand:[\d\w\-_]*>/<link:[\d\w\-_]*>'=>
+                'http://analogindex.<language:\w+>/<type:[\w\d\-_]+>/<brand:[\d\w\-_\+]*>/<link:[\d\w\-_]*>'=>
                     array('site/goods', 'urlSuffix'=>'.html'),
                 'http://analogindex.<language:\w+>/'=>array('site/index', 'urlSuffix'=>''),
                 
@@ -101,12 +104,17 @@ return array(
                 
                 'http://www.analogindex.<language:\w+>/_image/id<id:\d+>/<name:.*>'=>
                     array('files/image', 'urlSuffix'=>''),
+                'http://www.analogindex.<language:\w+>/brand/<link:[\d\w\-_]*>/page<page:\d+>'=>
+                    array('site/brand', 'urlSuffix'=>'.html'),
+                'http://www.analogindex.<language:\w+>/brand/<link:[\d\w\-_]*>'=>
+                    array('site/brand', 'urlSuffix'=>'.html'),
+                
                 'http://www.analogindex.<language:\w+>/lang'=>'site/language',
                 'http://www.analogindex.<language:\w+>/<link:[\d\w\-_]*>/img/id<id:\d+>/<filename:.*>/<size:\d+>'=>
                     array('site/download', 'urlSuffix'=>''),
                 'http://www.analogindex.<language:\w+>/<link:[\d\w\-_]*>/img/id<id:\d+>/<filename:.*>'=>
                     array('site/download', 'urlSuffix'=>''),
-                'http://www.analogindex.<language:\w+>/<type:[\w\d\-_]+>/<brand:[\d\w\-_]*>/<link:[\d\w\-_]*>'=>
+                'http://www.analogindex.<language:\w+>/<type:[\w\d\-_]+>/<brand:[\d\w\-_\+]*>/<link:[\d\w\-_]*>'=>
                     array('site/goods', 'urlSuffix'=>'.html'),
                 'http://www.analogindex.<language:\w+>/'=>array('site/index', 'urlSuffix'=>''),
                 // Дефолтные правила. 

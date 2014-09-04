@@ -2,6 +2,7 @@
 return array(
     'Главная'=>'Main page',
     'Коммуникаторы'=>'PDA',
+    'Производители'=>'Brands',
     'Вход'=>'Login',
     'Регистрация'=>'Registration',
     'Искать'=>'Search',
@@ -14,4 +15,8 @@ return array(
     // Для Lightbox
     'Фотография '=>'Photo ',
     ' из '=>' of ',
+    'Последняя' => 'Last',
+    'Первая' => 'First',
+    'Следующая' => 'Next',
+    'Предыдущая' => 'Previous'
 );

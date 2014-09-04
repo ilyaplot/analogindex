@@ -96,7 +96,7 @@ class Model extends CModel
     public function str2url($str) {
         $str = self::rus2translit($str);
         $str = strtolower($str);
-        $str = preg_replace('~[^a-z0-9\s-]+~u', '', $str);
+        $str = preg_replace('~[^a-z0-9\s-\+]+~u', '', $str);
         $str = preg_replace('~[\s]{1,}~u', '-', $str);
         $str = trim($str, "-");
 

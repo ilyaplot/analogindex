@@ -102,7 +102,7 @@ class SiteController extends Controller
     {
         $zones = Language::$zones;
         $url = Yii::app()->request->urlReferrer;
-        $url = preg_replace("~http://(.*)analogindex.(\w+)/(.*)~", "http://$1analogindex.{$language}/$3", $url);
+        $url = preg_replace("~http://(.*)analogindex.(\w+)/(.*)~", "http://analogindex.{$language}/$3", $url);
         Yii::app()->request->redirect($url);
     }
 
@@ -142,6 +142,39 @@ class SiteController extends Controller
         $items = $model->sphinx($result);
         //var_dump($items);
         $this->render("search", array('items'=>$items));
+    }
+    
+    
+    public function actionBrand($link, $language)
+    {
+        $brand = Brands::model()->findByAttributes(array("link"=>$link));
+        if (!$brand)
+            throw new CHttpException(404, Yii::t("errors", "Страница не найдена"));
+        $view = Yii::app()->request->getParam("view");
+        $views = array(
+            1=>array(
+                "limit"=>18,
+                "template"=>"_brand_catalog_1",
+                "id"=>1,
+            ),
+            2=>array(
+                "id"=>2,
+                "limit"=>5,
+                "template"=>"_brand_catalog_2"
+            ),
+        );
+        $view = isset($views[$view]) ? $views[$view] : $views[1];
+        $criteria = new CDbCriteria();
+        $criteria->compare("brand", $brand->id);
+        $criteria->compare("type", 1);
+        $goodsCount = Goods::model()->cache(60*60*48)->count($criteria);
+        $criteria->limit = $view['limit'];
+        $criteria->order = "t.name asc";
+        $pages = new CPagination($goodsCount);
+        $pages->setPageSize($view['limit']);
+        $pages->applyLimit($criteria);
+        $goods = Goods::model()->cache(60*60*24)->with(array('type_data'))->findAll($criteria);
+        $this->render("brand", array("brand"=>$brand, "goods"=>$goods, "pages"=>$pages, "view"=>$view));
     }
     
     public function actionTest()

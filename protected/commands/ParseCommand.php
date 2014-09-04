@@ -162,6 +162,7 @@ class ParseCommand extends CConsoleCommand
     public function actionSmartphoneua()
     {
         $task = SourcesSmartphoneua::model()->with("file_data")->findByAttributes(array("completed"=>0));
+        //$task = SourcesSmartphoneua::model()->with("file_data")->findByAttributes(array("completed"=>1, "id"=>2098));
         if (!$task)
         {
             echo "No tasks for parse".PHP_EOL;
@@ -232,8 +233,15 @@ class ParseCommand extends CConsoleCommand
         
         echo "$type $brand $name".PHP_EOL;
         
+        // Картинки
+        $images = pq($html)->find("#fotos ul > li");
+        $imagesList = array();
+        foreach ($images as $image)
+        {
+            $imagesList[] = pq($image)->find("a")->attr("href");
+        }
+       
         
-
         // Характеристики
         $characteristics_elems = pq($html)->find("#allspecs > *");
         $characteristics_lines = array();
@@ -244,17 +252,19 @@ class ParseCommand extends CConsoleCommand
             if ($text == '* Найденные неточности в описании просьба сообщать на help@smartphone.ua')
                 break;
             if ($elem->tagName == "strong")
-                $currentCatalog = substr($text, 0 ,strlen($text) - strlen("$brand $name  "));
+                $currentCatalog = trim(substr($text, 0 ,strlen($text) - strlen("$brand $name ")));
             else
             {
                 //echo "$currentCatalog::::$text".PHP_EOL;
                 $characteristics_lines[] = "$currentCatalog::::$text";
             }
         }      
+        //var_dump($characteristics_lines);
         
         $parser = new SmartphoneuaCharacteristicsParser($characteristics_lines);
         $result = $parser->run();
-        
+        //var_dump($result);
+
         // Ищем модель в бд
         $criteria = new CDbCriteria();
         $criteria->condition = 
@@ -267,7 +277,6 @@ class ParseCommand extends CConsoleCommand
         $criteria->params = array(
             "search"=>$search,
         );
-        echo $search.PHP_EOL;
         $goods = Goods::model()->with("brand_data","synonims")->find($criteria);
         // Если что-то нашли
         Yii::app()->language  = 'ru';
@@ -325,8 +334,85 @@ class ParseCommand extends CConsoleCommand
                 //var_dump($goodsCharacteristic->getErrors());
             }
         }
+
+        foreach ($imagesList as $image)
+        {
+            $goodsImage = GoodsImages::model()->with(array(
+                "image_data"=>array(
+                    "joinType"=>"INNER JOIN",
+                    "condition"=>"image_data.source  = :source",
+                    "params"=>array("source"=>$image),
+                )
+            ))->count();
+            if (!$goodsImage)
+            {
+                $ext = explode(".", $image);
+                $ext = end($ext);
+                $file = new Files();
+                $file->name = "{$brand} {$name}.{$ext}";
+                $file->save();
+                $filename = $file->getFilename();
+                if (!$this->getFile($image, $filename))
+                {
+                    echo "Не удалось скачать {$image}".PHP_EOL;
+                    $file->delete();
+                    continue;
+                }
+                sleep(1);
+                $file->size = $file->getFilesize();
+                $file->mime_type = $file->getMimeType();
+                if (!preg_match("~image.*~", $file->mime_type))
+                {
+                    $file->delete();
+                    echo "Тип изображения не соответствует image. {$file->mime_type}".PHP_EOL;
+                    continue;
+                }
+                echo "Добавлено изображение {$image}".PHP_EOL;
+                $file->save();
+                $imageModel = new Images();
+                $imageModel->file = $file->id;
+                $imageModel->size = 1;
+                $size = getimagesize($filename);
+                $imageModel->width = $size[0];
+                $imageModel->height = $size[1];
+                $imageModel->source = $image;
+                $imageModel->save();
+                $goodsImage = new GoodsImages();
+                $goodsImage->goods = $goods->id;
+                $goodsImage->image = $imageModel->id;
+                $goodsImage->save();
+            }
+        }
         $task->completed = 1;
         $task->save();
         $this->actionSmartphoneua();
+    }
+    
+    public function getFile($url, $filename)
+    {
+        if (empty($filename))
+            return false;
+        if (!$file = fopen($filename, 'w'))
+            return false;
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.153 Safari/537.36");
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, '1');
+        curl_setopt($ch, CURLOPT_TIMEOUT, 40);
+        curl_setopt($ch, CURLOPT_FILE, $file);
+        curl_exec($ch);
+        fclose($file);
+        if (curl_errno($ch))
+        {
+            echo "Curl error ".curl_error($ch).PHP_EOL;
+            curl_close($ch);
+            return false;
+        }
+        
+        $info = curl_getinfo($ch);
+        if ($info['http_code'] !== 200)
+            return false;
+        curl_close($ch);
+        return true;
     }
 }

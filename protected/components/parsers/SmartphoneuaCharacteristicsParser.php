@@ -12,6 +12,12 @@ class SmartphoneuaCharacteristicsParser extends CharacteristicsParser
                         return Yii::app()->dateFormatter->format("yyy", "{$matches['year']}-01-01 00:00:00");
                     },
                 ),
+                "Общие характеристики::::Год выпуска: (?P<year>\d+)"=>array(
+                    "function"=>function($matches, $lang){
+                        Yii::app()->language = $lang;
+                        return Yii::app()->dateFormatter->format("yyy", "{$matches['year']}-01-01 00:00:00");
+                    },
+                ),
             ),
             // Вес в граммах
             3=>array(
@@ -19,11 +25,20 @@ class SmartphoneuaCharacteristicsParser extends CharacteristicsParser
                     "function"=>function($matches, $lang){
                         return doubleval($matches['weight']);
                     }
-                )
+                ),      
             ),  
             // Размеры (в д ш)
             4=>array(
                 "Корпус::::Высота, мм: (?P<h>[\d\.]+)"=>array(
+                    "function"=>function($matches, $lang){
+                        return array(
+                            doubleval($matches['h']),
+                        );
+                    },
+                    "nobreak"=>true,
+                    "merge"=>true,
+                ),
+                "Корпус::::Длина, мм: (?P<h>[\d\.]+)"=>array(
                     "function"=>function($matches, $lang){
                         return array(
                             doubleval($matches['h']),
@@ -48,12 +63,18 @@ class SmartphoneuaCharacteristicsParser extends CharacteristicsParser
                         );
                     },
                     "merge"=>true,
-                )
+                    "nobreak"=>true,
+                ),
             ),
             
             // Количество ядер 
             5=>array(
                 "Технические характеристики::::Количество ядер: (?P<cores>\d+)"=>array(
+                    "function"=>function($matches, $lang) {
+                        return $matches['cores'];
+                    }
+                ),
+                "Общие характеристики::::Процессор: (?P<cores>\d+)-ядерный"=>array(
                     "function"=>function($matches, $lang) {
                         return $matches['cores'];
                     }
@@ -69,202 +90,261 @@ class SmartphoneuaCharacteristicsParser extends CharacteristicsParser
                         return doubleval($matches['freq']*1000*1000*1000);
                     }
                 ),
+                "Общие характеристики::::Процессор:.*[^\d\.,]{1,}(?P<freq>[\d,\.]+) ГГц"=>array(
+                    "function"=>function($matches, $lang) {
+                        $matches['freq'] = str_replace(",", ".", $matches['freq']);
+                        return doubleval($matches['freq']*1000*1000*1000);
+                    }
+                ),
                 "Технические характеристики::::Процессор:.*[^\d\.,]{1,}(?P<freq>[\d,\.]+) MГц"=>array(
                     "function"=>function($matches, $lang) {
                         $matches['freq'] = str_replace(",", ".", $matches['freq']);
                         return doubleval($matches['freq']*1000*1000);
                     }
                 ),
+                "Общие характеристики::::Процессор:.*[^\d\.,]{1,}(?P<freq>[\d,\.]+) МГц"=>array(
+                    "function"=>function($matches, $lang) {
+                        $matches['freq'] = str_replace(",", ".", $matches['freq']);
+                        return doubleval($matches['freq']*1000*1000*1000);
+                    }
+                ),
             ),
-            /**
-
             // Модель процессора (чипсет)
             7=>array(
-                "Features.Chipset::::(?P<chipset>.*)"=>array(
+                //Процессор: 4-ядерный Mediatek MT6582, 1.3 ГГц
+                "Общие характеристики::::Процессор: [\d]-ядерный (?P<chipset>.*), [\d,\.][Г|М]Гц"=>array(
                     "function"=>function($matches, $lang) {
                         return trim($matches['chipset']);
                     }
-                )
+                ),
+                "Технические характеристики::::Процессор: [\d]-ядерный (?P<chipset>.*), [\d,\.][Г|М]Гц"=>array(
+                    "function"=>function($matches, $lang) {
+                        return trim($matches['chipset']);
+                    }
+                ),
             ),
+            
             // Оперативка в байтах
             8=>array(
-                "Memory.Internal::::.*, (?P<memory>[\d\.]+)\sGB\sRAM.*"=>array(
+                "Общие характеристики::::Память:.* (?P<memory>[\d\.,]+) ГБ ОЗУ"=>array(
                     "function"=>function($matches, $lang) {
+                        $matches['memory'] = str_replace(",", ".", $matches['memory']);
                         return doubleval($matches['memory']*1024*1024*1024);
                     }
                 ),
-                "Memory.Internal::::.*, (?P<memory>[\d\.]+)\sMB\sRAM.*"=>array(
+                "Общие характеристики::::Память:.* (?P<memory>[\d\.,]+) МБ ОЗУ"=>array(
                     "function"=>function($matches, $lang) {
+                        $matches['memory'] = str_replace(",", ".", $matches['memory']);
                         return doubleval($matches['memory']*1024*1024);
                     }
                 ),
-                "Memory.Internal::::.*, (?P<memory>[\d\.]+)\sKB\sRAM.*"=>array(
+                "Общие характеристики::::Память: (?P<memory>[\d\.,]+) ГБ DDR[\d] ОЗУ"=>array(
                     "function"=>function($matches, $lang) {
-                        return doubleval($matches['memory']*1024);
-                    }
-                ),
-                "Memory.Internal::::.*[^\d](?P<memory>[\d\.]+)\sGB\sRAM.*"=>array(
-                    "function"=>function($matches, $lang) {
+                        $matches['memory'] = str_replace(",", ".", $matches['memory']);
                         return doubleval($matches['memory']*1024*1024*1024);
                     }
                 ),
-                "Memory.Internal::::.*[^\d](?P<memory>[\d\.]+)\sMB\sRAM.*"=>array(
+                "Технические характеристики::::Память: (?P<memory>[\d\.,]+) ГБ ОЗУ"=>array(
                     "function"=>function($matches, $lang) {
+                        $matches['memory'] = str_replace(",", ".", $matches['memory']);
+                        return doubleval($matches['memory']*1024*1024*1024);
+                    }
+                ),
+                "Технические характеристики::::Память: (?P<memory>[\d\.,]+) МБ ОЗУ"=>array(
+                    "function"=>function($matches, $lang) {
+                        $matches['memory'] = str_replace(",", ".", $matches['memory']);
                         return doubleval($matches['memory']*1024*1024);
                     }
                 ),
-                "Memory.Internal::::.*[^\d](?P<memory>[\d\.]+)\sKB\sRAM.*"=>array(
+                "Технические характеристики::::Память: (?P<memory>[\d\.,]+) Гб DDR[\d] ОЗУ"=>array(
                     "function"=>function($matches, $lang) {
-                        return doubleval($matches['memory']*1024);
+                        $matches['memory'] = str_replace(",", ".", $matches['memory']);
+                        return doubleval($matches['memory']*1024*1024*1024);
                     }
-                )  
+                ),
             ),
             // внутренняя память в байтах
             9=>array(
-                "Memory.Internal::::[^\d]*(?P<memory>[\d\.]+)\sGB.*[^RAM]"=>array(
+                "Общие характеристики::::Память: .*ОЗУ, (?P<memory>[\d\.,]+) Г[Бб]+ ПЗУ"=>array(
                     "function"=>function($matches, $lang) {
+                        $matches['memory'] = str_replace(",", ".", $matches['memory']);
                         return doubleval($matches['memory']*1024*1024*1024);
                     }
                 ),
-                "Memory.Internal::::[^\d]*(?P<memory>[\d\.]+)\sMB.*[^RAM]"=>array(
+                "Общие характеристики::::Память: .*ОЗУ, (?P<memory>[\d\.,]+) М[Бб]+ ПЗУ"=>array(
                     "function"=>function($matches, $lang) {
+                        $matches['memory'] = str_replace(",", ".", $matches['memory']);
                         return doubleval($matches['memory']*1024*1024);
                     }
                 ),
-                "Memory.Internal::::[^\d]*(?P<memory>[\d\.]+)\sKB.*[^RAM]"=>array(
+                "Технические характеристики::::Память: .* ОЗУ, (?P<memory>[\d\.,]+) Г[Бб]+ ПЗУ"=>array(
                     "function"=>function($matches, $lang) {
-                        return doubleval($matches['memory']*1024);
-                    }
-                ),
-                "^Memory.Internal::::(?P<memory>[\d\.]+)\sGB$"=>array(
-                    "function"=>function($matches, $lang) {
+                        $matches['memory'] = str_replace(",", ".", $matches['memory']);
                         return doubleval($matches['memory']*1024*1024*1024);
                     }
                 ),
-                "^Memory.Internal::::(?P<memory>[\d\.]+)\sMB$"=>array(
+                "Технические характеристики::::Память: .* ОЗУ, (?P<memory>[\d\.,]+) М[Бб]+ ПЗУ"=>array(
                     "function"=>function($matches, $lang) {
+                        $matches['memory'] = str_replace(",", ".", $matches['memory']);
+                        return doubleval($matches['memory']*1024*1024);
+                    }
+                ), 
+                "Общие характеристики::::Память: (?P<memory>[\d\.,]+) Г[Бб]+ ПЗУ"=>array(
+                    "function"=>function($matches, $lang) {
+                        $matches['memory'] = str_replace(",", ".", $matches['memory']);
+                        return doubleval($matches['memory']*1024*1024*1024);
+                    }
+                ),
+                "Общие характеристики::::Память: (?P<memory>[\d\.,]+) М[Бб]+ ПЗУ"=>array(
+                    "function"=>function($matches, $lang) {
+                        $matches['memory'] = str_replace(",", ".", $matches['memory']);
                         return doubleval($matches['memory']*1024*1024);
                     }
                 ),
-                "^Memory.Internal::::(?P<memory>[\d\.]+)\sKB$"=>array(
+                "Технические характеристики::::Память: (?P<memory>[\d\.,]+) Г[Бб]+ ПЗУ"=>array(
                     "function"=>function($matches, $lang) {
-                        return doubleval($matches['memory']*1024);
+                        $matches['memory'] = str_replace(",", ".", $matches['memory']);
+                        return doubleval($matches['memory']*1024*1024*1024);
+                    }
+                ),
+                "Технические характеристики::::Память: (?P<memory>[\d\.,]+) М[Бб]+ ПЗУ"=>array(
+                    "function"=>function($matches, $lang) {
+                        $matches['memory'] = str_replace(",", ".", $matches['memory']);
+                        return doubleval($matches['memory']*1024*1024);
+                    }
+                ),
+                "Технические характеристики::::Память: .*/(?P<memory>[\d\.,]+) Г[Бб]+ ПЗУ"=>array(
+                    "function"=>function($matches, $lang) {
+                        $matches['memory'] = str_replace(",", ".", $matches['memory']);
+                        return doubleval($matches['memory']*1024*1024*1024);
+                    }
+                ),
+                "Общие характеристики::::Память: .*/(?P<memory>[\d\.,]+) Г[Бб]+ ПЗУ"=>array(
+                    "function"=>function($matches, $lang) {
+                        $matches['memory'] = str_replace(",", ".", $matches['memory']);
+                        return doubleval($matches['memory']*1024*1024*1024);
                     }
                 ),
             ),
-            // Внутренняя память в байтах
+            // Внешняя память в байтах
             10=>array(
-                "Memory.Card slot::::[^\d]*(?P<memory>[\d\.]+)\sGB.*"=>array(
+                "Общие характеристики::::Тип карт памяти: .*максимальный объем (?P<memory>[\d\.]+) Г[бБ]+"=>array(
                     "function"=>function($matches, $lang) {
+                        $matches['memory'] = str_replace(",", ".", $matches['memory']);
                         return doubleval($matches['memory']*1024*1024*1024);
                     }
                 ),
-                "Memory.Card slot::::[^\d]*(?P<memory>[\d\.]+)\sMB.*"=>array(
+                "Технические характеристики::::Тип карт памяти: .*до (?P<memory>[\d\.]+) Г[бБ]+"=>array(
                     "function"=>function($matches, $lang) {
-                        return doubleval($matches['memory']*1024*1024);
+                        $matches['memory'] = str_replace(",", ".", $matches['memory']);
+                        return doubleval($matches['memory']*1024*1024*1024);
                     }
                 ),
-                "Memory.Card slot::::[^\d]*(?P<memory>[\d\.]+)\sKB.*"=>array(
-                    "function"=>function($matches, $lang) {
-                        return doubleval($matches['memory']*1024);
-                    }
-                )
             ),
             11=>array(
-                "Display.Type::::(?P<display>.*)"=>array(
+                "Основной дисплей::::Тип дисплея:(?P<display>.*)"=>array(
                     "function"=>function($matches, $lang) {
-                        $replaces = array(
-                            "capacitive"=>"емкостной",
-                            "touchscreen"=>"сенсорный",
-                            "resistive"=>"резистивный",
-                            "colors"=>"цветов",
-                            "Monochrome"=>"монохромный",
-                            "graphic"=>"графический",
-                        );
-                        if ($lang == 'ru')
-                        {
-                            foreach ($replaces as $from=>$to)
-                                $matches['display'] = str_replace($from, $to, $matches['display']);
-                        }
+                        return trim($matches["display"]);
+                    }
+                ),
+                "Дисплей::::Тип дисплея:(?P<display>.*)"=>array(
+                    "function"=>function($matches, $lang) {
                         return trim($matches["display"]);
                     }
                 )
             ),
             12=>array(
-                "Display.Size::::(?P<width>[\d\.]+) x (?P<height>[\d\.]+) pixels"=>array(
+                "Дисплей::::Разрешение: (?P<width>[\d]+)\*(?P<height>[\d]+)"=>array(
                     "function"=>function($matches, $lang){
                         return array(
-                            doubleval($matches['width']),
-                            doubleval($matches['height']),
+                            intval($matches['width']),
+                            intval($matches['height']),
+                        );
+                    }
+                ),
+                "Основной дисплей::::Разрешение д.: (?P<width>[\d]+)\*(?P<height>[\d]+)"=>array(
+                    "function"=>function($matches, $lang){
+                        return array(
+                            intval($matches['width']),
+                            intval($matches['height']),
                         );
                     }
                 ),
             ),
             13=>array(
-                "Display.Size::::.*\s(?P<size>[\d\.]+) inches.*"=>array(
+                "Основной дисплей::::Размер, д.: (?P<size>[\d\.,]+)"=>array(
                     "function"=>function($matches, $lang){
+                        $matches['size'] = str_replace(",", ".", $matches['size']);
+                        return doubleval($matches['size']);
+                    }
+                ),
+                "Дисплей::::Размер, д.: (?P<size>[\d\.,]+)"=>array(
+                    "function"=>function($matches, $lang){
+                        $matches['size'] = str_replace(",", ".", $matches['size']);
                         return doubleval($matches['size']);
                     }
                 ),
             ),
             14=>array(
-                "Features.OS::::(?P<os>.*)"=>array(
+                "Операционная система::::Версия: (?P<os>.*)"=>array(
                     "function"=>function($matches, $lang){
                         return trim($matches['os']);
                     }
                 ),
             ),
+            
             15=>array(
-                //"General. ::::HSDPA 850 / 1900 / 2100 - D850"
-                "General.[\d]G Network::::(?P<name>[^\s]*) (?P<standarts>[\d\s/]+)"=>array(
+                "Стандарт и частотный диапазон::::GSM:"=>array(
                     "function"=>function($matches, $lang){
-                        $name = trim($matches['name']);
-                        $standarts = explode(" / ", $matches['standarts']);
-                        $return = array();
-                        foreach($standarts as $std)
-                        {
-                            if (!trim($std))
-                                continue;
-                            $return[] = trim($name)." ".trim($std);
-                        }
-                        return $return;
+                        return array("GSM 850");
                     },
                     "nobreak"=>true,
                     "merge"=>true,
+                    "unique"=>true,
                 ),
-                "General. ::::(?P<name>[^\s]*) (?P<standarts>[\d\s/]+)"=>array(
+                "Стандарт и частотный диапазон::::GSM (?P<std>[\d]+)"=>array(
                     "function"=>function($matches, $lang){
-                        $name = trim($matches['name']);
-                        $standarts = explode(" / ", $matches['standarts']);
-                        $return = array();
-                        foreach($standarts as $std)
-                        {
-                            if (!trim($std))
-                                continue;
-                            $return[] = trim($name)." ".trim($std);
-                        }
-                        return $return;
+                        return array("GSM ".trim($matches['std']));
                     },
                     "nobreak"=>true,
                     "merge"=>true,
-                )
-            ),
-            16=>array(
-                "Display.Protection::::(?P<protection>.*)"=>array(
-                    "function"=>function($matches, $lang){
-                        return trim($matches['protection']);
-                    }
+                    "unique"=>true,
                 ),
-            ),
-            17=>array(
-                "General.SIM::::(?P<sim>.*)"=>array(
+                "Стандарт и частотный диапазон::::3G:"=>array(
                     "function"=>function($matches, $lang){
-                        return trim($matches['sim']);
-                    }
+                        return array("HSPDA 850");
+                    },
+                    "nobreak"=>true,
+                    "merge"=>true,
+                    "unique"=>true,
+                ),
+                "Стандарт и частотный диапазон::::WCDMA"=>array(
+                    "function"=>function($matches, $lang){
+                        return array("HSPDA 850");
+                    },
+                    "nobreak"=>true,
+                    "merge"=>true,
+                    "unique"=>true,
+                ),
+                "Стандарт и частотный диапазон::::WCDMA - версия: (?P<std>[\d/]+)"=>array(
+                    "function"=>function($matches, $lang){
+                        $result = array();
+                        $std = explode("/",$matches['std']);
+                        foreach ($std as $s)
+                        {
+                            $s = trim($s);
+                            if (!empty($s))
+                                $result[] = "HSPDA {$s}";
+                        }
+                        return $result;
+                    },
+                    "nobreak"=>true,
+                    "merge"=>true,
+                    "unique"=>true,
                 ),
             ),
             18=>array(
-                "Data.WLAN::::Wi-Fi 802\.11 (?P<standarts>[\w/]+),(?P<other>)"=>array(
+                "Передача данных::::Версия WiFi: 802.11 (?P<standarts>[\w/]+)"=>array(
                     "function"=>function($matches, $lang){
                         $standarts = array();
                         $std = explode("/", trim($matches['standarts']));
@@ -273,18 +353,11 @@ class SmartphoneuaCharacteristicsParser extends CharacteristicsParser
                             if (!$s)
                                 continue;
                             $standarts[] = "802.11 ".trim($s);
-                        }
-                        $etc = explode(",", trim($matches['other']));
-                        foreach ($etc as $e)
-                        {
-                            if (!$e)
-                                continue;
-                            $standarts[] = trim($e);
                         }
                         return $standarts;
                     }
                 ),
-                "Data.WLAN::::Wi-Fi 802\.11 (?P<standarts>[\w/]+)"=>array(
+                "Передача данных::::Wi-Fi: 802.11 (?P<standarts>[\w/]+)"=>array(
                     "function"=>function($matches, $lang){
                         $standarts = array();
                         $std = explode("/", trim($matches['standarts']));
@@ -296,15 +369,21 @@ class SmartphoneuaCharacteristicsParser extends CharacteristicsParser
                         }
                         return $standarts;
                     }
-                )
+                ),
             ),
             19=>array(
-                "Data.Bluetooth::::(?P<bluetooth>.*)"=>array(
+                "Передача данных::::Версия Bluetooth: (?P<bluetooth>.*)"=>array(
+                    "function"=>function($matches, $lang){
+                        return trim("Bluetooth ".$matches['bluetooth']);
+                    }
+                ),
+                "Передача данных::::Bluetooth: (?P<bluetooth>.*)"=>array(
                     "function"=>function($matches, $lang){
                         return trim($matches['bluetooth']);
                     }
                 )
             ),
+            /**
             20=>array(
                 "Data.Infrared port::::(?P<irda>.*)"=>array(
                     "function"=>function($matches, $lang){

@@ -62,7 +62,7 @@ class CharacteristicsParser
                     foreach ($this->_langs as $lang)
                     {
                         // Выполняем регулярку
-                        if (preg_match("~{$pattern}~", $line, $matches))
+                        if (preg_match("~{$pattern}~i", $line, $matches))
                         {
                             echo "PATTERN RUN {$pattern} {$lang}".PHP_EOL;
                             // Значение возвращает функция из правила
@@ -81,8 +81,10 @@ class CharacteristicsParser
                                 // Если резултат массив и нужно соединять результаты
                                 if (is_array($resultItem[$id.$lang]['values']) && isset($params['merge']))
                                 {
-                                    
                                     $resultItem[$id.$lang]['values'] = array_merge($resultItem[$id.$lang]['values'], $value);
+                                    if (isset($params['unique']))
+                                        $resultItem[$id.$lang]['values'] = array_unique($resultItem[$id.$lang]['values'], SORT_STRING);
+                                    
                                 }
                             }
                             // Если получили результат, добавляем его к общему массиву
