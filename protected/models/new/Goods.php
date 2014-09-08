@@ -27,7 +27,11 @@ class Goods extends CActiveRecord
             "type_data"=>array(self::BELONGS_TO, "GoodsTypes", "type"),
             "brand_data"=>array(self::BELONGS_TO, "Brands", "brand"),
             "images"=>array(self::HAS_MANY, "GoodsImages", "goods", 
-                "order"=>"images.disabled asc, images.priority desc"
+                "order"=>"images.disabled asc, images.priority desc",
+                "on"=>"images.disabled = 0",
+            ),
+            "primary_image"=>array(self::HAS_ONE, "GoodsImages", "goods",
+                "order"=>"primary_image.priority desc",
             ),
             "reviews"=>array(self::HAS_MANY, "Reviews", "goods",
                 "order"=>"priority desc", 
@@ -79,23 +83,25 @@ class Goods extends CActiveRecord
     
     public function getPrimaryImage($size = null)
     {
+        return false;
         if (!$size)
             $size = Images::SIZE_WIDGET;
         
         $size = abs(intval($size));
         
-        $image = GoodsImages::model()->cache(60*60*24)->with(array(
+        $image = GoodsImages::model()->cache(60*60*48)->with(array(
             "image_data"=>array(
                 'joinType'=>'INNER JOIN',
                 'limit'=>'1',
                 'order'=>'t.priority desc, t.id asc',
                 'condition'=>'t.disabled = 0',
             ),
-            "image_data.resized"=>array(
+            "resized"=>array(
                 'joinType'=>'INNER JOIN',
-                'on'=>'resized.size = '.$size,
+                'on'=>'resized.size = :size',
+                'params'=>array("size"=>$size)
             ),
-            "image_data.resized.file_data",
+            "resized.file_data",
         ))->findByAttributes(array("goods"=>$this->getPrimaryKey()));
         return isset($image->image_data) ? $image->image_data : null; 
     }

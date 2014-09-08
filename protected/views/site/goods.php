@@ -1,6 +1,3 @@
-<?php
-    $goods = $data->page_goods;
-?>
 <script type="text/javascript">
     /**
      * Возвращает строку для подписи к фото на нужном языке
@@ -18,15 +15,19 @@
         <span class="divider">/</span>
     </li>
     <li itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-1" itemref="breadcrumb-2">
-        <a href="<?php echo Yii::app()->createUrl("site/type", array("type"=>$data->link)) ?>"><?php echo $data->name->name?></a>
+        <a href="<?php echo Yii::app()->createUrl("site/type", array("type"=>$type->link)) ?>"><?php echo $type->name->name?></a>
         <span class="divider">/</span>
     </li>
     <li itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-2" itemref="breadcrumb-3">
-        <a href="<?php echo Yii::app()->createUrl("site/brand", array("link"=>$goods->brand_data->link, "language"=>Language::getCurrentZone())); ?>"><?php echo $data->page_goods->brand_data->name?></a>
+        <a href="<?php echo Yii::app()->createUrl("site/brand", array(
+            "link"=>$brand->link, 
+            "language"=>Language::getCurrentZone(),
+            "type"=>$type->link,
+        )); ?>"><?php echo $brand->name?></a>
         <span class="divider">/</span>
     </li>
     <li class="active" itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-3">
-        <?php echo $goods->brand_data->name?> <?php echo $goods->name?>
+        <?php echo $brand->name?> <?php echo $product->name?>
     </li>
 </ul>
 <div class="wp_col_fix clr">
@@ -34,7 +35,7 @@
         <div class="infoGoodItem">
             <div class="infoGoodItem-title">
                 <div class="infoGoodItem-title-1">
-                    <h1><?php echo $goods->brand_data->name?> <?php echo $goods->name?></h1>
+                    <h1><?php echo $brand->name?> <?php echo $product->name?></h1>
                 </div>
                 <div class="infoGoodItem-title-2 clr">
                     <div class="flLeft">
@@ -42,7 +43,7 @@
                         <ul class="infoGoodItem-title-2_list">
                             <li class="item1"></li>
                             <li class="item2"></li>
-                            <li class="item3"><?php echo isset($goods->rating->value) ? round($goods->rating->value,1) : '';?></li>
+                            <li class="item3"><?php echo isset($product->rating->value) ? round($product->rating->value,1) : '';?></li>
                         </ul>
                         <div class="clear"></div>
                     </div>
@@ -81,18 +82,18 @@
                 </div>
             <div class="wpcontent">
                 <div class="infoGoodItem-wp-photos" id="item1">
-                    <?php if (empty($goods->images)) : ?>
+                    <?php if (empty($product->images)) : ?>
                         <div class="infoGoodItem-wp-photos_main">
                             <img style="width: 450px; height: auto;" src="/assets/img/no_photo.png">
                         </div>
-                    <?php elseif (count($goods->images) == 1): ?>
-                        <?php echo $this->renderPartial("_goods_one_image", array("goods"=>$goods)) ?>
+                    <?php elseif (count($product->images) == 2): ?>
+                        <?php echo $this->renderPartial("_goods_one_image", array("product"=>$product, "brand"=>$brand)) ?>
                     <?php else: ?>
-                        <?php $this->renderPartial("_goods_many_images", array("goods"=>$goods)) ?>
+                        <?php $this->renderPartial("_goods_many_images", array("product"=>$product, "brand"=>$brand)) ?>
                     <?php endif; ?>
                     <div class="clear"></div>
                 </div>
-                <?php $this->renderPartial("_goods_ characteristics", array("goods"=>$goods))?>
+                <?php $this->renderPartial("_goods_ characteristics", array("product"=>$product))?>
                 <div class="infoGoodItem-wp-news" id="item3">
                     <section class="infoGoodItem_content">
                         <h3 class="infoGoodItem-infoTitle"><?php echo Yii::t('goods', 'Новости')?></h3>
@@ -127,10 +128,10 @@
                         </div>
                     </section>
                     <section class="views-list">
-                        <?php foreach($goods->getVideos() as $video):?>
+                        <?php foreach($product->getVideos() as $video):?>
                         <?php echo $video; ?>
                         <?php endforeach; ?>
-                        <?php foreach ($goods->reviews as $review): ?>
+                        <?php foreach ($product->reviews as $review): ?>
                         <div class="view_bl">
                             <div class="view_bl-head clr">
                                 <div class="view_bl-head-r flLeft">
@@ -172,7 +173,7 @@
                     </section>
 
                     <section class="views-list">
-                        <?php foreach ($goods->faq as $question): ?>
+                        <?php foreach ($product->faq as $question): ?>
                         <div class="view_bl">
                             <div class="view_bl-textView">
                                 <h2><?php echo $question['question']?></h2>

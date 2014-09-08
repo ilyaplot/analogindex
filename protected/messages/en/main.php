@@ -18,5 +18,6 @@ return array(
     'Последняя' => 'Last',
     'Первая' => 'First',
     'Следующая' => 'Next',
-    'Предыдущая' => 'Previous'
+    'Предыдущая' => 'Previous',
+    'Все типы товаров' => 'All products types',
 );

@@ -381,7 +381,9 @@ section.container {
     width: 35px;
     height: 38px;
     margin: 0 12px;
-    /*text-align: center;*/
+    text-align: center;
+    display: table-cell;
+    vertical-align: middle;
 }
 .informer-listGoods_photo img { border: none; }
 .informer-listGoods_desc {
@@ -663,10 +665,18 @@ h2.search_result-nameItem a:hover { color: #c1501e;}
     margin: 15px 15px 3px 15px;
 }
 .infoGoodItem-wp-photos_main img { 
-    vertical-align: bottom; 
     max-width: 510px;
-    height: auto;
+    max-height: 510px;
 }
+
+.infoGoodItem-wp-photos_main .big_image {
+    width: 510px;
+    height: 510px;
+    display: table-cell; 
+    vertical-align: middle;
+    text-align: center;
+}
+
 .infoGoodItem-wp-photos_all {
     float: left;
     margin: 5px 0 0;
@@ -1484,7 +1494,8 @@ a.lang-select {
     list-style: none;
     height: auto;
     border: 1px solid #c0c0c0;
-    width: 100%;
+    width: auto;
+    max-width: 944px;
     background: #fff;
     background: -moz-linear-gradient(top, #fff 0%, #f3f3f3 100%);
     background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fff), color-stop(100%,#f3f3f3));

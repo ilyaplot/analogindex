@@ -1,17 +1,26 @@
-<?php 
-    $bigImage = $goods->getPrimaryImage(Images::SIZE_PREVIEW);
-    if ($bigImage):
+<?php
+    if (
+        isset($product->primary_image)
+        && isset($product->primary_image->image_data)
+        && isset($product->primary_image->image_data->file_data)
+        && isset($product->primary_image->image_data->size2_data)
+    ):
+
 ?>
 <div class="infoGoodItem-wp-photos_main" id="photo_main">
-    <a style="width:510px; height: 300px;" data-lightbox="roadtrip" data-title="<?php echo $goods->brand_data->name." ".$goods->name ?>" href="<?php echo Yii::app()->createUrl("files/image", array(
-        'id'=>$bigImage->file_data->id,
-        'name'=>$bigImage->file_data->name,
+    <a class="big_image" data-lightbox="roadtrip" data-title="<?php echo $brand->name." ".$product->name ?>" 
+       href="<?php echo Yii::app()->createUrl("files/image", array(
+        'id'=>$product->primary_image->image_data->file_data->id,
+        'name'=>$product->primary_image->image_data->file_data->name,
         'language'=>Language::getCurrentZone(),
-        )); ?>"><img src="<?php echo Yii::app()->createUrl("files/image", array(
-        'id'=>$bigImage->file_data->id,
-        'name'=>$bigImage->file_data->name,
+        )); ?>">
+        
+        <img src="<?php echo Yii::app()->createUrl("files/image", array(
+        'id'=>$product->primary_image->image_data->size2_data->id,
+        'name'=>$product->primary_image->image_data->size2_data->name,
         'language'=>Language::getCurrentZone(),
         )); ?>" style="max-width: 510px; height: auto; max-height: 300px;"
-        alt="<?php echo $goods->brand_data->name." ".$goods->name ?>" /></a>
+        alt="<?php echo $brand->name." ".$product->name ?>" />
+    </a>
 </div>
-<?php endif; ?>
+<?php endif;?>

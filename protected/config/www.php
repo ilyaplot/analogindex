@@ -36,6 +36,7 @@ return array(
             'tablePrefix' => 'ai_',
             'charset' => 'utf8',
             'class' => 'CDbConnection',
+            'schemaCachingDuration'=>60*60*48,
         ),
         'reviews'=>array(
             'connectionString' => 'mysql:host=localhost;dbname=reviews',
@@ -86,6 +87,10 @@ return array(
                 
                 'http://analogindex.<language:\w+>/_image/id<id:\d+>/<name:.*>'=>
                     array('files/image', 'urlSuffix'=>''),
+                'http://analogindex.<language:\w+>/brand/<link:[\d\w\-_]*>/<type:[\d\w\-_]*>/page<page:\d+>'=>
+                    array('site/brand', 'urlSuffix'=>'.html'),
+                'http://analogindex.<language:\w+>/brand/<link:[\d\w\-_]*>/<type:[\d\w\-_]*>'=>
+                    array('site/brand', 'urlSuffix'=>'.html'),
                 'http://analogindex.<language:\w+>/brand/<link:[\d\w\-_]*>/page<page:\d+>'=>
                     array('site/brand', 'urlSuffix'=>'.html'),
                 'http://analogindex.<language:\w+>/brand/<link:[\d\w\-_]*>'=>
@@ -104,6 +109,10 @@ return array(
                 
                 'http://www.analogindex.<language:\w+>/_image/id<id:\d+>/<name:.*>'=>
                     array('files/image', 'urlSuffix'=>''),
+                'http://www.analogindex.<language:\w+>/brand/<link:[\d\w\-_]*>/<type:[\d\w\-_]*>/page<page:\d+>'=>
+                    array('site/brand', 'urlSuffix'=>'.html'),
+                'http://www.analogindex.<language:\w+>/brand/<link:[\d\w\-_]*>/<type:[\d\w\-_]*>'=>
+                    array('site/brand', 'urlSuffix'=>'.html'),
                 'http://www.analogindex.<language:\w+>/brand/<link:[\d\w\-_]*>/page<page:\d+>'=>
                     array('site/brand', 'urlSuffix'=>'.html'),
                 'http://www.analogindex.<language:\w+>/brand/<link:[\d\w\-_]*>'=>

@@ -3,6 +3,7 @@ $(document).ready(function(){
     
     $("#photo_main img").click(function(){
         $(".infoGoodItem-wp-photos_all .slide .preview[data-preview='"+$(this).attr("src")+"']").trigger("click");
+        return false;
     });
     
     $(".infoGoodItem-wp-photos_all .slide .preview").hover(function(){
@@ -15,29 +16,30 @@ $(document).ready(function(){
     }, function(){});
 });
 </script>
-<?php echo $this->renderPartial("_goods_one_image", array("goods"=>$goods)) ?>
+<?php echo $this->renderPartial("_goods_one_image", array("product"=>$product, "brand"=>$brand)) ?>
+
 <div class="clear" ></div>
 <div class="infoGoodItem-wp-photos_all">
-    <?php foreach ($goods->images as $image): ?>
-    <?php if (!isset($image->image_data->resized_preview->file_data->id)) continue;?>
-    <?php if (!isset($image->image_data->resized_list->file_data->id)) continue;?>
+    <?php foreach ($product->images as $image): ?>
     <div class="slide">
-        <a title="<?php echo $goods->brand_data->name?> <?php echo $goods->name?>" href="<?php echo Yii::app()->createUrl("files/image", array(
+        <a title="<?php echo $brand->name?> <?php echo $product->name?>" 
+           href="<?php echo Yii::app()->createUrl("files/image", array(
                 'id'=>$image->image_data->file_data->id,
                 'name'=>$image->image_data->file_data->name,
                 'language'=>Language::getCurrentZone(),
                 )); ?>" data-lightbox="roadtrip">
             <img class="preview" src="<?php echo Yii::app()->createUrl("files/image", array(
-                'id'=>$image->image_data->resized_list->file_data->id,
-                'name'=>$image->image_data->resized_list->file_data->name,
+                'id'=>$image->image_data->size3_data->id,
+                'name'=>$image->image_data->size3_data->name,
                 'language'=>Language::getCurrentZone(),
                 )); ?>" 
-                alt="<?php echo $goods->brand_data->name." ".$goods->name ?>" data-preview="<?php echo Yii::app()->createUrl("files/image", array(
-                'id'=>$image->image_data->resized_preview->file_data->id,
-                'name'=>$image->image_data->resized_preview->file_data->name,
+                alt="<?php echo $brand->name." ".$product->name ?>" data-preview="<?php echo Yii::app()->createUrl("files/image", array(
+                'id'=>$image->image_data->size2_data->id,
+                'name'=>$image->image_data->size2_data->name,
                 'language'=>Language::getCurrentZone(),
                 )); ?>">
         </a>
     </div>
     <?php endforeach; ?>
 </div>
+

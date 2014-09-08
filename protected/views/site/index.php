@@ -1,6 +1,5 @@
 <div class="i-informers clr">
         <div class="i-informers-inlinebl">
-                <?php //$this->widget('application.widgets.ListGoodsWidget', array('limit'=>150, 'sort'=>  GoodsModel::LIST_ORDER_NAME)); ?>
                 <?php $this->widget('application.widgets.ListGoodsWidget', array("type"=>'tablet')); ?>
         </div>
         <div class="i-informers-inlinebl">

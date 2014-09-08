@@ -9,92 +9,31 @@ class SiteController extends Controller
     
     public function actionGoods($language, $type, $brand, $link)
     {
-        if ($link == 'www')
-            Yii::app ()->request->redirect ("http://".str_replace("www.", "", $_SERVER['HTTP_HOST']));
+        $type = GoodsTypes::model()->findByAttributes(array("link"=>$type));
+        if (!$type)
+            throw new CHttpException(404, Yii::t("errors", "Страница не найдена"));       
         
-        $linkPattern = "~[\w\d\-_]+~";
-        if (!preg_match($linkPattern, $link) || !preg_match($linkPattern, $brand) || !preg_match($linkPattern, $type))
-            throw new CHttpException(404, Yii::t("errors", "Страница не найдена"));            
-        
-        $criteria = new CDbCriteria();
-        $criteria->limit = "1";
-        $criteria->compare("t.link", $type);
-        
-        $data = GoodsTypes::model()->cache(10)->with(array(
-            "name",
-            "page_goods"=>array(
-                "on"=>"page_goods.link = '{$link}'",
-            ),
-            "page_goods.brand_data"=>array(
-                "joinType"=>"INNER JOIN",
-                "on"=>"brand_data.link = '{$brand}'",
-            ),
-            "page_goods.rating",
-            "page_goods.videos",
-            "page_goods.reviews",
-            "page_goods.faq",
-            "page_goods.images"=>array(
-                "order"=>"images.priority desc",
-                "on"=>"images.disabled = 0",
-            ),
-            "page_goods.synonims",
-            "page_goods.modifications",
-            "page_goods.modifications.children",
-            "page_goods.images.image_data",
-            "page_goods.images.image_data.resized_preview",
-            "page_goods.images.image_data.resized_list",
-        ))->find($criteria);
-        
-        if (!$data)
+        $brand = Brands::model()->findByAttributes(array("link"=>$brand));
+        if (!$brand)
             throw new CHttpException(404, Yii::t("errors", "Страница не найдена"));
-        
-        $this->setPageTitle($data->page_goods->brand_data->name." ".$data->page_goods->name);
+        $criteria = new CDbCriteria();
+        $criteria->condition = "t.link = :link and t.brand = :brand and t.type = :type";
+        $criteria->params = array("link"=>$link, "brand"=>$brand->id, "type"=>$type->id);
+        $product = Goods::model()->with(array(
+            "rating",
+            //"images",
+            "primary_image",
+        ))->find($criteria);
+        if (!$product)
+            throw new CHttpException(404, Yii::t("errors", "Страница не найдена"));
 
-        /**
         
-        if (Yii::app()->language == "ru")
-        {
-            $connection = Yii::app()->reviews;
-            $data['reviews'] = $connection->createCommand($query)->queryAll(true, array('name'=>$data['manufacturer']. " " .$data['name']));
-            $query = "select q.question, q.answer from qa_devices d inner join qa_relations r on r.device = d.id inner join qa_questions q on r.question = q.id where d.name = :name and q.answer != ''";
-            $data['questions'] = $connection->createCommand($query)->queryAll(true, array('name'=>$data['manufacturer']. " " .$data['name']));
-        } else {
-            $data['reviews'] = array();
-            $data['questions'] = array();
-        }
-        
-        
-        $data['videos'] = array();
-        require_once Yii::app()->basePath.'/extensions/google-api-php-client/src/Google_Client.php';
-        require_once Yii::app()->basePath.'/extensions/google-api-php-client/src/contrib/Google_YouTubeService.php';
-        $client = new Google_Client();
-        $client->setDeveloperKey("AIzaSyCm5k_ScE8R_WiSyEBOc3xWGM9oXFg2RRI");
-        $youtube = new Google_YoutubeService($client);
-        try
-        {
-            $searchResponse = $youtube->search->listSearch('id', array(
-                'q' => $data['manufacturer']. " " .$data['name']." ".Yii::t('goods', "Обзор телефона"),
-                'maxResults' => 3,
-                'regionCode' => (Yii::app()->language == 'ru') ? 'ru' : 'us',
-            ));
-        } catch (Exception $ex) {
-            
-        }
-
-        if (isset($searchResponse['items']) && !empty($searchResponse['items']))
-        {
-            foreach ($searchResponse['items'] as $video)
-            {
-                if (isset($video['id']['videoId']))
-                    $data['videos'][] = $video['id']['videoId'];
-            }
-        }
-
-        $this->setPageTitle($data['manufacturer']." ".$data['name']);
-        $this->render("goods", array('data'=>$data));
-         * 
-         */
-        $this->render("goods", array("data"=>$data));
+        $this->setPageTitle($brand->name." ".$product->name);
+        $this->render("goods", array(
+            "type"=>$type,
+            "brand"=>$brand,
+            "product"=>$product,
+        ));
     }
     
     
@@ -145,11 +84,17 @@ class SiteController extends Controller
     }
     
     
-    public function actionBrand($link, $language)
+    public function actionBrand($link, $language, $type=null)
     {
-        $brand = Brands::model()->findByAttributes(array("link"=>$link));
+        $brand = Brands::model()->cache(60*60*24)->findByAttributes(array("link"=>$link));
         if (!$brand)
             throw new CHttpException(404, Yii::t("errors", "Страница не найдена"));
+        if ($type !== null)
+        {
+            $type = GoodsTypes::model()->cache(60*60*24)->findByAttributes(array("link"=>$type));
+            if (!$type)
+                throw new CHttpException(404, Yii::t("errors", "Страница не найдена"));
+        }
         $view = Yii::app()->request->getParam("view");
         $views = array(
             1=>array(
@@ -166,15 +111,28 @@ class SiteController extends Controller
         $view = isset($views[$view]) ? $views[$view] : $views[1];
         $criteria = new CDbCriteria();
         $criteria->compare("brand", $brand->id);
-        $criteria->compare("type", 1);
+        if (isset($type->id))
+        {
+            $criteria->compare("type", $type->id);
+        }
         $goodsCount = Goods::model()->cache(60*60*48)->count($criteria);
         $criteria->limit = $view['limit'];
         $criteria->order = "t.name asc";
         $pages = new CPagination($goodsCount);
         $pages->setPageSize($view['limit']);
         $pages->applyLimit($criteria);
-        $goods = Goods::model()->cache(60*60*24)->with(array('type_data'))->findAll($criteria);
-        $this->render("brand", array("brand"=>$brand, "goods"=>$goods, "pages"=>$pages, "view"=>$view));
+        $goods = Goods::model()->cache(60*60*24)->with(array(
+            'type_data'=>array(
+                "joinType"=>"inner join",
+            )
+        ))->findAll($criteria);
+        $this->render("brand", array(
+            "brand"=>$brand, 
+            "goods"=>$goods, 
+            "pages"=>$pages, 
+            "view"=>$view,
+            "type_selected"=>isset($type->link) ? $type : null,
+        ));
     }
     
     public function actionTest()

@@ -3,10 +3,17 @@
                     <a href="http://analogindex.<?php echo Language::getCurrentZone() ?>/"><?php echo Yii::t('main', 'Главная')?></a>
                     <span class="divider">/</span>
                 </li>
+                <?php if ($type_selected):?>
+                <li itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-1" itemref="breadcrumb-2">
+                    <?php echo $type_selected->name->name?>
+                    <span class="divider">/</span>
+                </li>
+                <?php else: ?>
                 <li itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-1" itemref="breadcrumb-2">
                     <?php echo Yii::t("main", "Производители")?>
                     <span class="divider">/</span>
                 </li>
+                <?php endif;?>
                 <li itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-2">
                     <?php echo $brand->name?>
                 </li>
@@ -20,23 +27,17 @@
                                 <span><?php echo $brand->name?></span>
                         </div>
                         <div class="mnf-catLiks clr">
-                                <a class="active" href="#">Мобильные устройства</a>
-                                <a href="#">Фотокамеры</a>
-                                <a href="#">Видео/Аудиотехника</a>
-                                <a href="#">Компьютеры</a>
-                                <a href="#">Бытовая техника</a>
-                                <a href="#">Печатная техника</a>
-                                <a href="#">Бытовая техника</a>
-                                <a href="#">Видео/Аудиотехника</a>
-                                <a href="#">Бытовая техника</a>
-                                <a href="#">Печатная техника</a>
-                                <a href="#">Компьютеры</a>
-                                <a href="#">Фотокамеры</a>
-                                <a href="#">Мобильные устройства</a>
-                                <a href="#">Компьютеры</a>
-                                <a href="#">Печатная техника</a>
-                                <a href="#">Фотокамеры</a>
-                                <a href="#">Видео/Аудиотехника</a>
+                            <a<?php echo (!isset($type_selected->link)) ? ' class="active"' : ''?> href="<?php echo Yii::app()->createUrl("site/brand", array(
+                                    "link"=>$brand->link,
+                                    "language"=>Language::getCurrentZone(),
+                                ))?>"><?php echo Yii::t("main", "Все типы товаров")?></a>
+                            <?php foreach ($brand->getTypes() as $type):?>
+                                <a<?php echo (isset($type_selected->link) && ($type->link == $type_selected->link)) ? ' class="active"' : ''?> href="<?php echo Yii::app()->createUrl("site/brand", array(
+                                    "link"=>$brand->link,
+                                    "type"=>$type->link,
+                                    "language"=>Language::getCurrentZone(),
+                                ))?>"><?php echo $type->name->name?></a>
+                            <?php endforeach;?>
                         </div>
                 </div>
         </div>
@@ -48,7 +49,7 @@
         </div>
         <div class="bl_catalogList">
                 <div class="bl_catalogList-top clr">
-                        <div class="flLeft"><h2 class="bl_catalogList-title">Мобильные устройства</h2></div>
+                        <div class="flLeft"><h2 class="bl_catalogList-title"><?php echo isset($type_selected->name) ? $type_selected->name->name : Yii::t("main","Все типы товаров") ?></h2></div>
                         <div class="flRight">
                                 <div class="catalogList-sortLinks">
                                         <a class="sorting-cols<?php echo ($view['id'] == 1) ? ' active' : ''?>" href="<?php echo $this->createUrl($this->route, array_merge($_GET, array("view"=>1, "page"=>1)))?>">колонками</a>

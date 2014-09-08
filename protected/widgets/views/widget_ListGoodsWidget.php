@@ -1,7 +1,7 @@
 <div class="informer">
     <div class="informer-top">
         <div class="informer-t-left">
-            <span class="informer-title"><?php echo $data->name->name?></span>
+            <span class="informer-title"><?php echo $type->name->name?></span>
         </div>
         <div class="informer-t-right">
             <nav id="informer-top-menu">
@@ -30,24 +30,21 @@
     </div>
     <div class="informer-c">
         <ul class="informer-listGoods">
-            <?php foreach ($data->goods as $goods): ?>
+            <?php foreach ($data as $goods): ?>
             <li>
                 <div class="informer-listGoods_photo">
                     <a href="<?php echo Yii::app()->createUrl("site/goods", array(
                         'link'=>$goods->link, 
                         'brand'=>$goods->brand_data->link,
-                        'type'=>$goods->type_data->link, 
+                        'type'=>$type->link, 
                         'language'=>Yii::app()->language
                     ));?>">
-                        <?php $image = $goods->getPrimaryImage(); ?>
-                        <?php if(isset($image->resized) && $image->resized):?>
-                            <?php $resized = $image->resized[0];?>
+                        <?php if (isset($goods->primary_image->image_data->size4_data->id)):?>
                             <img src="<?php echo Yii::app()->createUrl("files/image", array(
-                                'id'=>$resized->file_data->id,
-                                'name'=>$resized->file_data->name,
+                                'id'=>$goods->primary_image->image_data->size4_data->id,
+                                'name'=>$goods->primary_image->image_data->size4_data->name,
                                 'language'=>Language::getCurrentZone(),
-                                )); ?>" style="height:<?php echo $resized->height?>px; width: <?php echo $resized->width?>px;" 
-                                alt="<?php echo $goods->brand_data->name." ".$goods->name ?>" />
+                                )); ?>" alt="<?php echo $goods->brand_data->name." ".$goods->name ?>" />
                         <?php else :?>
                             <img src="/assets/img/photo/informers/1.png" style="height:37px; width: 30px;" alt="<?php echo $goods->brand_data->name." ".$goods->name ?>" />
                         <?php endif;?>
@@ -57,7 +54,7 @@
                     <a href="<?php echo Yii::app()->createUrl("site/goods", array(
                         'link'=>$goods->link, 
                         'brand'=>$goods->brand_data->link,
-                        'type'=>$goods->type_data->link,
+                        'type'=>$type->link,
                         'language'=> Language::getCurrentZone()
                     ))?>">
                         <span><?php echo $goods->brand_data->name." ".$goods->name ?></span>

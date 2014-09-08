@@ -2,7 +2,7 @@
     <section class="infoGoodItem_content">
         <h3 class="infoGoodItem-infoTitle"><?php echo Yii::t('goods', 'Характеристики')?></h3>
         <div class="item-set-bl">
-            <?php foreach ($goods->getCharacteristics() as $catalog=>$items):?>
+            <?php foreach ($product->getCharacteristics() as $catalog=>$items):?>
             
                 <div class="item-set-bl_title"><?php echo $catalog;?></div>
                 <?php foreach ($items as $characteristic):?>

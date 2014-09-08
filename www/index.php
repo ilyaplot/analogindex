@@ -1,4 +1,5 @@
 <?php
+ini_set("memory_limit", "1G");
 $yii='../framework/yii.php';
 $config=dirname(__FILE__).'/../protected/config/www.php';
  

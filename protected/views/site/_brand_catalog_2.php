@@ -9,13 +9,14 @@
                                 'language'=> Language::getCurrentZone()
                             ))?>">
                         <?php if($image = $item->getPrimaryImage(Images::SIZE_BRAND)): ?>
+                        <?php $resized = $image->resized[0];?>
                                     <img src="<?php echo Yii::app()->createUrl("files/image", array(
-                                        'id'=>$image->resized_preview->file_data->id,
-                                        'name'=>$image->resized_preview->file_data->name,
+                                        'id'=>$resized->file_data->id,
+                                        'name'=>$resized->file_data->name,
                                         'language'=>Language::getCurrentZone(),
                                         )); ?>" alt="<?php echo $brand->name?> <?php echo $item->name?>">
                                     <?php else :?>
-                                    <img src="img/photo/s5.png" alt="<?php echo $brand->name?> <?php echo $item->name?>">
+                                    <img src="/assets/img/no-image-available.jpg" alt="<?php echo $brand->name?> <?php echo $item->name?>">
                                     <?php endif?></a></div>
                 <div class="catalog_st2-l-info">
                         <div class="catalog_st2-l-info-title"><a href="<?php echo Yii::app()->createUrl("site/goods", array(
