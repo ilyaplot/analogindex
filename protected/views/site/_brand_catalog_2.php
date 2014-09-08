@@ -8,11 +8,10 @@
                                 'type'=>$item->type_data->link,
                                 'language'=> Language::getCurrentZone()
                             ))?>">
-                        <?php if($image = $item->getPrimaryImage(Images::SIZE_BRAND)): ?>
-                        <?php $resized = $image->resized[0];?>
+                        <?php if($item->primary_image): ?>
                                     <img src="<?php echo Yii::app()->createUrl("files/image", array(
-                                        'id'=>$resized->file_data->id,
-                                        'name'=>$resized->file_data->name,
+                                        'id'=>$item->primary_image->image_data->size6_data->id,
+                                        'name'=>$item->primary_image->image_data->size6_data->name,
                                         'language'=>Language::getCurrentZone(),
                                         )); ?>" alt="<?php echo $brand->name?> <?php echo $item->name?>">
                                     <?php else :?>
