@@ -1,6 +1,28 @@
 <?php
 class SiteController extends Controller
 {
+    public function filters()
+    {
+        return array(
+            'accessControl',
+        );
+    }
+    
+    public function accessRules()
+    {
+        return array(
+            array('allow',
+                'actions'=>array('index', 'goods', 'language'),
+                'users'=>array('*'),
+            ),
+            array('allow',
+                'actions'=>array("brand"),
+                'users'=>array('?'),
+            )
+        );
+    }
+    
+    
     public function actionIndex()
     {
         $this->setPageTitle("Analogindex");
@@ -22,20 +44,38 @@ class SiteController extends Controller
         $product = Goods::model()->with(array(
             "rating",
             //"images",
+            "synonims"=>array(
+                "on"=>"synonims.visibled = 1"
+            ),
             "primary_image",
         ))->find($criteria);
         if (!$product)
             throw new CHttpException(404, Yii::t("errors", "Страница не найдена"));
 
         
+        $connection = Yii::app()->reviews;
+        $query = "select d.name, d.rating, r.title, substring(r.content, 1, 200) as content from destinations d inner join reviews r on d.id = r.destination where d.name = :name ";
+        $params = array('name'=>$brand->name. " " .$product->name); 
+        foreach ($product->synonims as $key=>$synonim)
+        {
+            $params['name'.$key] = $brand->name." ".$synonim['name'];
+        }
+        $reviews = $connection->createCommand($query)->queryAll(true, $params);
+        
         $this->setPageTitle($brand->name." ".$product->name);
         $this->render("goods", array(
             "type"=>$type,
             "brand"=>$brand,
             "product"=>$product,
+            "reviews"=>$reviews,
         ));
     }
     
+    public function getWords($str, $length = 50)
+    {
+        $words = explode(" ", strip_tags($str));
+        return implode (" ", array_slice($words, 0, $length));
+    }
     
     public function actionLanguage($language)
     {
@@ -134,11 +174,12 @@ class SiteController extends Controller
             "type_selected"=>isset($type->link) ? $type : null,
         ));
     }
+ 
     
     public function actionTest()
     {
-        $goods = Goods::model()->findByPk(953);
-        $goods->getCharacteristics();
+        $user = new Users();
+        echo $user->cryptPassword("3qeruj");
     }
 }
 

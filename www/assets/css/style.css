@@ -1545,3 +1545,151 @@ a.lang-select {
 
 
 /* END Footer */
+
+    .errorSummary {
+        border: 1px solid #FF5757;
+        color: #FF5757;
+        -moz-border-radius: 3px;
+        -webkit-border-radius: 3px;
+        border-radius: 3px;
+        padding: 3px;
+        margin: 5px;
+        background: #faebcc;
+        font-size: 18px;
+    }
+    
+    .errorSummary p {
+        font-weight: bold;
+        color: D42626;
+    }
+    
+    .login-form {
+        display: block;
+        width: 600px;
+        margin: auto;
+        margin-top: 20px;
+        border: 1px solid #ccc;
+        -moz-border-radius: 3px;
+        -webkit-border-radius: 3px;
+        border-radius: 3px;
+        padding-top: 7px;
+        padding-bottom: 0px;
+        -webkit-box-shadow: 4px 4px 12px 0px rgba(50, 50, 50, 0.41);
+        -moz-box-shadow:    4px 4px 12px 0px rgba(50, 50, 50, 0.41);
+        box-shadow:         4px 4px 12px 0px rgba(50, 50, 50, 0.41);
+    }
+    
+    .login-form .row {
+        margin-top: 15px;
+    }
+    
+    .login-form .row label {
+        font-size: 18px;
+    }
+    
+    .login-form .row {
+        width: 450px;
+        margin: auto;
+        margin-top: 15px;
+    }
+    
+    .row > input[type=text], input[type=password], input[type=email] {
+        margin-top: 6px;
+        background: #F1F1F1;
+        //background: #F1F1F1 url(/assets/img/login-form-input.png) no-repeat;
+        background-position: 5px -3px !important;
+        padding: 10px 10px 10px 30px;
+        width: 400px;
+        font-size: 20px;
+        color: #666666;
+        border: 1px solid #CCC;
+        -moz-border-radius: 5px;
+        -webkit-border-radius: 5px;
+        border-radius: 5px;
+        -moz-box-shadow: 0 1px 1px #ccc inset, 0 1px 0 #fff;
+        -webkit-box-shadow: 0 1px 1px #CCC inset, 0 1px 0 #FFF;
+        box-shadow: 0 1px 1px #CCC inset, 0 1px 0 #FFF;
+    }
+
+    .row > input[type=password]
+    {
+        background-position: 5px -52px !important;
+    }
+    
+    .row > input[type=email]
+    {
+        background-position: 5px -102px !important;
+    }
+    
+    .row > input[type=text]:focus, input[type=password]:focus, input[type=email]:focus 
+    {
+        background-color: #FFF;
+        border-color: #E8C291;
+        outline: none;
+        -moz-box-shadow: 0 0 0 1px #e8c291 inset;
+        -webkit-box-shadow: 0 0 0 1px #E8C291 inset;
+        box-shadow: 0 0 0 1px #E8C291 inset;
+    }
+
+    
+    .row > input[type=submit] {
+        font-size: 16px;
+        font-family: Arial;
+        font-weight: normal;
+        min-width: 150px;
+        text-decoration: inherit;
+        -webkit-border-radius: 8px 8px 8px 8px;
+        -moz-border-radius: 8px 8px 8px 8px;
+        border-radius: 8px 8px 8px 8px;
+        border: 1px solid #dcdcdc;
+        padding: 9px 18px;
+        text-shadow: 1px 1px 0px #ffffff;
+        -webkit-box-shadow: inset 1px 1px 0px 0px #ffffff;
+        -moz-box-shadow: inset 1px 1px 0px 0px #ffffff;
+        box-shadow: inset 1px 1px 0px 0px #ffffff;
+        cursor: pointer;
+        color: #777777;
+        display: inline-block;
+        background: -webkit-linear-gradient(90deg, #dfdfdf 5%, #ededed 100%);
+        background: -moz-linear-gradient(90deg, #dfdfdf 5%, #ededed 100%);
+        background: -ms-linear-gradient(90deg, #dfdfdf 5%, #ededed 100%);
+        background: linear-gradient(180deg, #ededed 5%, #dfdfdf 100%);
+        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#ededed",endColorstr="#dfdfdf");
+    }
+
+    .row > input[type=submit]:hover {
+        background: -webkit-linear-gradient(90deg, #ededed 5%, #dfdfdf 100%);
+        background: -moz-linear-gradient(90deg, #ededed 5%, #dfdfdf 100%);
+        background: -ms-linear-gradient(90deg, #ededed 5%, #dfdfdf 100%);
+        background: linear-gradient(180deg, #dfdfdf 5%, #ededed 100%);
+        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#dfdfdf",endColorstr="#ededed");
+    }
+
+    .row > input[type=submit]:active {
+        position:relative;
+        top: 1px;
+    }
+    
+    .error {
+        border-color: red !important;
+    }
+    
+    .errorSummary ul li {
+        margin-left: 7px;
+ 
+    }
+    
+    .login-form .footer {
+        width: auto;
+        height: 20px;
+        background: #eee;
+        padding: 15px;
+        margin: 0px;
+        margin-top: 20px;
+        -moz-border-radius: 0 0 2px 2px;
+        -webkit-border-radius: 0 0 2px 2px;
+        border-radius: 0 0 2px 2px;
+        border-top: 2px solid #ccc;
+        font-size: 18px;
+        color: #555;
+    }

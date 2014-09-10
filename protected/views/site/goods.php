@@ -131,11 +131,12 @@
                         <?php foreach($product->getVideos() as $video):?>
                         <?php echo $video; ?>
                         <?php endforeach; ?>
-                        <?php foreach ($product->reviews as $review): ?>
+                        
+                        <?php foreach ($reviews as $review): ?>
                         <div class="view_bl">
                             <div class="view_bl-head clr">
                                 <div class="view_bl-head-r flLeft">
-                                    <div class="view_bl-avatar"><img src="/assets/img/photo/avatar_view.png"></div>
+                                    <div class="view_bl-avatar"><img src="/assets/img/photo/avatar_view1.png"></div>
                                     <div class="view_bl-h2">
                                         <div class="view_bl-h2_name">Аноним</div>
                                         <div class="view_bl-h2_rating">
@@ -156,9 +157,9 @@
                             </div>
                             <div class="view_bl-textView">
                                 <h2><?php echo $review['title']?></h2>
-                                <?php echo $review['content'] ?>
+                                <?php echo $this->getWords($review['content']) ?>...
                             </div>
-                            <div class="view_bl-replyLink"><a href="#" class="link-replyView">Ответить</a></div>
+                            <div class="view_bl-replyLink"><a href="reviews/Array" class="link-replyView">Читать полностью...</a></div>
                         </div>
 
                         <?php endforeach; ?>
@@ -188,6 +189,7 @@
 
 
                 <div class="infoGoodItem-wp-new_comment" id="item7">
+                    <?php if (Yii::app()->user->checkAccess(Users::ROLE_USER)): ?>
                     <section class="infoGoodItem_content">
                         <div class="infoGoodItem_title-2 clr">
                             <div class="flLeft"><h3 class="infoGoodItem-infoTitle">Ваш отзыв</h3></div>
@@ -198,10 +200,10 @@
                                 <div class="view_read-head">
                                     <div class="clr">
                                         <div class="view_read-avatar">
-                                            <img src="/assets/img/photo/avatar_view2.png" height="40" width="40">
+                                            <img src="/assets/img/photo/avatar_view3.png" height="40" width="40">
                                         </div>
                                         <div class="view_read-h2">
-                                            <div class="view_r-name">Анна Аннова</div>
+                                            <div class="view_r-name"><?php echo Yii::app()->user->getState("name")?></div>
                                             <div class="view_r-setRating">
                                                 <div>Оцените товар:</div>
                                                 <ul class="rating2">
@@ -233,6 +235,7 @@
                             </form>
                         </div>
                     </section>
+                    <?php endif;?>
                 </div>
                         <!--
                 <div class="infoGoodItem-wp-new_comment" id="item6">

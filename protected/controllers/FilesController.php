@@ -1,6 +1,7 @@
 <?php
 class FilesController extends Controller
 {
+    
     public function actionImage($id, $name)
     {
         $id = intval(isset($_GET['id'])? $_GET['id'] : 0 );

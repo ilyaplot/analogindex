@@ -26,8 +26,12 @@
             <section class="container">
                 <div class="auth-login">
                     <div class="flRight">
-                        <a href="#" class="auth_link-in"><?php echo Yii::t('main', 'Вход'); ?></a> / 
-                        <a href="#" class="auth_link-out"><?php echo Yii::t('main', 'Регистрация'); ?></a> /
+                        <?php if (Yii::app()->user->isGuest):?>
+                            <a class="auth_link-in" href="<?php echo Yii::app()->createUrl("user/login")?>"><?php echo Yii::t('main', 'Вход'); ?></a> / 
+                            <a href="<?php echo Yii::app()->createUrl("user/registration")?>" class="auth_link-out"><?php echo Yii::t('main', 'Регистрация'); ?></a> /
+                        <?php else: ?>
+                            <?php echo Yii::app()->user->getState("name")?> <a class="auth_link-in" href="<?php echo Yii::app()->createUrl("user/logout")?>"><?php echo Yii::t('main', 'Выход'); ?></a> /
+                        <?php endif;?>
                         <?php echo Yii::t('main', '<a href="http://analogindex.com/lang.html">English version</a>') ?>
                     </div>
                     <div class="clear"></div>
@@ -49,16 +53,17 @@
                         <div class="clear"></div>
                     </div>
                 </div>
-                <!--
+                
                 <menu id="nav-top">
                     <ul class="clr">
                         <li class="item1"><a href="#">Планшеты</a>
-                        <ul>
+                        <!--<ul>
                             <li><a href="#">iOS</a></li>
                             <li><a href="#">Windows</a></li>
                             <li><a href="#">Android</a></li>
                             <li><a href="#">Другое</a></li>
-                        </ul></li>
+                        </ul>-->
+                        </li>
                         <li class="item2"><a href="#">Компьютеры</a></li>
                         <li class="item3"><a href="#">Телефоны</a></li>
                         <li class="item4"><a href="#">Смартфоны</a></li>
@@ -66,7 +71,6 @@
                         <li class="item6"><a href="#">Банки</a></li>
                     </ul>
                 </menu>
-                -->
             </section>
         </header><!-- /header -->
 

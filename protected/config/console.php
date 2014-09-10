@@ -5,9 +5,8 @@ return array(
     'import'=>array(
         'application.components.*',
         'application.components.parsers.*',
-        'application.components.formatters.*',
+        'application.extensions.*',
         'application.models.*',
-        'application.models.new.*',
         'application.models.sources.*',
         // Parsers only for console!
         'application.parsers.*',
@@ -35,16 +34,8 @@ return array(
             'emulatePrepare' => true,
             'username' => 'analogindex',
             'password' => 'analogindex',
-            'charset' => 'utf8',
-        ),
-        'newdb'=>array(
-            'connectionString' => 'mysql:host=localhost;dbname=analogindex',
-            'emulatePrepare' => true,
-            'username' => 'analogindex',
-            'password' => 'analogindex',
             'tablePrefix' => 'ai_',
             'charset' => 'utf8',
-            'class' => 'CDbConnection',
         ),
         'reviews'=>array(
             'connectionString' => 'mysql:host=localhost;dbname=reviews',
@@ -54,9 +45,17 @@ return array(
             'charset' => 'utf8',
             'class' => 'CDbConnection',
         ),
-        'mob'=>array(
-            'path'=>'/inktomia/db/analogindex/mob',
-            'class'=>'Storage',
+        'Smtpmail'=>array(
+            'class'=>'application.extensions.PHPMailer',
+            'Host'=>'smtp.yandex.ru',
+            'Username'=>'admin@ilyaplot.ru',
+            'Password'=>'3qeruj',
+            'From'=>'admin@ilyaplot.ru',
+            'FromName'=>'AnalogIndex',
+            'Mailer'=>'smtp',
+            'Port'=>25,
+            'CharSet'=>"utf-8",
+            'SMTPAuth'=>true, 
         ),
     ),
 );

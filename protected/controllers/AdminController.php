@@ -20,7 +20,7 @@ class AdminController extends Controller
             ),
             array(
                 'allow',
-                'users'=>array('@'),
+                'roles'=>array(Users::ROLE_MODER),
             ),
             array('deny',
                 'users'=>array('*'),
