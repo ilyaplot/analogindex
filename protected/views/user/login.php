@@ -13,7 +13,13 @@
         <?php echo CHtml::activeLabel($model,'password'); ?><br />
         <?php echo CHtml::activePasswordField($model,'password', array("autocomlete"=>"off", "placeholder"=>Yii::t("models","Пароль"))); ?>
     </div>
-
+    <div class="row">
+        <?php if(CCaptcha::checkRequirements() && Yii::app()->user->isGuest):?>
+            <?php echo CHtml::activeLabelEx($model, 'verifyCode') ?>
+            <?php $this->widget('CCaptcha'); ?>
+            <?php echo CHtml::activeTextField($model, 'verifyCode') ?>
+        <?php endif; ?>
+    </div>
     <div class="row rememberMe">
     <?php echo CHtml::activeCheckBox($model,'rememberMe'); ?> <?php echo CHtml::activeLabel($model,'rememberMe'); ?>
     </div>

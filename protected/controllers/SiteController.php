@@ -48,33 +48,20 @@ class SiteController extends Controller
                 "on"=>"synonims.visibled = 1"
             ),
             "primary_image",
+            "reviews"=>array(
+                "select"=>"reviews.link, reviews.id, reviews.preview, reviews.title, reviews.created",
+            )
         ))->find($criteria);
         if (!$product)
             throw new CHttpException(404, Yii::t("errors", "Страница не найдена"));
 
-        
-        $connection = Yii::app()->reviews;
-        $query = "select d.name, d.rating, r.title, substring(r.content, 1, 200) as content from destinations d inner join reviews r on d.id = r.destination where d.name = :name ";
-        $params = array('name'=>$brand->name. " " .$product->name); 
-        foreach ($product->synonims as $key=>$synonim)
-        {
-            $params['name'.$key] = $brand->name." ".$synonim['name'];
-        }
-        $reviews = $connection->createCommand($query)->queryAll(true, $params);
-        
+
         $this->setPageTitle($brand->name." ".$product->name);
         $this->render("goods", array(
             "type"=>$type,
             "brand"=>$brand,
             "product"=>$product,
-            "reviews"=>$reviews,
         ));
-    }
-    
-    public function getWords($str, $length = 50)
-    {
-        $words = explode(" ", strip_tags($str));
-        return implode (" ", array_slice($words, 0, $length));
     }
     
     public function actionLanguage($language)
@@ -93,37 +80,7 @@ class SiteController extends Controller
         $size = isset($_GET['size']) ? intval($_GET['size']) : null;
         $filesModel->send($id,$filename,$size);
     }
-    
-    public function actionSearch()
-    {
-        $keyword = isset($_GET['keyword']) ? empty($_GET['keyword']) ? 'test' : $_GET['keyword'] : 'test';
-        $this->setPageTitle("Поиск товаров");
-        $model = new GoodsModel();
-        $searchCriteria = new stdClass();
-        $searchCriteria->select = '*';
-        $searchCriteria->query = '@full '.Yii::app()->search->EscapeString($keyword).'*';
-        $searchCriteria->from = 'goods_index';
-        $searchCriteria->paginator = null;
-        $srch = Yii::App()->search;
-        $srch->SetMaxQueryTime(300);
-        $srch->setMatchMode(SPH_MATCH_EXTENDED2);
-        $srch->SetRankingMode(SPH_RANK_SPH04);
-        $resArray = $srch->searchRaw($searchCriteria); 
-        $result = array_keys($resArray['matches']);
-        /**if (!$result)
-        {
-            $srch->setMatchMode(SPH_MATCH_ALL);
-            $srch->SetRankingMode(SPH_SORT_RELEVANCE);
-            $searchCriteria->query = '@full '.Yii::app()->search->EscapeString($keyword).'*';
-            $resArray = $srch->searchRaw($searchCriteria); 
-            $result = array_keys($resArray['matches']);
-        }**/
-        $items = $model->sphinx($result);
-        //var_dump($items);
-        $this->render("search", array('items'=>$items));
-    }
-    
-    
+
     public function actionBrand($link, $language, $type=null)
     {
         $brand = Brands::model()->cache(60*60*24)->findByAttributes(array("link"=>$link));
@@ -174,12 +131,17 @@ class SiteController extends Controller
             "type_selected"=>isset($type->link) ? $type : null,
         ));
     }
- 
     
-    public function actionTest()
+    public function actionReview($link, $id)
     {
-        $user = new Users();
-        echo $user->cryptPassword("3qeruj");
+        if (!Reviews::model()->countByAttributes(array(
+            "link"=>$link,
+            "id"=>$id,
+        )))
+                throw new CHttpException(404, Yii::t("errors", "Страница не найдена"));
+        
+        $review = Reviews::model()->findByPk($id);
+        $this->render("review", array("review"=>$review));
     }
 }
 

@@ -43,7 +43,9 @@
                         <ul class="infoGoodItem-title-2_list">
                             <li class="item1"></li>
                             <li class="item2"></li>
-                            <li class="item3"><?php echo isset($product->rating->value) ? round($product->rating->value,1) : '';?></li>
+                            <li class="item3">
+                                <?php echo isset($product->rating->value) ? round($product->rating->value,1) : '';?>
+                            </li>
                         </ul>
                         <div class="clear"></div>
                     </div>
@@ -124,15 +126,16 @@
                     <section class="infoGoodItem_content view-title">
                         <div class="infoGoodItem_title-2 clr">
                             <div class="flLeft"><h3 class="infoGoodItem-infoTitle"><?php echo Yii::t('goods', 'Отзывы')?></h3></div> 
-                            <div class="flRight"><a href="#" class="btn-link_st1" title=""><?php echo Yii::t('goods', "Написать отзыв") ?></a></div>
+                            <!--<div class="flRight"><a href="#" class="btn-link_st1" title=""><?php echo Yii::t('goods', "Написать отзыв") ?></a></div>-->
                         </div>
                     </section>
                     <section class="views-list">
+                        <div class="view_bl">
                         <?php foreach($product->getVideos() as $video):?>
                         <?php echo $video; ?>
                         <?php endforeach; ?>
-                        
-                        <?php foreach ($reviews as $review): ?>
+                        </div>
+                        <?php foreach ($product->reviews as $review): ?>
                         <div class="view_bl">
                             <div class="view_bl-head clr">
                                 <div class="view_bl-head-r flLeft">
@@ -152,48 +155,22 @@
                                     <div class="clear"></div>
                                 </div>
                                 <div class="view_bl-head-l flRight">
-                                    <date class="view_bl-date">24 февраля 2014 в 19:05</date>
+                                    <date class="view_bl-date"><?php echo Yii::app()->dateFormatter->format('d MMMM yyyy в hh:mm', $review->created); ?></date>
                                 </div>
                             </div>
                             <div class="view_bl-textView">
-                                <h2><?php echo $review['title']?></h2>
-                                <?php echo $this->getWords($review['content']) ?>...
+                                <h2><?php echo $review->title?></h2>
+                                <?php echo $review->preview ?>...
                             </div>
-                            <div class="view_bl-replyLink"><a href="reviews/Array" class="link-replyView">Читать полностью...</a></div>
+                            <div class="view_bl-replyLink"><a href="<?php echo Yii::app()->createUrl("site/review", array("link"=>$review->link, "id"=>$review->id, "language"=>Language::getCurrentZone()))?>" class="link-replyView">Читать полностью...</a></div>
                         </div>
 
                         <?php endforeach; ?>
                     </section>
-                </div>
-
-                <div class="infoGoodItem-wp-comments" id="item6">
-                    <section class="infoGoodItem_content view-title">
-                        <div class="infoGoodItem_title-2 clr">
-                            <div class="flLeft"><h3 class="infoGoodItem-infoTitle"><?php echo Yii::t('goods', 'FAQ')?></h3></div> 
-                        </div>
-                    </section>
-
-                    <section class="views-list">
-                        <?php foreach ($product->faq as $question): ?>
-                        <div class="view_bl">
-                            <div class="view_bl-textView">
-                                <h2><?php echo $question['question']?></h2>
-                                <?php echo $question['answer']?>
-                            </div>
-                        </div>
-
-                        <?php endforeach; ?>
-                    </section>
-
-                </div>
-
-
-                <div class="infoGoodItem-wp-new_comment" id="item7">
                     <?php if (Yii::app()->user->checkAccess(Users::ROLE_USER)): ?>
                     <section class="infoGoodItem_content">
                         <div class="infoGoodItem_title-2 clr">
                             <div class="flLeft"><h3 class="infoGoodItem-infoTitle">Ваш отзыв</h3></div>
-                            <div class="flRight"><a href="#" class="link-st3" title="">Посмотреть отзывы</a></div>
                         </div>
                         <div class="view_read-bl">
                             <form action="#" method="post">
@@ -237,6 +214,28 @@
                     </section>
                     <?php endif;?>
                 </div>
+
+                <div class="infoGoodItem-wp-comments" id="item6">
+                    <section class="infoGoodItem_content view-title">
+                        <div class="infoGoodItem_title-2 clr">
+                            <div class="flLeft"><h3 class="infoGoodItem-infoTitle"><?php echo Yii::t('goods', 'FAQ')?></h3></div> 
+                        </div>
+                    </section>
+
+                    <section class="views-list">
+                        <?php foreach ($product->faq as $question): ?>
+                        <div class="view_bl">
+                            <div class="view_bl-textView">
+                                <h2><?php echo $question['question']?></h2>
+                                <?php echo $question['answer']?>
+                            </div>
+                        </div>
+
+                        <?php endforeach; ?>
+                    </section>
+
+                </div>
+
                         <!--
                 <div class="infoGoodItem-wp-new_comment" id="item6">
                     <section class="infoGoodItem_content">

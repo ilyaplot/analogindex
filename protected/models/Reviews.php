@@ -37,4 +37,15 @@ class Reviews extends CActiveRecord
             "disabled"=>Yii::t("model", "Не показывать"),
         );
     }
+    
+    public function beforeSave() {
+        $this->preview = $this->getWords($this->content);
+        return parent::beforeSave();
+    }
+    
+    public function getWords($str, $length = 50)
+    {
+        $words = explode(" ", strip_tags($str));
+        return implode (" ", array_slice($words, 0, $length));
+    }
 }

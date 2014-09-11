@@ -29,14 +29,7 @@ return array(
                 ),
             ),
         ),
-        'db'=>array(
-            'connectionString' => 'mysql:host=localhost;dbname=analogindex',
-            'emulatePrepare' => true,
-            'username' => 'analogindex',
-            'password' => 'analogindex',
-            'tablePrefix' => 'ai_',
-            'charset' => 'utf8',
-        ),
+        'db'=>  require dirname(__FILE__).'/mysql.php',
         'reviews'=>array(
             'connectionString' => 'mysql:host=localhost;dbname=reviews',
             'emulatePrepare' => true,

@@ -16,6 +16,8 @@ class ListGoodsWidget extends CWidget
         $criteria->limit = $this->limit;
         $type = GoodsTypes::model()->cache(60*60*48)->findByAttributes(array("link"=>$this->type));
         $criteria->compare("type", $type->id);
+        $criteria->group = "t.id, rating.value";
+        $criteria->order = "rating.value desc";
         if (!$type)
             return false;
         $data = Goods::model()->cache(60*60)->with(array(
@@ -23,6 +25,7 @@ class ListGoodsWidget extends CWidget
                 "joinType"=>"inner join"
             ),
             "primary_image",
+            "rating"
         ))->findAll($criteria);
         
         if ($data)

@@ -14,6 +14,8 @@ class Users extends CActiveRecord
     
     public $rememberMe=false;
     public $password2;
+    public $verifyCode;
+    
     private $_identity;
     
     public static function model($className = __CLASS__)
@@ -36,6 +38,7 @@ class Users extends CActiveRecord
         return array(
             'email'=>Yii::t("models", "Имя пользователя (Email)"),
             'password'=>Yii::t("models", "Пароль"),
+            'password2'=>Yii::t("models", "Подтверждение пароля"),
             'rememberMe'=>Yii::t("models", "Запомнить"),
         );
     }
@@ -48,6 +51,10 @@ class Users extends CActiveRecord
             array('email', 'email'),
             array('rememberMe', 'boolean'),
             array('password', 'authenticate'),
+            array('verifyCode', 'captcha',
+                // авторизованным пользователям код можно не вводить
+                'allowEmpty'=>!Yii::app()->user->isGuest || !CCaptcha::checkRequirements(),
+            )
         );
     }
  

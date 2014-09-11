@@ -19,24 +19,7 @@ return array(
             'class'=>'WebUser',
             'allowAutoLogin'=>true,
         ),
-        'db'=>array(
-            'connectionString' => 'mysql:host=localhost;dbname=analogindex',
-            'emulatePrepare' => true,
-            'username' => 'analogindex',
-            'password' => 'analogindex',
-            'tablePrefix' => 'ai_',
-            'charset' => 'utf8',
-            //'class' => 'CDbConnection',
-            'schemaCachingDuration'=>60*60*48,
-        ),
-        'reviews'=>array(
-            'connectionString' => 'mysql:host=localhost;dbname=reviews',
-            'emulatePrepare' => true,
-            'username' => 'reviews',
-            'password' => 'reviews',
-            'charset' => 'utf8',
-            'class' => 'CDBConnection',
-        ),
+        'db'=>  require dirname(__FILE__).'/mysql.php',
         'search' => array(
                 'class' => 'application.components.DGSphinxSearch.DGSphinxSearch',
                 'server' => '127.0.0.1',
@@ -97,7 +80,8 @@ return array(
                 'http://analogindex.<language:\w+>/<type:[\w\d\-_]+>/<brand:[\d\w\-_\+]*>/<link:[\d\w\-_]*>'=>
                     array('site/goods', 'urlSuffix'=>'.html'),
                 'http://analogindex.<language:\w+>/'=>array('site/index', 'urlSuffix'=>''),
-                
+                'http://analogindex.<language:\w+>/review/<link:[\d\w\-_]*>_<id:\d+>'=>
+                    array('site/review', 'urlSuffix'=>'.html'),
 
                 // Дефолтные правила. 
                 'http://analogindex.<language:\w+>/<controller:\w+>/<action:\w+>'=>'<controller>/<action>',

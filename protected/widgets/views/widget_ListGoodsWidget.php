@@ -6,10 +6,10 @@
         <div class="informer-t-right">
             <nav id="informer-top-menu">
                 <ul>
-                    <li class="active">
+                    <li>
                         <a href="#" class="informer-icon-rating"></a>
                     </li>
-                    <li id="like_li_informer">
+                    <li class="active" id="like_li_informer">
                         <a href="#" class="informer-icon-likes"></a>
                     </li>
                     <li id="price_li_informer">
@@ -60,9 +60,9 @@
                         <span><?php echo $goods->brand_data->name." ".$goods->name ?></span>
                     </a>
                 </div>
-                <div class="informer-listGoods_rating"><?php echo 0?></div>
-                <div class="informer-listGoods_like"><?php echo 0?></div>
-                <div class="informer-listGoods_price"><?php echo 0?></div>
+                <div class="informer-listGoods_rating">0</div>
+                <div class="informer-listGoods_like"><?php echo isset($goods->rating->value) ? round($goods->rating->value,1) : 0;?></div>
+                <div class="informer-listGoods_price">0</div>
             </li>
             <?php endforeach;?>
         </ul>

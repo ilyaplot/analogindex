@@ -1,9 +1,24 @@
 <?php
 class UserController extends Controller
 {
+    public function actions(){
+        return array(
+            'captcha'=>array(
+                'class'=>'CCaptchaAction',
+                'backColor'=>0xFFFFFF,
+                'transparent'=>true,
+                'testLimit'=>1,
+                'foreColor'=>0x999999,
+                'minLength'=>5,
+                'maxLength'=>8,
+                'offset'=>1,
+            ),
+        );
+    }
+    
     public function actionLogin()
     {
-        $model=new Users;
+        $model=new Users("login");
         if(isset($_POST['Users']))
         {
 
@@ -31,7 +46,7 @@ class UserController extends Controller
     
     public function actionRegistration()
     {
-        $model = new Users;
+        $model = new Users("registration");
         $this->render('registration', array('model'=>$model));
     }
     
