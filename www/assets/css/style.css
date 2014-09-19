@@ -573,10 +573,16 @@ h2.search_result-nameItem a:hover { color: #c1501e;}
 }
 
 .col-infoGoods,
+.col-infoReview,
 .col-infoPrices,
 .col-sidebars { float: left; }
 .col-infoGoods {
     width: 540px;
+}
+
+.col-infoReview {
+    width: 705px;
+    margin-right: 15px;
 }
 .infoGoodItem-title-2_name {
     display: block;
@@ -1184,10 +1190,14 @@ li.active a.menu_lFix-item5 { background-position: 0 -33px; }
     box-shadow: 0 2px 3px rgba(0,0,0,0.15);
     padding: 0 0 8px;
 }
+
 .mnf_logo {
     float: left;
     width: 120px;
     padding-left: 10px;
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
 }
 .mnf_clr {
     margin-left: 148px;
@@ -1692,4 +1702,16 @@ a.lang-select {
         border-top: 2px solid #ccc;
         font-size: 18px;
         color: #555;
+    }
+    
+    
+    .review-content {
+        padding: 7px;
+        padding-top: 4px;
+        font-size: 14px;
+    }
+    
+    .review > h1 {
+        font-size: 24px;
+        margin: 12px;
     }

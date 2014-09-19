@@ -50,8 +50,10 @@ class SiteController extends Controller
             "primary_image",
             "reviews"=>array(
                 "select"=>"reviews.link, reviews.id, reviews.preview, reviews.title, reviews.created",
+                "group"=>"reviews.id",
             )
         ))->find($criteria);
+        
         if (!$product)
             throw new CHttpException(404, Yii::t("errors", "Страница не найдена"));
 
@@ -138,10 +140,25 @@ class SiteController extends Controller
             "link"=>$link,
             "id"=>$id,
         )))
-                throw new CHttpException(404, Yii::t("errors", "Страница не найдена"));
+            throw new CHttpException(404, Yii::t("errors", "Страница не найдена"));
         
-        $review = Reviews::model()->findByPk($id);
-        $this->render("review", array("review"=>$review));
+        $review = Reviews::model()->cache(60*60)->findByPk($id);
+        $criteria = new CDbCriteria();
+        $criteria->compare("t.id", $review->goods);
+        $criteria->group = "t.id, rating.value";
+        $criteria->order = "rating.value desc";
+
+        $product = Goods::model()->cache(60*60)->with(array(
+            "brand_data",
+            "type_data",
+            "primary_image",
+            "rating"
+        ))->find($criteria);
+        
+        $this->render("review", array(
+            "review"=>$review,
+            "product"=>$product,
+        ));
     }
 }
 

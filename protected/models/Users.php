@@ -51,10 +51,10 @@ class Users extends CActiveRecord
             array('email', 'email'),
             array('rememberMe', 'boolean'),
             array('password', 'authenticate'),
-            array('verifyCode', 'captcha',
+            //array('verifyCode', 'captcha',
                 // авторизованным пользователям код можно не вводить
-                'allowEmpty'=>!Yii::app()->user->isGuest || !CCaptcha::checkRequirements(),
-            )
+            //    'allowEmpty'=>!Yii::app()->user->isGuest || !CCaptcha::checkRequirements(),
+            //)
         );
     }
  

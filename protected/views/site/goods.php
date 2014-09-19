@@ -172,45 +172,7 @@
                         <div class="infoGoodItem_title-2 clr">
                             <div class="flLeft"><h3 class="infoGoodItem-infoTitle">Ваш отзыв</h3></div>
                         </div>
-                        <div class="view_read-bl">
-                            <form action="#" method="post">
-                                <div class="view_read-head">
-                                    <div class="clr">
-                                        <div class="view_read-avatar">
-                                            <img src="/assets/img/photo/avatar_view3.png" height="40" width="40">
-                                        </div>
-                                        <div class="view_read-h2">
-                                            <div class="view_r-name"><?php echo Yii::app()->user->getState("name")?></div>
-                                            <div class="view_r-setRating">
-                                                <div>Оцените товар:</div>
-                                                <ul class="rating2">
-                                                    <li><a href="#">1</a></li>
-                                                    <li><a href="#">2</a></li>
-                                                    <li><a href="#">3</a></li>
-                                                    <li><a href="#">4</a></li>
-                                                    <li><a href="#">5</a></li>
-                                                </ul>
-                                                <div class="clear"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="view_read-text">
-                                    <textarea name="view_text" class="textarea-st3"></textarea>
-                                </div>
-                                <div class="view_read-bottom clr">
-                                    <div class="view_read-bottom-left flLeft">
-                                        <div class="view_r_b-replytext">
-                                            Вы отвечаете на комментарий:<br>
-                                            «Открыл, взял в руки и понял - ОНО. Честно говоря  с...»
-                                        </div>
-                                        <div class="view_r_b-linkOff"><a href="#" class="link-st3">Отменить</a></div>
-                                    </div>
-                                    <div class="flRight"><input type="submit" class="btn_submit2" value="Отправить" name="submit_readView"></div>
-                                </div>
-                                <input type="hidden" name="GoodItemSetRating" class="GoodItemSetRating" value="">
-                            </form>
-                        </div>
+                        <?php $this->widget('application.widgets.CommentsWidget.CommentsWidget', array("type"=>'goods', 'id'=>$product->id)); ?>
                     </section>
                     <?php endif;?>
                 </div>
@@ -291,9 +253,23 @@
     </div>
 
     <div class="col-infoPrices">
-        <!--
+        
         <div class="prices_inner">
+
         <div class="c_min-price">
+            
+            <div class="bl_min_price first">
+                <div class="bl_min_price-name">
+                    <span></span>
+                </div>
+                <div class="bl_min_price-price">
+                    <span class="price_c_minimum"></span>
+                </div>
+                <div class="bl_min_price-buy">
+                    
+                </div>
+            </div>
+            <!--
             <div class="bl_min_price first">
                 <div class="bl_min_price-name">
                     <span>"М-Видео"</span>
@@ -328,6 +304,7 @@
                 </div>
             </div>
             <div class="bl_min_price">
+                
                 <div class="bl_min_price-name">
                     <span>"Евросеть"</span>
                 </div>
@@ -349,180 +326,25 @@
                     <a href="#" class="link-btn_buy-small">Купить</a>
                 </div>
             </div>
+            -->
         </div>
+           
         </div>
-        -->
+        
     </div>
 
     <div class="col-sidebars">
-        <!--
+        
         <div class="c_sidebars_inner">
-        <div class="informer sidebar-informer">
-            <div class="informer-top">
-                <div class="informer-t-left"><span class="informer-title">Планшеты</span></div>
-                <div class="informer-t-right">
-                    <nav id="informer-top-menu">
-                        <ul>
-                            <li><a href="#" class="informer-icon-rating"></a></li>
-                            <li id="price_li_informer"><a href="#" class="informer-icon-price"></a>
-                                <div class="informer-curr-bl">
-                                    <a href="#" class="informer_currency-select cur-rub"><span class="drpd_arrow-informer"></span></a>
-                                    <ul>
-                                        <li><a href="#" class="cur-dol"></a></li>
-                                        <li><a href="#" class="cur-eur"></a></li>
-                                    </ul>
-                                </div>
-                            </li>
-                        </ul>
-                    </nav>
-                    <div class="clear"></div>
-                </div>
-                <div class="clear"></div>
-            </div>
-            <div class="informer-c">
-                <ul class="informer-listGoods">
-                    <li>
-                        <div class="informer-listGoods_photo"><a href="#"><img src="/assets/img/photo/informers/1.png" height="37" width="30"></a></div>
-                        <div class="informer-listGoods_desc"><a href="#"><span>Samsung Galaxy Tab 2 10.1 P5100 16Gb</span></a></div>
-                        <div class="informer-listGoods_rating">100</div>
-                        <div class="informer-listGoods_price">36000</div>
-                    </li>
-                    <li>
-                        <div class="informer-listGoods_photo"><a href="#"><img src="/assets/img/photo/informers/2.png" height="37" width="30"></a></div>
-                        <div class="informer-listGoods_desc"><a href="#"><span>Apple iPad mini 16Gb Wi-Fi</span></a></div>
-                        <div class="informer-listGoods_rating">99</div>
-                        <div class="informer-listGoods_price">36000</div>
-                    </li>
-                    <li>
-                        <div class="informer-listGoods_photo"><a href="#"><img src="/assets/img/photo/informers/3.png" height="37" width="30"></a></div>
-                        <div class="informer-listGoods_desc"><a href="#"><span>Samsung Galaxy Note 8.0 N5100 16Gb</span></a></div>
-                        <div class="informer-listGoods_rating">97</div>
-                        <div class="informer-listGoods_price">36000</div>
-                    </li>
-                    <li>
-                        <div class="informer-listGoods_photo"><a href="#"><img src="/assets/img/photo/informers/2.png" height="37" width="30"></a></div>
-                        <div class="informer-listGoods_desc"><a href="#"><span>Apple iPad mini 16Gb Wi-Fi</span></a></div>
-                        <div class="informer-listGoods_rating">99</div>
-                        <div class="informer-listGoods_price">36000</div>
-                    </li>
-                    <li>
-                        <div class="informer-listGoods_photo"><a href="#"><img src="/assets/img/photo/informers/2.png" height="37" width="30"></a></div>
-                        <div class="informer-listGoods_desc"><a href="#"><span>Apple iPad mini 16Gb Wi-Fi</span></a></div>
-                        <div class="informer-listGoods_rating">99</div>
-                        <div class="informer-listGoods_price">36000</div>
-                    </li>
-                </ul>
-            </div>
-            <div class="informer-bottom">
-                <div class="informer-b-left"><img src="/assets/img/small/logo.png" height="17" width="79"></div>
-                <div class="informer-b-right">
-                    <ul id="informer-b-r-links" class="clr">
-                        <li><a href="#" class="informer-link-share" title="Поделиться"></a>
-                        <div class="submenu">
-                            <nav class="clr">
-                                <a href="#" class="share_block-fb" title="Facebook"></a>
-                                <a href="#" class="share_block-gp" title="Google+"></a>
-                                <a href="#" class="share_block-tw" title="Twitter"></a>
-                                <a href="#" class="share_block-vk" title="Вконтакте"></a>
-                            </nav>
-                        </div></li>
-                        <li><a href="#" class="informer-link-send" title="Рассказать"></a></li>
-                    </ul>
-                </div>
-                <div class="clear"></div>
-            </div>
+            <?php $this->widget('application.widgets.ListGoodsWidget', array("type"=>'pda', 'limit'=>5, 'style'=>'inner')); ?>
         </div>
 
         <div class="informer sidebar-informer sidebar-informer-pr">
-            <div class="informer-top">
-                <div class="informer-t-left"><span class="informer-title">Производительность</span></div>
-                <div class="informer-t-right"></div>
-                <div class="clear"></div>
-            </div>
-            <div class="informer-c">
-                <ul class="informer-listGoods">
-                    <li>
-                        <div class="informer-listGoods_photo"><a href="#"><img src="/assets/img/photo/informers/1.png" height="37" width="30"></a></div>
-                        <div class="informer-listGoods_desc"><a href="#"><span>Samsung Galaxy Tab 2 10.1 P5100 16Gb</span></a></div>
-                        <div class="informer-listGoods_like">100</div>
-                    </li>
-                    <li>
-                        <div class="informer-listGoods_photo"><a href="#"><img src="/assets/img/photo/informers/2.png" height="37" width="30"></a></div>
-                        <div class="informer-listGoods_desc"><a href="#"><span>Apple iPad mini 16Gb Wi-Fi</span></a></div>
-                        <div class="informer-listGoods_like">99</div>
-                    </li>
-                    <li>
-                        <div class="informer-listGoods_photo"><a href="#"><img src="/assets/img/photo/informers/3.png" height="37" width="30"></a></div>
-                        <div class="informer-listGoods_desc"><a href="#"><span>Samsung Galaxy Note 8.0 N5100 16Gb</span></a></div>
-                        <div class="informer-listGoods_like">97</div>
-                    </li>
-                </ul>
-            </div>
-            <div class="informer-bottom">
-                <div class="informer-b-left"><img src="/assets/img/small/logo.png" height="17" width="79"></div>
-                <div class="informer-b-right">
-                    <ul id="informer-b-r-links" class="clr">
-                        <li><a href="#" class="informer-link-share" title="Поделиться"></a>
-                        <div class="submenu">
-                            <nav class="clr">
-                                <a href="#" class="share_block-fb" title="Facebook"></a>
-                                <a href="#" class="share_block-gp" title="Google+"></a>
-                                <a href="#" class="share_block-tw" title="Twitter"></a>
-                                <a href="#" class="share_block-vk" title="Вконтакте"></a>
-                            </nav>
-                        </div></li>
-                        <li><a href="#" class="informer-link-send" title="Рассказать"></a></li>
-                    </ul>
-                </div>
-                <div class="clear"></div>
-            </div>
+            <?php $this->widget('application.widgets.ListGoodsWidget', array("type"=>'e-book', 'limit'=>5, 'style'=>'inner')); ?>
         </div>
 
         <div class="informer sidebar-informer sidebar-informer-pr sidebar-informer-rt">
-            <div class="informer-top">
-                <div class="informer-t-left"><span class="informer-title">Оценка пользователей</span></div>
-                <div class="informer-t-right"></div>
-                <div class="clear"></div>
-            </div>
-            <div class="informer-c">
-                <ul class="informer-listGoods">
-                    <li>
-                        <div class="informer-listGoods_photo"><a href="#"><img src="/assets/img/photo/informers/1.png" height="37" width="30"></a></div>
-                        <div class="informer-listGoods_desc"><a href="#"><span>Samsung Galaxy Tab 2 10.1 P5100 16Gb</span></a></div>
-                        <div class="informer-listGoods_like">100</div>
-                    </li>
-                    <li>
-                        <div class="informer-listGoods_photo"><a href="#"><img src="/assets/img/photo/informers/2.png" height="37" width="30"></a></div>
-                        <div class="informer-listGoods_desc"><a href="#"><span>Apple iPad mini 16Gb Wi-Fi</span></a></div>
-                        <div class="informer-listGoods_like">99</div>
-                    </li>
-                    <li>
-                        <div class="informer-listGoods_photo"><a href="#"><img src="/assets/img/photo/informers/3.png" height="37" width="30"></a></div>
-                        <div class="informer-listGoods_desc"><a href="#"><span>Samsung Galaxy Note 8.0 N5100 16Gb</span></a></div>
-                        <div class="informer-listGoods_like">97</div>
-                    </li>
-                </ul>
-            </div>
-            <div class="informer-bottom">
-                <div class="informer-b-left"><img src="/assets/img/small/logo.png" height="17" width="79"></div>
-                <div class="informer-b-right">
-                    <ul id="informer-b-r-links" class="clr">
-                        <li><a href="#" class="informer-link-share" title="Поделиться"></a>
-                        <div class="submenu">
-                            <nav class="clr">
-                                <a href="#" class="share_block-fb" title="Facebook"></a>
-                                <a href="#" class="share_block-gp" title="Google+"></a>
-                                <a href="#" class="share_block-tw" title="Twitter"></a>
-                                <a href="#" class="share_block-vk" title="Вконтакте"></a>
-                            </nav>
-                        </div></li>
-                        <li><a href="#" class="informer-link-send" title="Рассказать"></a></li>
-                    </ul>
-                </div>
-                <div class="clear"></div>
-            </div>
+            <?php $this->widget('application.widgets.ListGoodsWidget', array("type"=>'tablet', 'limit'=>5, 'style'=>'inner')); ?>
         </div>
-        </div>
-        -->
     </div>
 </div>

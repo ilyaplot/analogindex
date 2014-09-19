@@ -3,9 +3,11 @@ class ListGoodsWidget extends CWidget
 {
     public $type;
     public $limit;
+    public $style;
     public function __call($name, $parameters = array()) {
         $this->type = isset($parameters['type']) ? $parameters['type'] : 'pda';
         $this->limit = isset($parameters['limit']) ? $parameters['limit'] : 0;
+        //$this->style = isset($parameters['style']) ? "_".$parameters['style'] : '';
         return parent::__call($name, $parameters);
     }
     public function run() 
@@ -27,9 +29,10 @@ class ListGoodsWidget extends CWidget
             "primary_image",
             "rating"
         ))->findAll($criteria);
-        
+        if ($this->style)
+            $this->style = "_".$this->style;
         if ($data)
-            $this->render("widget_ListGoodsWidget", array('data'=>$data, 'type'=>$type));
+            $this->render("widget_ListGoodsWidget".$this->style, array('data'=>$data, 'type'=>$type));
         
     }
 }

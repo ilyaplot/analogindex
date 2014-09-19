@@ -19,7 +19,7 @@ class Reviews extends CActiveRecord
         return array(
             "rating"=>array(self::HAS_ONE, "RatingsReviews", "review", 
                 "select"=>"AVG(rating.value) as value",
-            )
+            ),
         );
     }
     

@@ -40,7 +40,7 @@
   <li><a href="#images">Фотографии</a></li>
   <li><a href="#characteristics">Характеристики</a></li>
   <?php if (!$data->is_modification):?>
-  <li><a href="#modifications">Модификации</a></li>
+  <!--<li><a href="#modifications">Модификации</a></li>-->
   <?php endif; ?>
   <li><a href="#videos">Видео</a></li>
   <li><a href="#reviews">Обзоры</a></li>
@@ -108,7 +108,7 @@
             <div class="control-group">
                 <label class="control-label" for="inputName">Наименование</label>
                 <div class="controls">
-                    <input type="text" name='Goods[name]' id="inputName" placeholder="Наименование" value="<?php echo $data->name?>">
+                    <input type="text" autocomplete="off" name='Goods[name]' id="inputName" placeholder="Наименование" value="<?php echo $data->name?>">
                 </div>
             </div>
             <table class="table table-bordered table-striped synonims">
@@ -119,7 +119,7 @@
                 <tr>
                     <td data-id="<?php echo $synonim->id?>">
                                   
-                        <input type="text" name="synonims[<?php echo $synonim->id?>][name]" value="<?php echo $synonim->name?>" placeholder="Синоним"/><br />
+                        <input type="text" autocomplete="off" name="synonims[<?php echo $synonim->id?>][name]" value="<?php echo $synonim->name?>" placeholder="Синоним"/><br />
                         <input type="checkbox" value='1' name="synonims[<?php echo $synonim->id?>][visibled]" <?php echo ($synonim->visibled) ? "checked " : ''?>/> Отображать<br />
                         <input type="checkbox" name="synonims[<?php echo $synonim->id?>][remove]" value="1" /> Удалить
                     </td>
@@ -142,7 +142,7 @@
                 Первое изображение в списке является основным и отображается как картинка товара.<br />
             </div>
             <table class="table table-bordered">
-                <?php foreach($data->images as $image):?>
+                <?php /* foreach($data->images as $image):?>
                 <tr>
                     <td>
                         <input class="priority" type="hidden" name="images[<?php echo $image->id?>][priority]" value="<?php echo $image->priority?>" />
@@ -171,7 +171,7 @@
                         <button class="btn btn-success enable<?php echo (!$image->disabled) ? ' hidden' : ''?>"><i class="icon-ok"></i> Показать</button>
                     </td>
                 </tr>
-                <?php endforeach;?>
+                <?php endforeach; */?>
             </table>
         </div>
         <div class="tab-pane" id="characteristics">...</div>

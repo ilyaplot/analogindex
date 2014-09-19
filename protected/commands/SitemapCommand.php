@@ -23,12 +23,14 @@ class SitemapCommand extends ConsoleCommand
     {
         $goods = Goods::model()->with(array("brand_data", "type_data"))->findAll();
         $links = array(
-            "/index.html",
+            "http://analogindex.ru/index.html",
+            "http://analogindex.com/index.html",
         );
         foreach ($goods as $item)
         {
             echo ".";
-            $links[] = "/".$item->type_data->link."/".$item->brand_data->link."/".$item->link.".html";
+            $links[] = "http://analogindex.ru/".$item->type_data->link."/".$item->brand_data->link."/".$item->link.".html";
+            $links[] = "http://analogindex.com/".$item->type_data->link."/".$item->brand_data->link."/".$item->link.".html";
         }
         echo PHP_EOL;
         $this->_createSitemap($links);
