@@ -18,6 +18,13 @@
         <?php echo CHtml::activeLabel($model,'password2'); ?><br />
         <?php echo CHtml::activePasswordField($model,'password2', array("autocomlete"=>"off", "placeholder"=>"Пароль еще раз")); ?>
     </div>
+    
+    <div class="row">
+        <?php echo CHtml::activeLabel($model,'name'); ?><br />
+        <?php echo CHtml::activeEmailField($model,'name', array("autocomlete"=>"off", "placeholder"=>"Иван Иванов")); ?>
+    </div>
+    
+    
     <div class="row">
         <?php if(CCaptcha::checkRequirements() && Yii::app()->user->isGuest):?>
             <?php echo CHtml::activeLabelEx($model, 'verifyCode') ?>
@@ -25,6 +32,7 @@
             <?php echo CHtml::activeTextField($model, 'verifyCode') ?>
         <?php endif; ?>
     </div>
+    
     <div class="row submit">
         <?php echo CHtml::submitButton(Yii::t("models", "Регистрация")); ?>
     </div>

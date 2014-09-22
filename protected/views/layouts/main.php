@@ -9,7 +9,6 @@
     <meta name='yandex-verification' content='60481e4daa763de4' />
     <meta name='yandex-verification' content='57ea89bb434b0eaf' />
     <meta name="google-site-verification" content="GvnDB4pCoqEMd_YGsLvuNeuYFMhwskJEX5QBnQU6v8I" />
-    <script type="text/javascript" src="/assets/js/jquery-1.10.2.min.js"></script>
     <script type="text/javascript" src="/assets/js/selectivizr-min.js"></script>
     <!--[if lt IE 9]>
         <script src="js/html5.js"></script>

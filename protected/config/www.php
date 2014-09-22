@@ -35,16 +35,6 @@ return array(
             'class' => 'ext.GoogleApis.GoogleApis',
             'developerKey' => 'AIzaSyBMrwCo6ilsyiAzJjhtXccjqke6eU-Pd3Q',
         ),
-        'log'=>array(
-            'class'=>'CLogRouter',
-            'routes'=>array(
-                array(
-                    'class' => 'CWebLogRoute',
-                    'categories' => 'application',
-                    'levels'=>'error, warning, trace, profile, info',
-                ),
-            ),
-        ),
         'format'=>array(
             'class'=>'Formatter',
         ),
@@ -63,14 +53,17 @@ return array(
                 'http://analogindex.<language:\w+>/user/login'=>'user/login',
                 'http://analogindex.<language:\w+>/user/registration'=>'user/registration',
                 
+                'http://analogindex.<language:\w+>/review/<goods:[\d\w\-_]*>/<link:[\d\w\-_]+>_<id:\d+>'=>
+                    array('site/review', 'urlSuffix'=>'.html'),
+                'http://analogindex.<language:\w+>/brand/<link:[\d\w\-_]*>/page<page:\d+>'=>
+                    array('site/brand', 'urlSuffix'=>'.html'),
                 'http://analogindex.<language:\w+>/_image/id<id:\d+>/<name:.*>'=>
                     array('files/image', 'urlSuffix'=>''),
                 'http://analogindex.<language:\w+>/brand/<link:[\d\w\-_]*>/<type:[\d\w\-_]*>/page<page:\d+>'=>
                     array('site/brand', 'urlSuffix'=>'.html'),
                 'http://analogindex.<language:\w+>/brand/<link:[\d\w\-_]*>/<type:[\d\w\-_]*>'=>
                     array('site/brand', 'urlSuffix'=>'.html'),
-                'http://analogindex.<language:\w+>/brand/<link:[\d\w\-_]*>/page<page:\d+>'=>
-                    array('site/brand', 'urlSuffix'=>'.html'),
+
                 'http://analogindex.<language:\w+>/brand/<link:[\d\w\-_]*>'=>
                     array('site/brand', 'urlSuffix'=>'.html'),
                 'http://analogindex.<language:\w+>/<link:[\d\w\-_]*>/img/id<id:\d+>/<filename:.*>/<size:\d+>'=>
@@ -80,8 +73,7 @@ return array(
                 'http://analogindex.<language:\w+>/<type:[\w\d\-_]+>/<brand:[\d\w\-_\+]*>/<link:[\d\w\-_]*>'=>
                     array('site/goods', 'urlSuffix'=>'.html'),
                 'http://analogindex.<language:\w+>/'=>array('site/index', 'urlSuffix'=>''),
-                'http://analogindex.<language:\w+>/review/<link:[\d\w\-_]*>_<id:\d+>'=>
-                    array('site/review', 'urlSuffix'=>'.html'),
+                
 
                 // Дефолтные правила. 
                 'http://analogindex.<language:\w+>/<controller:\w+>/<action:\w+>'=>'<controller>/<action>',
@@ -105,6 +97,13 @@ return array(
             'section'=>'newfiles',
             'class'=>'Storage',
         ),
-        
+        'session' => array (
+            'class'=>'CHttpSession',
+            'savePath' => '/inktomia/db/analogindex/sessions',
+            'autoStart'=>true,
+        ),
+        'request' => array (
+            'enableCsrfValidation'=>true,
+        )
     ),
 );

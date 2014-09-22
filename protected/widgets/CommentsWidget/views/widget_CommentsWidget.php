@@ -1,4 +1,5 @@
 <div class="view_read-bl">
+    <h4>Комментарии</h4>
     <form action="#" method="post">
         <div class="view_read-head">
             <div class="clr">

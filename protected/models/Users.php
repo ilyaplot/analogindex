@@ -12,7 +12,6 @@ class Users extends CActiveRecord
     
     const SALT = "877476ugbkm&%^$#%^$&*()5435645436JKHFRcvhjFKHJ<hd467890-^^^^*****UTgjnvd";
     
-    public $rememberMe=false;
     public $password2;
     public $verifyCode;
     
@@ -49,12 +48,11 @@ class Users extends CActiveRecord
             array('email, password', 'required'),
             array('email', 'length', 'min'=>4, 'max'=>255),
             array('email', 'email'),
-            array('rememberMe', 'boolean'),
             array('password', 'authenticate'),
-            //array('verifyCode', 'captcha',
+            array('verifyCode', 'captcha',
                 // авторизованным пользователям код можно не вводить
-            //    'allowEmpty'=>!Yii::app()->user->isGuest || !CCaptcha::checkRequirements(),
-            //)
+                'allowEmpty'=>!Yii::app()->user->isGuest || !CCaptcha::checkRequirements(),
+            )
         );
     }
  

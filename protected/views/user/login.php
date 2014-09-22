@@ -20,9 +20,6 @@
             <?php echo CHtml::activeTextField($model, 'verifyCode') ?>
         <?php endif; ?>
     </div>
-    <div class="row rememberMe">
-    <?php echo CHtml::activeCheckBox($model,'rememberMe'); ?> <?php echo CHtml::activeLabel($model,'rememberMe'); ?>
-    </div>
 
     <div class="row submit">
         <?php echo CHtml::submitButton(Yii::t("models", "Войти")); ?>

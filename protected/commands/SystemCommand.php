@@ -22,63 +22,111 @@ class SystemCommand extends ConsoleCommand
         }
     }
     
-    public function actionTest()
+    
+    public function actionImportReviews()
     {
         $connection = Yii::app()->reviews;
-        $query = "select r.id, r.url, d.name, d.rating, r.title, r.content as content from destinations d inner join reviews r on d.id = r.destination where d.name = :name";
-        $goods = Goods::model()->findAll();
-        foreach ($goods as $item)
+        $urlManager = new UrlManager;
+        $goods = Goods::model()->with(array(
+            "brand_data",
+            "synonims",
+        ))->findAll();
+        foreach ($goods as $product)
         {
-            $params = array('name'=>$item->brand_data->name. " " .$item->name);
-            $append = '';
-            foreach ($item->synonims as $key=>$synonim)
+            $query = "select * from reviews where product like :name ";
+            $queryParams = array("name"=>$product->brand_data->name." ".$product->name);
+            $params = array();
+            foreach ($product->synonims as $synonim)
             {
-                $append.=' and name = :name'.$key.'';
-                $params['name'.$key] = $item->brand_data->name." ".$synonim->name;
+                $params[] = $product->brand_data->name." ".$synonim->name;
             }
-            $urlManager = new UrlManager();
-            $reviews = $connection->createCommand($query.$append)->queryAll(true, $params);
-            if ($reviews)
+            
+            foreach ($params as $paramKey=>$paramValue)
             {
-                foreach ($reviews as $review)
+                $query .= ' or product like :name'.$paramKey;
+                $queryParams["name".$paramKey] = $paramValue;
+            }
+            $reviews = $connection->createCommand($query)->queryAll(true, $queryParams);
+            foreach ($reviews as $review)
+            {
+                if (!Reviews::model()->countByAttributes(array("source"=>$review['url'])))
                 {
-                    $ratingsCount = RatingsGoods::model()->countByAttributes(array(
-                        "goods"=>$item->id,
-                        "user"=>0,
-                        "value"=>doubleval($review['rating']),
-                    ));
-                    if (!$ratingsCount)
+                    $reviewModel = new Reviews("import");
+                    $reviewModel->source = $review['url'];
+                    $reviewModel->goods = $product->id;
+                    $reviewModel->title = $review['title'];
+                    $reviewModel->link = $urlManager->translitUrl($review['title']);
+                    $reviewModel->author = 0;
+                    $reviewModel->content = $review['content'];
+                    $reviewModel->disabled = 0;
+                    $reviewModel->save();
+                    if ($review['rating'])
                     {
-                        $rating = new RatingsGoods();
-                        $rating->goods = $item->id;
+                        $rating = new RatingsGoods("import");
+                        $rating->goods = $product->id;
                         $rating->user = 0;
-                        $rating->value = doubleval($review['rating']);
+                        $rating->value = $review['rating'];
                         $rating->save();
-                        echo $item->id." ".$ratingsCount." ".$item->brand_data->name. " " .$item->name." ";
-                        echo "Добавлен рейтинг".PHP_EOL;
                     }
-                    $reviewCount = Reviews::model()->countByAttributes(array(
-                        "goods"=>$item->id,
-                        "source"=>$review['url'],
-                    ));
-                    if (!$reviewCount)
-                    {
-                        $reviewModel = new Reviews();
-                        $reviewModel->goods = $item->id;
-                        $reviewModel->source = $review['url'];
-                        $reviewModel->title = $review['title'];
-                        $reviewModel->lang = 'ru';
-                        $reviewModel->link = $urlManager->translitUrl($review['title']);
-                        $reviewModel->author = 0;
-                        $reviewModel->content = $review['content'];
-                        $reviewModel->disabled = 0;
-                        if ($reviewModel->validate())
-                            $reviewModel->save();
-                        echo $item->id." ".$reviewCount." ".$item->brand_data->name. " " .$item->name." ";
-                        echo "Добавлен обзор".PHP_EOL;
-                    }
+                    echo ".";
                 }
             }
         }
+        echo PHP_EOL;
+        sleep(10);
+        return $this->actionImportReviews();
+    }
+    
+    public function actionReviewFilter()
+    {
+        $reviews = Reviews::model()->findAllByAttributes(array('filtered'=>0));
+        foreach ($reviews as $review)
+        {
+            $review->title = ucfirst(trim(strip_tags($review->title)));
+            $html = phpQuery::newDocumentHTML($review->content);
+            foreach ($html->find("a") as $a)
+            {
+                // Удаляем Lightbox ссылки и заменяем на изображения
+                $image = (string) pq($a)->find("img");
+                if (!empty($image))
+                {
+                    $rel = pq($a)->attr("rel");
+                    if (!empty($rel))
+                    {
+                        if (preg_match("~light~", $rel))
+                        {
+                            
+                            pq($a)->find("img")->attr("src", pq($a)->attr("href"));
+                            $image = (string) pq($a)->find("img");
+                        }
+                    }
+                    pq($a)->replaceWith($image);
+                } else {
+                    if (!preg_match("~^http://.*~", pq($a)->attr("href")))
+                        pq($a)->replaceWith(pq($a)->html());
+                }
+            }
+            
+            // Заменяем div на p
+            while(count($html->find('div')))
+            {
+                foreach ($html->find('div') as $div)
+                {
+                    $divHtml = pq($div)->html();
+                    if (!empty($divHtml))
+                        pq($div)->replaceWith("<p>".pq($div)->html()."<p>");
+                    else
+                        pq($div)->remove();
+                }
+            }
+            
+            pq($html)->find("p:empty")->remove();
+            
+            $review->content = (string) $html;
+            $review->filtered = 1;
+            $review->save();
+            echo ".";
+        }
+        echo PHP_EOL;
     }
 }

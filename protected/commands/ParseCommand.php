@@ -98,6 +98,7 @@ class ParseCommand extends CConsoleCommand
         $criteria->params = array(
             "search"=>$search,
         );
+        $urlManager = new UrlManager();
         echo $search.PHP_EOL;
         $goods = Goods::model()->with("brand_data","synonims")->find($criteria);
         // Если что-то нашли
@@ -106,9 +107,10 @@ class ParseCommand extends CConsoleCommand
         {
             if (!$brandModel = Brands::model()->findByAttributes(array("name"=>$brand)))
             {
+                
                 $brandModel = new Brands();
                 $brandModel->name = $brand;
-                $brandModel->link = Model::str2url($brand);
+                $brandModel->link = $urlManager->translitUrl($brand);
                 if ($brandModel->validate())
                 {
                     echo "Добавлен бренд {$brand}".PHP_EOL;
@@ -123,9 +125,9 @@ class ParseCommand extends CConsoleCommand
             $goods = new Goods();
             $goods->brand = $brandModel->id;
             $goods->name = $name;
-            $goods->link = Model::str2url($name);
+            $goods->link = $urlManager->translitUrl($name);
             $goods->type = 1;
-            echo Model::str2url($name).PHP_EOL;
+            echo $urlManager->translitUrl($name).PHP_EOL;
             if ($goods->validate())
             {
                 echo "Добавлен товар {$brand} {$name}".PHP_EOL;
@@ -286,7 +288,7 @@ class ParseCommand extends CConsoleCommand
             {
                 $brandModel = new Brands();
                 $brandModel->name = $brand;
-                $brandModel->link = Model::str2url($brand);
+                $brandModel->link = $urlManager->translitUrl($brand);
                 if ($brandModel->validate())
                 {
                     echo "Добавлен бренд {$brand}".PHP_EOL;
@@ -298,12 +300,13 @@ class ParseCommand extends CConsoleCommand
                     return $this->actionGsmArena();
                 }
             }
+            $urlManager = new UrlManager();
             $goods = new Goods();
             $goods->brand = $brandModel->id;
             $goods->name = $name;
-            $goods->link = Model::str2url($name);
+            $goods->link = $urlManager->translitUrl($name);
             $goods->type = $type;
-            echo Model::str2url($name).PHP_EOL;
+            echo $goods->link.PHP_EOL;
             if ($goods->validate())
             {
                 echo "Добавлен товар {$brand} {$name}".PHP_EOL;

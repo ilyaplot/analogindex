@@ -22,6 +22,7 @@ class SitemapCommand extends ConsoleCommand
     public function actionIndex()
     {
         $goods = Goods::model()->with(array("brand_data", "type_data"))->findAll();
+        $reviews = Reviews::model()->with(array("goods_data"))->findAll();
         $links = array(
             "http://analogindex.ru/index.html",
             "http://analogindex.com/index.html",
@@ -31,6 +32,19 @@ class SitemapCommand extends ConsoleCommand
             echo ".";
             $links[] = "http://analogindex.ru/".$item->type_data->link."/".$item->brand_data->link."/".$item->link.".html";
             $links[] = "http://analogindex.com/".$item->type_data->link."/".$item->brand_data->link."/".$item->link.".html";
+        }
+        foreach ($reviews as $review)
+        {
+            //http://analogindex.ru/review/nokia-asha-500/otli-nyj-telefon-v-vostorge-foto-_2027.html
+            if ($review->lang == 'ru')
+            {
+                $links[] = "http://analogindex.ru/review/".$review->goods_data->brand_data->link.
+                    "-".$review->goods_data->link."/".$review->link.".html";
+            } elseif ($review->lang == 'en') {
+                $links[] = "http://analogindex.com/review/".$review->goods_data->brand_data->link.
+                    "-".$review->goods_data->link."/".$review->link.".html";
+            }
+            echo ".";
         }
         echo PHP_EOL;
         $this->_createSitemap($links);

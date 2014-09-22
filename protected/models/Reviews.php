@@ -20,6 +20,8 @@ class Reviews extends CActiveRecord
             "rating"=>array(self::HAS_ONE, "RatingsReviews", "review", 
                 "select"=>"AVG(rating.value) as value",
             ),
+            "goods_data"=>array(self::BELONGS_TO, "Goods", "goods"),
+            "images"=>array(self::HAS_MANY, "ReviewsImages", "review"),
         );
     }
     
@@ -45,7 +47,7 @@ class Reviews extends CActiveRecord
     
     public function getWords($str, $length = 50)
     {
-        $words = explode(" ", strip_tags($str));
+        $words = explode(" ", trim(strip_tags($str)));
         return implode (" ", array_slice($words, 0, $length));
     }
 }

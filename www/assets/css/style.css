@@ -656,6 +656,11 @@ h2.search_result-nameItem a:hover { color: #c1501e;}
     background: url(/assets/img/small/icon-item3.png) no-repeat left center;
     padding-left: 21px;
 }
+
+.infoGoodItem-title-2_list .item0 {
+    background: transparent;
+    padding-left: 21px;
+}
 .infoGoodItem-title-2 .flRight { margin-right: 16px; }
 
 
@@ -910,22 +915,6 @@ span.icon-like {
     list-style: none;
     overflow: hidden;
 }
-
-.rating2 li {
-    float: left;
-    width: 16px;
-    height: 15px;
-    margin-right: 2px;
-    text-indent: -9999px;
-    overflow: hidden;
-}
-.rating2 a {
-    display: block;
-    background: url(/assets/img/small/icon-like.png) no-repeat 0 -15px;
-    height: 100%;
-}
-.rating2 .full a, .rating2 .full2 a{background-position: 0 0;}
-.rating2 .empty a { background-position: 0 -15px; }
 
 .view_read-head {
     margin: 0 0 20px;

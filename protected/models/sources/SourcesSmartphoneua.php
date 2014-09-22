@@ -6,10 +6,6 @@ class SourcesSmartphoneua extends CActiveRecord
         return parent::model($className);
     }
     
-    public function getDbConnection() {
-        return Yii::app()->newdb;
-    }
-    
     public function tableName()
     {
         return "{{sources_smartphoneua}}";

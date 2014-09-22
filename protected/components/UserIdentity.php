@@ -16,7 +16,7 @@ class UserIdentity extends CUserIdentity {
             
             $this->_id = $user->id;
             $this->setState("readonly", $user->readonly);
-            
+            $this->setState("language", Language::getCurrentLang());
             $this->setState("name", !empty($user->name) ? $user->name : $user->username);
             
             $this->errorCode = self::ERROR_NONE;

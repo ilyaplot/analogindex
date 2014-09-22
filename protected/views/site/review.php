@@ -34,11 +34,13 @@
     <div class="col-infoReview">
         <div class="manufacture-categories clr">
             <div class="mnf_logo">
+                <?php if($product->primary_image): ?>
                     <img src="<?php echo Yii::app()->createUrl("files/image", array(
                         'id'=>$product->primary_image->image_data->size3_data->id,
                         'name'=>$product->primary_image->image_data->size3_data->name,
                         'language'=>Language::getCurrentZone(),
                     )); ?>" alt="<?php echo $product->brand_data->name." ".$product->name ?>" />
+                <?php endif;?>
             </div>
             <div class="mnf_clr">
                     <div class="mnf-name">

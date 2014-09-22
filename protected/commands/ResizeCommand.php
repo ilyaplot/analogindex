@@ -1,7 +1,7 @@
 <?php
 class ResizeCommand extends CConsoleCommand
 {
-    public function actionGoods()
+    public function actionIndex()
     {
         // http://wideimage.sourceforge.net/
         include 'WideImage/WideImage.php';

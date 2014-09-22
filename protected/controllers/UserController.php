@@ -19,14 +19,14 @@ class UserController extends Controller
     public function actionLogin()
     {
         $model=new Users("login");
-        if(isset($_POST['Users']))
+        if($attributes = Yii::app()->request->getParam("Users"))
         {
 
-            $model->attributes=$_POST['Users'];
+            $model->attributes=$attributes;
 
             if($model->validate())
             {
-                Yii::app()->user->login($model->getIdentity(), ($model->rememberMe) ? (3600*24*7) : null);
+                Yii::app()->user->login($model->getIdentity(), 3600*24*7);
                 $this->redirect(Yii::app()->user->returnUrl);
             }
         }
@@ -54,14 +54,5 @@ class UserController extends Controller
     {
         
     }
-    
-    protected function performAjaxValidation($model)
-    {
-        var_dump($_POST);
-        if(isset($_POST['ajax']) && $_POST['ajax']==='test-form')
-        {
-            echo CActiveForm::validate($model);
-            Yii::app()->end();
-        }
-    }        
+        
 }

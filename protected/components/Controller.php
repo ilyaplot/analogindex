@@ -13,6 +13,9 @@ class Controller extends CController
         
         $this->setPageTitle("Analogindex");
         
+        $cs=Yii::app()->getClientScript();
+        $cs->registerCoreScript('jquery');
+        
         return parent::beforeAction($action);
     }
 }

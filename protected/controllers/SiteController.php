@@ -59,10 +59,19 @@ class SiteController extends Controller
 
 
         $this->setPageTitle($brand->name." ".$product->name);
+        $ratingDisabled = 1;
+        if (!Yii::app()->user->isGuest &&
+                !Yii::app()->user->getState("readonly") &&
+                !RatingsGoods::model()->countByAttributes(array("goods"=>$product->id, "user"=>Yii::app()->user->id)))
+        {
+            $ratingDisabled = 0;
+        }
+        
         $this->render("goods", array(
             "type"=>$type,
             "brand"=>$brand,
             "product"=>$product,
+            "ratingDisabled"=>$ratingDisabled,
         ));
     }
     
@@ -134,7 +143,7 @@ class SiteController extends Controller
         ));
     }
     
-    public function actionReview($link, $id)
+    public function actionReview($goods, $link, $id)
     {
         if (!Reviews::model()->countByAttributes(array(
             "link"=>$link,

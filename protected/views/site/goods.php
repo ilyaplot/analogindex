@@ -43,8 +43,33 @@
                         <ul class="infoGoodItem-title-2_list">
                             <li class="item1"></li>
                             <li class="item2"></li>
-                            <li class="item3">
+                            <li class="item<?php echo (!$ratingDisabled) ? 0 : 3?>" id="ratingResult">
+                                <?php if (!$ratingDisabled) : ?>
+                                
+                                <?php
+                                    $this->widget('application.widgets.StarRating',array(
+                                        'name'=>'ratingAjax',
+                                        'maxRating'=>5,
+                                        'value'=>isset($product->rating->value) ? round($product->rating->value) : 0,
+                                        'resetValue'=>false,
+                                        'cssFile'=>'/assets/css/rating.css',
+                                        'callback'=>'
+                                            function(){
+                                                $.ajax({
+                                                    type: "POST",
+                                                    url: "'.Yii::app()->createUrl('ajax/ratingGoods', array("goods"=>$product->id)).'",
+                                                    data: "'.Yii::app()->request->csrfTokenName.'='.Yii::app()->request->getCsrfToken().'&rate=" + $(this).val(),
+                                                    success: function(msg){
+                                                        $("#ratingResult").html(msg);
+                                                        $(".infoGoodItem-title-2_list > .item0").removeClass("item0").addClass("item3");
+                                                    }
+                                                })
+                                            }'
+                                      ));
+                                ?> <?php echo isset($product->rating->value) ? "(".round($product->rating->value,1).")" : '';?>
+                                <?php else: ?>
                                 <?php echo isset($product->rating->value) ? round($product->rating->value,1) : '';?>
+                                <?php endif;?>
                             </li>
                         </ul>
                         <div class="clear"></div>
@@ -139,10 +164,10 @@
                         <div class="view_bl">
                             <div class="view_bl-head clr">
                                 <div class="view_bl-head-r flLeft">
-                                    <div class="view_bl-avatar"><img src="/assets/img/photo/avatar_view1.png"></div>
+                                    <div class="view_bl-avatar"><img src="/assets/img/photo/avatar_view.png"></div>
                                     <div class="view_bl-h2">
                                         <div class="view_bl-h2_name">Аноним</div>
-                                        <div class="view_bl-h2_rating">
+                                        <!--<div class="view_bl-h2_rating">
                                             <ul class="rating_like-s" title="Оценка - 5">
                                                 <li><span class="icon-like"></span></li>
                                                 <li><span class="icon-like"></span></li>
@@ -150,7 +175,7 @@
                                                 <li><span class="icon-like"></span></li>
                                                 <li><span class="icon-like"></span></li>
                                             </ul>
-                                        </div>
+                                        </div>-->
                                     </div>
                                     <div class="clear"></div>
                                 </div>
@@ -162,7 +187,7 @@
                                 <h2><?php echo $review->title?></h2>
                                 <?php echo $review->preview ?>...
                             </div>
-                            <div class="view_bl-replyLink"><a href="<?php echo Yii::app()->createUrl("site/review", array("link"=>$review->link, "id"=>$review->id, "language"=>Language::getCurrentZone()))?>" class="link-replyView">Читать полностью...</a></div>
+                            <div class="view_bl-replyLink"><a href="<?php echo Yii::app()->createUrl("site/review", array("goods"=>$brand->link."-".$product->link,"link"=>$review->link, "id"=>$review->id, "language"=>Language::getCurrentZone()))?>" class="link-replyView">Читать полностью...</a></div>
                         </div>
 
                         <?php endforeach; ?>
