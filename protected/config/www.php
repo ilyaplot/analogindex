@@ -21,15 +21,15 @@ return array(
         ),
         'db'=>  require dirname(__FILE__).'/mysql.php',
         'search' => array(
-                'class' => 'application.components.DGSphinxSearch.DGSphinxSearch',
-                'server' => '127.0.0.1',
-                'port' => 9312,
-                'maxQueryTime' => 3000,
-                'enableProfiling'=>0,
-                'enableResultTrace'=>0,
-                'fieldWeights' => array(
-                    'fullname' => 10000,
-                ),
+            'class' => 'SphinxSearch',
+            'server' => '127.0.0.1',
+            'port' => 9312,
+            'maxQueryTime' => 3000,
+            'enableProfiling'=>0,
+            'enableResultTrace'=>0,
+            'fieldWeights' => array(
+                'name' => 10000,
+            ),
         ),
         'GoogleApis' => array(
             'class' => 'ext.GoogleApis.GoogleApis',
@@ -52,6 +52,7 @@ return array(
                 
                 'http://analogindex.<language:\w+>/user/login'=>'user/login',
                 'http://analogindex.<language:\w+>/user/registration'=>'user/registration',
+                'http://analogindex.<language:\w+>/user/confirm'=>'user/confirm',
                 
                 'http://analogindex.<language:\w+>/review/<goods:[\d\w\-_]*>/<link:[\d\w\-_]+>_<id:\d+>'=>
                     array('site/review', 'urlSuffix'=>'.html'),
@@ -97,11 +98,12 @@ return array(
             'section'=>'newfiles',
             'class'=>'Storage',
         ),
-        'session' => array (
-            'class'=>'CHttpSession',
-            'savePath' => '/inktomia/db/analogindex/sessions',
-            'autoStart'=>true,
-        ),
+        //'session' => array (
+        //    'class'=>'CHttpSession',
+        //    'savePath' => '/inktomia/db/analogindex/sessions',
+        //    'autoStart'=>true,
+        //    'timeout'=>1440,
+        //),
         'request' => array (
             'enableCsrfValidation'=>true,
         )

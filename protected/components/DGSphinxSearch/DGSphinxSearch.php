@@ -154,7 +154,7 @@ class DGSphinxSearch extends CApplicationComponent
      * @var SphinxClient
      * @brief Sphinx client object
      */
-    private $client;
+    protected $client;
 
     public function init()
     {

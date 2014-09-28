@@ -1,6 +1,21 @@
 <?php
 class SiteController extends Controller
 {
+    public function actions(){
+        return array(
+            'captcha'=>array(
+                'class'=>'CCaptchaAction',
+                'backColor'=>0xFFFFFF,
+                'transparent'=>true,
+                'testLimit'=>1,
+                'foreColor'=>0x999999,
+                'minLength'=>3,
+                'maxLength'=>5,
+                'offset'=>1,
+            ),
+        );
+    }
+    
     public function filters()
     {
         return array(
@@ -22,6 +37,11 @@ class SiteController extends Controller
         );
     }
     
+    public function actionTest()
+    {
+        $product = Goods::model()->findByPk(10562);
+        var_dump($product->getCharacteristics());
+    }
     
     public function actionIndex()
     {
@@ -164,10 +184,83 @@ class SiteController extends Controller
             "rating"
         ))->find($criteria);
         
+        $ratingDisabled = 1;
+        if (!Yii::app()->user->isGuest &&
+                !Yii::app()->user->getState("readonly") &&
+                !RatingsGoods::model()->countByAttributes(array("goods"=>$product->id, "user"=>Yii::app()->user->id)))
+        {
+            $ratingDisabled = 0;
+        }
+        
+        $this->pageDescription = $review->getDescription();
+        $keywords = array();
+        if (!empty($product->synonims))
+        {
+            foreach ($product->synonims as $synonim)
+            {
+                $keywords[] = $synonim->name;
+            }
+        }
+        $keywords = array_merge($keywords, array(
+            $product->name,
+            $product->brand_data->name,
+            $product->type_data->name->name,
+        ));
+        $this->pageKeywords = implode(", ", $keywords);
         $this->render("review", array(
             "review"=>$review,
             "product"=>$product,
+            "ratingDisabled"=>$ratingDisabled,
         ));
+    }
+    
+    public function actionSearch()
+    {
+        $query = Yii::app()->request->getParam("keyword");
+        $paramType = Yii::app()->request->getParam("type");
+        $searchCriteria = new stdClass();
+        $search = Yii::app()->search;
+        
+        
+        
+        $pages = new CPagination(10000000000000);
+        $pages->pageSize = 10;
+        //$searchCriteria->select = 'id';
+        if ($paramType)
+            $searchCriteria->filters = array('type' => $paramType);
+        
+        $searchCriteria->paginator = $pages;
+        //$searchCriteria->groupby = $groupby;
+        //$searchCriteria->orders = array('f_name' => 'ASC');
+        $searchCriteria->from = 'goods_index';
+        try
+        {
+            $query=$search->escape($query);
+            $searchCriteria->query = '@name '.$query;
+            $pages->applyLimit($searchCriteria);
+            $resIterator = $search->search($searchCriteria); // interator result
+        } catch (Exception $ex) {
+            // Не пашет sphinx;
+        }
+        
+        $goods = array();
+        
+        if ($resIterator->getTotal())
+        {
+            $pages->setItemCount($resIterator->getTotalFound());
+            $criteria = new CDbCriteria();
+            $criteria->addInCondition("t.id", $resIterator->getIdList());
+            $criteria->group = "t.id, rating.value";
+            $goods = Goods::model()->with(array(
+                "brand_data"=>array(
+                    "joinType"=>"inner join"
+                ),
+                "primary_image",
+                "rating"
+            ))->findAll($criteria); 
+        }
+        
+        $this->render("search", array("goods"=>$goods, "pages"=>$pages));
     }
 }
 

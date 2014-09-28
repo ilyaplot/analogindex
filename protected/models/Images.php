@@ -22,7 +22,7 @@ class Images extends CActiveRecord
         2=>array(510, 510),
         3=>array(91, 91),
         4=>array(30, 37),
-        //5=>array(400, 400, false),
+        //5=>array(100, 100, false),
         6=>array(131, 131),
     );
     

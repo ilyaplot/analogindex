@@ -3,22 +3,29 @@ class SystemCommand extends ConsoleCommand
 {
     public function actionSendEmails()
     {
-        $to = "ilyaplot@gmail.com";
-        $subject = "Подтверждение регистрации";
-        $message = "Данунах";
-        
-        $mailer = Yii::app()->Smtpmail;
-        $mailer->IsSMTP();
-        $mailer->IsHTML(true);
-        $mailer->Subject = $subject;
-        $mailer->AddAddress($to);
-        $mailer->Body = $message;
-        
-        if (!$mailer->Send())
+        $notifications = Notifications::model()->findAllByAttributes(array("sended"=>0));
+        foreach ($notifications as $notify)
         {
-            echo $mailer->ErrorInfo.PHP_EOL;
-        } else {
-            Echo 'EMail OK'.PHP_EOL;
+            $to = $notify->email;
+            $subject = $notify->subject;
+            $message = $notify->message;
+
+            $mailer = Yii::app()->Smtpmail;
+            $mailer->IsSMTP();
+            $mailer->IsHTML(true);
+            $mailer->Subject = $subject;
+            $mailer->AddAddress($to);
+            $mailer->Body = $message;
+
+            if (!$mailer->Send())
+            {
+                //$notify->sended = ;
+                echo $mailer->ErrorInfo.PHP_EOL;
+            } else {
+                $notify->sended = 1;
+                $notify->save();
+                Echo 'EMail OK'.PHP_EOL;
+            }
         }
     }
     
@@ -73,8 +80,6 @@ class SystemCommand extends ConsoleCommand
             }
         }
         echo PHP_EOL;
-        sleep(10);
-        return $this->actionImportReviews();
     }
     
     public function actionReviewFilter()

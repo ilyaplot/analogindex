@@ -4,7 +4,7 @@
  */
 class Goods extends CActiveRecord
 {    
-    
+    public $generalCharacteristics = array(5,6,8,9,11,13,14,18,22);
     public $appendVideos = 3;
     
     public static function model($className = __CLASS__) 
@@ -49,6 +49,7 @@ class Goods extends CActiveRecord
                 "select"=>"AVG(rating.value) as value",
             ),
             "modifications"=>array(self::HAS_MANY, "GoodsModifications", "goods_parent"),
+            "comments"=>array(self::HAS_MANY, "CommentsGoods", "goods"),
         );
     }
     
@@ -126,8 +127,28 @@ class Goods extends CActiveRecord
         return $result;
     }
     
-    public function getCharacteristics()
+    public function getGeneralCharacteristics()
     {
+        $characteristics = $this->getCharacteristics($this->generalCharacteristics);
+        $result = array();
+        foreach($characteristics as $ch)
+        {
+            foreach ($ch as $c)
+            {
+                $result[] = $c;
+            }
+        }
+        return $result;
+    }
+    
+    public function getCharacteristics($ids = array())
+    {
+        if (!empty($ids) && is_array($ids))
+        {
+            $ids = " and c.id in (".implode(", ",$ids).") ";
+        } else {
+            $ids = '';
+        }
         $query="select 
                 ccn.name as catalog_name, 
                 cn.name as characteristic_name,
@@ -144,11 +165,12 @@ class Goods extends CActiveRecord
                 and gc.lang = :lang 
                 and cn.lang = :lang 
                 and gc.goods = :goods
+                {$ids}
             order by cc.priority desc, c.priority desc";
         $params = array("lang"=>Yii::app()->language, "goods"=>$this->getPrimaryKey());
         
         $result = array();
-        if (!$result = Yii::app()->cache->get("goods.characteristics".serialize($params)))
+        if (!$result = Yii::app()->cache->get("goods.characteristics".serialize($params).$ids))
         {
             $connection = $this->getDbConnection();
             $items = $connection->createCommand($query)->queryAll(true, $params);
@@ -160,7 +182,8 @@ class Goods extends CActiveRecord
                 $result[$item['catalog_name']][] = $item;
             }
         }
-        Yii::app()->cache->set("goods.characteristics".serialize($params), $result, 60*60*12);
+        
+        Yii::app()->cache->set("goods.characteristics".serialize($params).$ids, $result, 60*60*12);
         return $result;
     }
 }

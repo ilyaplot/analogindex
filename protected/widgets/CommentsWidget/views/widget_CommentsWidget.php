@@ -1,6 +1,6 @@
 <div class="view_read-bl">
-    <h4>Комментарии</h4>
-    <form action="#" method="post">
+    <?php echo CHtml::beginForm(Yii::app()->request->getUrl()."#write_comment"); ?>
+        <a name="write_comment"></a>
         <div class="view_read-head">
             <div class="clr">
                 <div class="view_read-avatar">
@@ -8,7 +8,7 @@
                 </div>
                 <div class="view_read-h2">
                     <div class="view_r-name"><?php echo Yii::app()->user->getState("name")?></div>
-                    <div class="view_r-setRating">
+                    <!--<div class="view_r-setRating">
                         <div>Оцените товар:</div>
                         <ul class="rating2">
                             <li><a href="#">1</a></li>
@@ -18,23 +18,26 @@
                             <li><a href="#">5</a></li>
                         </ul>
                         <div class="clear"></div>
-                    </div>
+                    </div>-->
                 </div>
             </div>
+            <?php echo CHtml::errorSummary($model); ?>
         </div>
         <div class="view_read-text">
-            <textarea name="view_text" class="textarea-st3"></textarea>
+            <?php echo CHtml::activeTextArea($model, "text", array("class"=>"textarea-st3"))?>
         </div>
         <div class="view_read-bottom clr">
             <div class="view_read-bottom-left flLeft">
-                <div class="view_r_b-replytext">
+                <!--<div class="view_r_b-replytext">
                     Вы отвечаете на комментарий:<br>
                     «Открыл, взял в руки и понял - ОНО. Честно говоря  с...»
                 </div>
-                <div class="view_r_b-linkOff"><a href="#" class="link-st3">Отменить</a></div>
+                <div class="view_r_b-linkOff"><a href="#" class="link-st3">Отменить</a></div>-->
             </div>
-            <div class="flRight"><input type="submit" class="btn_submit2" value="Отправить" name="submit_readView"></div>
+            <div class="flRight">
+                <?php echo CHtml::submitButton('Отправить', array('class'=>'btn_submit2')) ?>
+            </div>
         </div>
-        <input type="hidden" name="GoodItemSetRating" class="GoodItemSetRating" value="">
-    </form>
+    <?php echo CHtml::hiddenField("{$className}[".$className::$subject."]", $this->id)?>
+    <?php echo CHtml::endForm(); ?>
 </div>

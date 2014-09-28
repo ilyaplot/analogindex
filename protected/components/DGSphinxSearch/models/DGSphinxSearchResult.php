@@ -37,6 +37,8 @@ class DGSphinxSearchResult
      * @brief enable Yii tracing
      */
     public $enableResultTrace = false;
+    
+    public $total;
     /**
      * @var array
      * @brief data strore
@@ -62,7 +64,7 @@ class DGSphinxSearchResult
         $this->criteria = $criteria;
 
         $ar = array();
-
+        $this->total = $data['total'];
         foreach ($data['matches'] as $id => $data) {
             $resData = new stdClass();
             foreach ($data['attrs'] as $key => $value) {
@@ -84,6 +86,11 @@ class DGSphinxSearchResult
         }
     }
 
+    public function getTotalFound()
+    {
+        return $this->total;
+    }
+    
     /*
      * @brief get values from data from param
      * @return array

@@ -49,10 +49,7 @@
                                 <?php
                                     $this->widget('application.widgets.StarRating',array(
                                         'name'=>'ratingAjax',
-                                        'maxRating'=>5,
-                                        'value'=>isset($product->rating->value) ? round($product->rating->value) : 0,
-                                        'resetValue'=>false,
-                                        'cssFile'=>'/assets/css/rating.css',
+                                        'value'=>isset($product->rating->value) ? round($product->rating->value*2) : 0,
                                         'callback'=>'
                                             function(){
                                                 $.ajax({
@@ -192,6 +189,9 @@
 
                         <?php endforeach; ?>
                     </section>
+                    <?php foreach ($product->comments as $comment):?>
+                    <div><?php echo $comment->text?></div>
+                    <?php endforeach;?>
                     <?php if (Yii::app()->user->checkAccess(Users::ROLE_USER)): ?>
                     <section class="infoGoodItem_content">
                         <div class="infoGoodItem_title-2 clr">
@@ -284,15 +284,13 @@
         <div class="c_min-price">
             
             <div class="bl_min_price first">
-                <div class="bl_min_price-name">
-                    <span></span>
-                </div>
-                <div class="bl_min_price-price">
-                    <span class="price_c_minimum"></span>
-                </div>
-                <div class="bl_min_price-buy">
-                    
-                </div>
+                <script type="text/topadvert">
+                        load_event: page_load
+                        feed_id: 11111
+                        pattern_id: 7333
+                        tech_model: <?php echo $brand->name." ".$product->name?>
+                </script>
+                <script type="text/javascript" charset="utf-8" defer="defer" async="async" src="http://loader.topadvert.ru/load.js"></script>
             </div>
             <!--
             <div class="bl_min_price first">

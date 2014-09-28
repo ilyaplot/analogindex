@@ -21,12 +21,12 @@
     
     <div class="row">
         <?php echo CHtml::activeLabel($model,'name'); ?><br />
-        <?php echo CHtml::activeEmailField($model,'name', array("autocomlete"=>"off", "placeholder"=>"Иван Иванов")); ?>
+        <?php echo CHtml::activeTextField($model,'name', array("autocomlete"=>"off", "placeholder"=>"Иван Иванов")); ?>
     </div>
     
     
     <div class="row">
-        <?php if(CCaptcha::checkRequirements() && Yii::app()->user->isGuest):?>
+        <?php if(CCaptcha::checkRequirements()):?>
             <?php echo CHtml::activeLabelEx($model, 'verifyCode') ?>
             <?php $this->widget('CCaptcha'); ?>
             <?php echo CHtml::activeTextField($model, 'verifyCode') ?>

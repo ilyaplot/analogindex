@@ -34,18 +34,66 @@
     <div class="col-infoReview">
         <div class="manufacture-categories clr">
             <div class="mnf_logo">
+                <a href="<?php echo Yii::app()->createUrl("site/goods", array(
+                                'link'=>$product->link, 
+                                'brand'=>$product->brand_data->link,
+                                'type'=>$product->type_data->link,
+                                'language'=> Language::getCurrentZone()
+                            ))?>">
                 <?php if($product->primary_image): ?>
                     <img src="<?php echo Yii::app()->createUrl("files/image", array(
                         'id'=>$product->primary_image->image_data->size3_data->id,
                         'name'=>$product->primary_image->image_data->size3_data->name,
                         'language'=>Language::getCurrentZone(),
-                    )); ?>" alt="<?php echo $product->brand_data->name." ".$product->name ?>" />
+                        )); ?>" alt="<?php echo $product->brand_data->name." ".$product->name ?>" /></a>
                 <?php endif;?>
             </div>
             <div class="mnf_clr">
                     <div class="mnf-name">
-                            <span><?php echo $product->brand_data->name." ".$product->name ?></span>
+                        <a href="<?php echo Yii::app()->createUrl("site/goods", array(
+                                'link'=>$product->link, 
+                                'brand'=>$product->brand_data->link,
+                                'type'=>$product->type_data->link,
+                                'language'=> Language::getCurrentZone()
+                            ))?>"><span><?php echo $product->brand_data->name." ".$product->name ?></span></a>
                     </div>
+                    <div class="item<?php echo (!$ratingDisabled) ? 0 : 3?>" id="ratingResult">
+      
+                        <?php if (!$ratingDisabled) : ?>
+                                
+                                <?php
+                                    $this->widget('application.widgets.StarRating',array(
+                                        'name'=>'ratingAjax',
+                                        'maxRating'=>10,
+                                        'starCount'=>5,
+                                        'value'=>isset($product->rating->value) ? round($product->rating->value*2) : 0,
+                                        'resetValue'=>false,
+                                        'cssFile'=>'/assets/css/rating.css',
+                                        'callback'=>'
+                                            function(){
+                                                $.ajax({
+                                                    type: "POST",
+                                                    url: "'.Yii::app()->createUrl('ajax/ratingGoods', array("goods"=>$product->id)).'",
+                                                    data: "'.Yii::app()->request->csrfTokenName.'='.Yii::app()->request->getCsrfToken().'&rate=" + $(this).val(),
+                                                    success: function(msg){
+                                                        $("#ratingResult").html(msg);
+                                                        $(".infoGoodItem-title-2_list > .item0").removeClass("item0").addClass("item3");
+                                                    }
+                                                })
+                                            }'
+                                      ));
+                                ?> <?php echo isset($product->rating->value) ? "(".round($product->rating->value,1).")" : '';?>
+                                <?php else: ?>
+                                <?php echo isset($product->rating->value) ? round($product->rating->value,1) : '';?>
+                                <?php endif;?>
+                        </div>
+                        <br />
+                    <small>
+                        <?php foreach ($product->getGeneralCharacteristics() as $characteristic):?>
+                            <?php echo $characteristic['characteristic_name'].": ".$characteristic['value'].PHP_EOL; ?><br />
+                        <?php endforeach;?>
+                    </small>
+                                
             </div>
         </div>
         <div class="review">
@@ -53,7 +101,10 @@
             <div class="review-content"><?php echo $review->content?></div>
             <hr />
             <br />
-            <?php $this->widget('application.widgets.CommentsWidget.CommentsWidget', array("type"=>'review', 'id'=>$review->id)); ?>
+            <?php foreach ($review->comments  as $comment):?>
+            <div><?php echo $comment->text?></div>
+            <?php endforeach;?>
+            <?php $this->widget('application.widgets.CommentsWidget.CommentsWidget', array("type"=>'reviews', 'id'=>$review->id)); ?>
         </div>    
     </div>
     

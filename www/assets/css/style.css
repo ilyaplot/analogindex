@@ -81,15 +81,24 @@ section.container {
 
 #nav-top { width: 100%; height: 44px; }
 #nav-top>ul {
-    margin: 0 0 0 -2px;
-    padding: 1px 0 0;
-    background: url(/assets/img/nav-top_bg.png) no-repeat top center;
-    width: 944px;
-    height: 44px;
+    margin: 1 0 0 -2px;
+    padding: 0px;
+    background: url(/assets/img/nav_top_bg_repeat.png) repeat-x top center;
+    width: 942px;
+    height: 38px;
+    border: 1px solid #ccc;
 }
+
+#nav-top>ul>li:last-child {
+    float: left;
+    position: relative;
+    border-right: 0px !important;
+}
+
 #nav-top>ul>li {
     float: left;
     position: relative;
+    border-right: 1px solid #ccc;
 }
 #nav-top>ul>li>ul {
     position: absolute;
@@ -104,7 +113,7 @@ section.container {
     box-shadow: 2px 2px 3px rgba(0,0,0,0.25);
 }
 #nav-top>ul>li>ul li a {
-    width: 140px;
+    width: 120px;
     display: block;
     text-decoration: none;
     font: normal 14px/30px Arial, Verdana, sans-serif;
@@ -112,9 +121,6 @@ section.container {
     padding-left: 15px;
 }
 #nav-top>ul>li>ul li a:hover { background: #eeeeee; }
-#nav-top>ul>li.item1 { padding-left: 2px;}
-#nav-top>ul>li.item2>a { width: 158px; }
-#nav-top>ul>li.item3>a { width: 157px; }
 #nav-top>ul>li>a {
     display: block;
     text-decoration: none;
@@ -161,7 +167,7 @@ section.container {
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#f3f3f3',GradientType=0 );
 }
 .informer-title {
-    font: normal 17px/26px Arial, Verdana, sans-serif;
+    font: normal 15px/26px Arial, Verdana, sans-serif;
     color: #545454;
     display: block;
     margin-left: 10px;
@@ -652,15 +658,20 @@ h2.search_result-nameItem a:hover { color: #c1501e;}
     background: url(/assets/img/small/icon-item2.png) no-repeat left center;
     padding-left: 22px;
 }
-.infoGoodItem-title-2_list .item3 {
+.infoGoodItem-title-2_list .item3, .mnf_clr .item3 {
     background: url(/assets/img/small/icon-item3.png) no-repeat left center;
     padding-left: 21px;
+}
+.mnf_clr > small {
+    font-size: 12px;
 }
 
 .infoGoodItem-title-2_list .item0 {
     background: transparent;
     padding-left: 21px;
 }
+
+
 .infoGoodItem-title-2 .flRight { margin-right: 16px; }
 
 
@@ -1183,18 +1194,32 @@ li.active a.menu_lFix-item5 { background-position: 0 -33px; }
 .mnf_logo {
     float: left;
     width: 120px;
-    padding-left: 10px;
+    padding-top: 10px;
     display: table-cell;
     vertical-align: middle;
     text-align: center;
 }
+
 .mnf_clr {
-    margin-left: 148px;
+    margin-left: 125px;
 }
 .mnf-name {
     color: #000;
     font: normal 24px/24px Arial, verdana, sans-serif;
     padding: 15px 0 20px;
+}
+.mnf-name>a {
+    color: #000;
+    font: normal 24px/24px Arial, verdana, sans-serif;
+    padding: 15px 0 20px;
+    text-decoration: none;
+}
+
+.mnf-name>a:hover {
+    color: #777;
+    font: normal 24px/24px Arial, verdana, sans-serif;
+    padding: 15px 0 20px;
+    text-decoration: underline;
 }
 .mnf-catLiks>a {
     display: block;

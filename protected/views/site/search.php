@@ -2,39 +2,48 @@
 
                 <div class="bl_sort clr">
                     <span class="bl_sort-t">Сортировка:</span>
-                    <span class="bl_sort-link"><a class="active" href="#">по рейтингу</a></span>
+                    <span class="bl_sort-link"><a class="active" href="#">по релевантности</a></span>
+                    <span class="bl_sort-link"><a href="#">по рейтингу</a></span>
                     <span class="bl_sort-link"><a href="#">по цене</a></span>
                     <span class="bl_sort-link"><a href="#">по наименованию</a></span>
                 </div>
 
                 <ul class="search_result-bl clr">
-                    <?php foreach ($items as $key=>$item) : ?>
+                    <?php foreach ($goods as $key=>$product) : ?>
                     <li>
                         <div class="flLeft">
                             <div class="search_result-id"><?php echo $key+1?>.</div>
-                            <div class="search_result-photo"><a href="<?php echo Yii::app()->createUrl("site/goods", array('link'=>$item['link'], 'manufacturer'=>$item['mlink'], 'language'=>  Language::getCurrentZone()))?>"><img src="<?php
-                                                                            if (isset($item['image']['file']))
-                                                                                echo Yii::app()->createUrl("site/download", array(
-                                                                                    'id'=>@$item['image']['file'],
-                                                                                    'filename'=>@$item['image']['link'],
-                                                                                    'link'=>@$item['link'],
-                                                                                    'language'=>  Language::getCurrentZone(),
-                                                                                    'size' => ImagesModel::SIZE_MEDIUM
-                                                                                )); 
-                                                                            else
-                                                                                echo "/assets/img/photo/informers/1.png";
-                                        ?>"></a></div>
+                            <div class="search_result-photo">
+                                <a href="<?php echo Yii::app()->createUrl("site/goods", array('link'=>$product->link, 'brand'=>$product->brand_data->link, 'type'=>$product->type_data->link, 'language'=>Language::getCurrentZone()))?>">
+                                    <?php if (isset($product->primary_image->image_data->size3_data->id)):?>
+                                        <img src="<?php echo Yii::app()->createUrl("files/image", array(
+                                            'id'=>$product->primary_image->image_data->size3_data->id,
+                                            'name'=>$product->primary_image->image_data->size3_data->name,
+                                            'language'=>Language::getCurrentZone(),
+                                            )); ?>" alt="<?php echo $product->brand_data->name." ".$product->name ?>" />
+                                    <?php else :?>
+                                        <img src="/assets/img/photo/informers/1.png" alt="<?php echo $product->brand_data->name." ".$product->name ?>" />
+                                    <?php endif;?>
+                                    
+                                </a>
+                            </div>
                             <div class="search_result-desc">
-                                <h2 class="search_result-nameItem"><a href="<?php echo Yii::app()->createUrl("site/goods", array('link'=>$item['link'], 'manufacturer'=>$item['mlink'], 'language'=>  Language::getCurrentZone()))?>">
-                                    <?php echo $item['manufacturer']." ".$item['name']?>
-                                </a></h2>
-                                <p class="search_result-text">Описание....</p>
+                                <h2 class="search_result-nameItem">
+                                    <a href="<?php echo Yii::app()->createUrl("site/goods", array('link'=>$product->link, 'brand'=>$product->brand_data->link, 'type'=>$product->type_data->link, 'language'=>  Language::getCurrentZone()))?>">
+                                        <?php echo $product->brand_data->name ." ". $product->name?>
+                                    </a>
+                                </h2>
+                                <p class="search_result-text">
+                                    <?php foreach ($product->getGeneralCharacteristics() as $characteristic):?>
+                                        <?php echo $characteristic['characteristic_name'].": ".$characteristic['value'].PHP_EOL; ?><br />
+                                    <?php endforeach;?>
+                                </p>
                             </div>
                             <div class="clear"></div>
                         </div>
                         <div class="flRight">
                             <div class="search_result-p_r">
-                                <div class="search_result-price">15 000 р.</div>
+                                <!--<div class="search_result-price">15 000 р.</div>
                                 <div class="search_result-rating">
                                     <ul class="rating">
                                          <li class="full"><a href="#">1</a></li>
@@ -43,7 +52,7 @@
                                          <li class=""><a href="#">4</a></li>
                                          <li class=""><a href="#">5</a></li>
                                       </ul>
-                                </div>
+                                </div>-->
                             </div>
                         </div>
                     </li>
@@ -127,17 +136,17 @@
                     -->
                 </ul>
 
-                <nav id="pagination">
-                    <a class="pag_prev" href="#">Предыдущая</a>
-                    <a href="#">1</a>
-                    <span>...</span>
-                    <a href="#">5</a>
-                    <a href="#">6</a>
-                    <a href="#">7</a>
-                    <a href="#">8</a>
-                    <a href="#">9</a>
-                    <a href="#">10</a>
-                    <span>...</span>
-                    <a href="#">22</a>
-                    <a class="pag_next" href="#">Следующая</a>
-                </nav>
+                <?php 
+                    $this->widget('LinkPager', array(
+                        'currentPage'=>$pages->getCurrentPage(),
+                        'itemCount'=>$pages->getItemCount(),
+                        'pageSize'=>10,
+                        'maxButtonCount'=>8,
+                        'header'=>'',
+                        'htmlOptions'=>array('class'=>'pagination'),
+                        'firstPageLabel'=>Yii::t("main", "Первая"),
+                        'lastPageLabel'=>Yii::t("main", "Последняя")." (".ceil($pages->getItemCount()/10).")",
+                        'nextPageLabel'=>Yii::t("main", "Следующая"),
+                        'prevPageLabel'=>Yii::t("main", "Предыдущая"),
+                    ));
+                ?>

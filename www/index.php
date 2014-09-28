@@ -1,6 +1,6 @@
 <?php
 ini_set("memory_limit", "1G");
-ini_set("session.cookie_domain", ".analogindex.com");
+//ini_set("session.cookie_domain", ".analogindex.com");
 $yii='../framework/yii.php';
 $config=dirname(__FILE__).'/../protected/config/www.php';
  

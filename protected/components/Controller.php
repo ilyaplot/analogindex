@@ -2,7 +2,8 @@
 class Controller extends CController
 {
 
-    
+    public $pageDescription;
+    public $pageKeywords;
     
     public function beforeAction($action) {
         

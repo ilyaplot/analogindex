@@ -24,11 +24,16 @@
                                 'type'=>$item->type_data->link,
                                 'language'=> Language::getCurrentZone()
                             ))?>"><?php echo $brand->name?> <?php echo $item->name?></a></div>
-                        <div class="catalog_st2-l-info-desc">Операционная система iOS экран 9.7", 2048x1536, емкостный, мультитач встроенная память 128 Гб еспроводная связь Wi-Fi, Bluetooth, 3G, LTE навигация GPS вес 478 г тыловая камера 5 млн пикс.</div>
+                    <div class="catalog_st2-l-info-desc">
+                        <?php foreach ($item->getGeneralCharacteristics() as $characteristic):?>
+                            <?php echo $characteristic['characteristic_name'].": ".$characteristic['value'].PHP_EOL; ?><br />
+                        <?php endforeach;?>
+                    </div>
                 </div>
                 <div class="clear"></div>
         </div>
         <div class="catalog_st2-r">
+            <!--
                 <div class="catalog_st2-r_price">
                         <span>24 900</span>
                                                 <div class="informer-curr-bl">
@@ -42,6 +47,7 @@
                 <div class="catalog_st2-r_set1"><span class="icon"></span>94</div>
                 <div class="catalog_st2-r_set2"><span class="icon"></span>91</div>
                 <div class="catalog_st2-r_set3"><span class="icon"></span>95</div>
+            -->
         </div>
 </li>
 <?php endforeach;?>

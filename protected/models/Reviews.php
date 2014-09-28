@@ -22,6 +22,7 @@ class Reviews extends CActiveRecord
             ),
             "goods_data"=>array(self::BELONGS_TO, "Goods", "goods"),
             "images"=>array(self::HAS_MANY, "ReviewsImages", "review"),
+            "comments"=>array(self::HAS_MANY, "CommentsReviews", "review"),
         );
     }
     
@@ -49,5 +50,23 @@ class Reviews extends CActiveRecord
     {
         $words = explode(" ", trim(strip_tags($str)));
         return implode (" ", array_slice($words, 0, $length));
+    }
+    
+    public function getDescription()
+    {
+        $words = explode(" ", trim(strip_tags($this->content)));
+        $description = $words[0];
+        $key = 0;
+        do {
+            if (isset($words[$key]))
+                $key++;
+            else 
+                break;
+            if (mb_strlen($description.$words[$key]) > 250)
+                break;
+            $description.=" ".$words[$key];
+        } while (mb_strlen($description) < 245);
+        $description = htmlspecialchars($description);
+        return mb_substr($description, 0, 250);
     }
 }

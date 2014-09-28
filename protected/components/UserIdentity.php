@@ -18,7 +18,8 @@ class UserIdentity extends CUserIdentity {
             $this->setState("readonly", $user->readonly);
             $this->setState("language", Language::getCurrentLang());
             $this->setState("name", !empty($user->name) ? $user->name : $user->username);
-            
+            $user->last_login = date("Y-m-d H:i:s");
+            $user->save(false);
             $this->errorCode = self::ERROR_NONE;
         }
        return !$this->errorCode;

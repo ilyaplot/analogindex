@@ -14,7 +14,7 @@
         <?php echo CHtml::activePasswordField($model,'password', array("autocomlete"=>"off", "placeholder"=>Yii::t("models","Пароль"))); ?>
     </div>
     <div class="row">
-        <?php if(CCaptcha::checkRequirements() && Yii::app()->user->isGuest):?>
+        <?php if(CCaptcha::checkRequirements()):?>
             <?php echo CHtml::activeLabelEx($model, 'verifyCode') ?>
             <?php $this->widget('CCaptcha'); ?>
             <?php echo CHtml::activeTextField($model, 'verifyCode') ?>

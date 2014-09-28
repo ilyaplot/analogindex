@@ -10,7 +10,7 @@ class UserController extends Controller
                 'testLimit'=>1,
                 'foreColor'=>0x999999,
                 'minLength'=>5,
-                'maxLength'=>8,
+                'maxLength'=>6,
                 'offset'=>1,
             ),
         );
@@ -19,7 +19,7 @@ class UserController extends Controller
     public function actionLogin()
     {
         $model=new Users("login");
-        if($attributes = Yii::app()->request->getParam("Users"))
+        if($attributes = Yii::app()->request->getPost("Users"))
         {
 
             $model->attributes=$attributes;
@@ -47,6 +47,24 @@ class UserController extends Controller
     public function actionRegistration()
     {
         $model = new Users("registration");
+        
+        if($attributes = Yii::app()->request->getPost("Users"))
+        {
+            $model->attributes=$attributes;
+            $model->role = Users::ROLE_USER;
+            
+            if($model->validate() && $model->save())
+            {
+                $notification = new Notifications();
+                $notification->email  = $model->email;
+                $notification->subject = 'Email confirmation';
+                $notification->message = "Code: {$model->confirmCode} <a href=".Yii::app()->createAbsoluteUrl("user/confirm", array("language"=>Language::getCurrentZone(), "code"=>$model->confirmCode, "email"=>$model->email)).">Confirm EMAIL</a>";
+                $notification->save();
+                $this->render("confirm");
+                exit();
+            }
+        }
+        
         $this->render('registration', array('model'=>$model));
     }
     
@@ -55,4 +73,21 @@ class UserController extends Controller
         
     }
         
+    public function actionConfirm($email)
+    {
+        $user = Users::model()->findByAttributes(array("email"=>$email, "confirmCode"=>Yii::app()->request->getParam("code")));
+        if (!$user)
+            echo "Не удалось подтвердить email.";
+        else
+        {
+            if ($user->confirmed)
+            {
+                echo "Ваш ящик уже был подтвержден.";
+            } else {
+                $user->confirmed = 1;
+                $user->save();
+                echo "Ящик подтвержден";
+            }
+        }
+    }
 }

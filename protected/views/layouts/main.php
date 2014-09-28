@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <title><?php echo $this->pageTitle ?></title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="description" content="" />
-    <meta name="keywords" content="" />
+    <meta name="description" content="<?php echo $this->pageDescription?>" />
+    <meta name="keywords" content="<?php echo $this->pageKeywords?>" />
     <meta name='yandex-verification' content='60481e4daa763de4' />
     <meta name='yandex-verification' content='57ea89bb434b0eaf' />
     <meta name="google-site-verification" content="GvnDB4pCoqEMd_YGsLvuNeuYFMhwskJEX5QBnQU6v8I" />
@@ -44,7 +44,7 @@
                         </div>
                         <div class="flRight">
                             <form action="http://search.analogindex.<?php echo Language::getCurrentZone() ?>/" method="get" class="head-form-search">
-                                <input type="submit" class="submit-search-h" id="head_submit_search" title="<?php echo Yii::t('main', "Искать")?>" value="">
+                                <input type="submit" class="submit-search-h" autocomplete="off" id="head_submit_search" title="<?php echo Yii::t('main', "Искать")?>" value="">
                                 <input type="text" class="input-search" name="keyword" value="<?php echo htmlspecialchars(isset($_GET['keyword'])?$_GET['keyword']:'')?>">
                                 <div class="clear"></div>
                             </form>
@@ -53,23 +53,7 @@
                     </div>
                 </div>
                 
-                <menu id="nav-top">
-                    <ul class="clr">
-                        <li class="item1"><a href="#">Планшеты</a>
-                        <!--<ul>
-                            <li><a href="#">iOS</a></li>
-                            <li><a href="#">Windows</a></li>
-                            <li><a href="#">Android</a></li>
-                            <li><a href="#">Другое</a></li>
-                        </ul>-->
-                        </li>
-                        <li class="item2"><a href="#">Компьютеры</a></li>
-                        <li class="item3"><a href="#">Телефоны</a></li>
-                        <li class="item4"><a href="#">Смартфоны</a></li>
-                        <li class="item5"><a href="#">Автомобили</a></li>
-                        <li class="item6"><a href="#">Банки</a></li>
-                    </ul>
-                </menu>
+                <?php $this->widget('application.widgets.MainNavWidget.MainNavWidget');?>
             </section>
         </header><!-- /header -->
 
