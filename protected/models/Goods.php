@@ -53,6 +53,17 @@ class Goods extends CActiveRecord
         );
     }
     
+    public function getRanking($source, $round = 2, $append = '')
+    {
+        $criteria = new CDbCriteria();
+        $criteria->select = "@goods_type:=:type as type, (t.value / (select max(value) from {{goods_ranking}} where source = :source and type=@goods_type))*100 as value";
+        $criteria->params = array("source"=>$source, "type"=>$this->type, "goods"=>$this->id);
+        $criteria->condition = "goods = :goods";
+        if ($rank = GoodsRanking::model()->cache(60*60*24)->find($criteria))
+                return round($rank->value, $round).$append;
+        return 0;
+    }
+    
     public function attributeLabels()
     {
         return array(

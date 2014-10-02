@@ -27,7 +27,7 @@ class ListGoodsWidget extends CWidget
                 "joinType"=>"inner join"
             ),
             "primary_image",
-            "rating"
+            "rating",
         ))->findAll($criteria);
         if ($this->style)
             $this->style = "_".$this->style;

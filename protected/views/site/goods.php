@@ -42,7 +42,7 @@
                         <span class="infoGoodItem-title-2_name"><?php echo Yii::t('goods', 'Рейтинги')?>:</span>
                         <ul class="infoGoodItem-title-2_list">
                             <li class="item1"></li>
-                            <li class="item2"></li>
+                            <li class="item2"><?php echo $product->getRanking("antutu", 1, '%');?></li>
                             <li class="item<?php echo (!$ratingDisabled) ? 0 : 3?>" id="ratingResult">
                                 <?php if (!$ratingDisabled) : ?>
                                 

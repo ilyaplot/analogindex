@@ -2,6 +2,70 @@
 class DownloadCommand extends CConsoleCommand
 {
 
+    public function actionAntutu($type=1)
+    {
+        $types = array(
+            1=>array(
+                "source"=>"mobile",
+                "system"=>1,
+            ),
+            2=>array(
+                "source"=>"pad",
+                "system"=>2,
+            ),
+        );
+        $url = "http://www.antutu.com/en/Ranking.shtml?cmd={$types[$type]['source']}&page=";
+        $startPage = 1;
+        $content = $this->getContent($url.$startPage);
+        if (!$content)
+            exit();
+        $html = phpQuery::newDocumentHTML($content);
+        $lastUrl = pq($html)->find(".pagination>strong:last-child>a")->attr("href");
+        $lastUrl = explode("=", $lastUrl);
+        $maxPage = end($lastUrl);
+        echo $maxPage.PHP_EOL;
+        $page = 1;
+        do {
+            $page++;
+            $devices = pq($html)->find("div.rank>ul>li");
+            foreach ($devices as $device)
+            {
+                $name = pq($device)->find("div.fl.mobiletext>div.mobileT>a")->text();
+                $value = pq($device)->find("div.fl.mobiletext>div.score>div.fl")->text();
+                $value = intval(str_replace("Score:", '', $value));
+                $criteria = new CDbCriteria();
+                $criteria->condition = 
+                        "(CONCAT(brand_data.name, ' ', t.name) LIKE :search "
+                        . "OR CONCAT(brand_data.name, ' ', synonims.name) LIKE :search) ";
+                $search = $name;
+                $criteria->params = array(
+                    "search"=>$search,
+                );
+                echo $search.PHP_EOL;
+                
+                $product = Goods::model()->with("brand_data","synonims")->find($criteria);
+                if ($product)
+                {
+                    echo $search.": ";
+                    if (!$rank = GoodsRanking::model()->findByAttributes(array("source"=>"antutu", "goods"=>$product->id)))
+                        $rank = new GoodsRanking();
+                    $rank->source = "antutu";
+                    $rank->goods = $product->id;
+                    $rank->value = $value;
+                    $rank->type = $types[$type]['system'];
+                    $rank->save();
+                    echo $rank->id.PHP_EOL;
+                }
+            }
+            $content = $this->getContent($url.$page);
+            if (!$content)
+                exit();
+            $html = phpQuery::newDocumentHTML($content);
+            sleep(1);
+        } while ($page < $maxPage+1);
+        echo "Done".PHP_EOL;
+    }
+    
     public function actionSmartphoneuaList($source)
     {
         $sources = array(
@@ -54,6 +118,7 @@ class DownloadCommand extends CConsoleCommand
         }
         foreach ($urls as $url)
         {
+            echo ".";
             $model = new SourcesSmartphoneua();
             $model->url = $url;
             if ($model->validate())
@@ -61,6 +126,7 @@ class DownloadCommand extends CConsoleCommand
             else
                 var_dump($model->getErrors());
         }
+        echo PHP_EOL;
     }
     
     public function actionGsmarenaList()
@@ -110,6 +176,7 @@ class DownloadCommand extends CConsoleCommand
         }
         foreach ($urls as $url)
         {
+            echo ".";
             $model = new SourcesGsmarena();
             $model->url = $url;
             if ($model->validate())
@@ -117,6 +184,7 @@ class DownloadCommand extends CConsoleCommand
             else
                 var_dump($model->getErrors());
         }
+        echo PHP_EOL;
     }
     
     public function actionGsmArena()
@@ -148,7 +216,9 @@ class DownloadCommand extends CConsoleCommand
             $file->save();
             $url->file = $file->id;
             $url->save();
+            echo ".";
         }
+        echo PHP_EOL;
     }
     
     public function actionSmartphoneua()
@@ -180,7 +250,9 @@ class DownloadCommand extends CConsoleCommand
             $file->save();
             $url->file = $file->id;
             $url->save();
+            echo ".";
         }
+        echo PHP_EOL;
     }
     
     private function _getSmartphoneuaItems($content)

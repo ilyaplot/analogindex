@@ -60,7 +60,7 @@
                         <span><?php echo $goods->brand_data->name." ".$goods->name ?></span>
                     </a>
                 </div>
-                <div class="informer-listGoods_rating">0</div>
+                <div class="informer-listGoods_rating"><?php echo $goods->getRanking("antutu", 0, '%');?></div>
                 <div class="informer-listGoods_like"><?php echo isset($goods->rating->value) ? round($goods->rating->value,1) : 0;?></div>
                 <div class="informer-listGoods_price">0</div>
             </li>

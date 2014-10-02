@@ -105,7 +105,7 @@ return array(
         //    'timeout'=>1440,
         //),
         'request' => array (
-            'enableCsrfValidation'=>true,
+            //'enableCsrfValidation'=>true,
         )
     ),
 );
