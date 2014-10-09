@@ -15,7 +15,7 @@
         <span class="divider">/</span>
     </li>
     <li itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-1" itemref="breadcrumb-2">
-        <a href="<?php echo Yii::app()->createUrl("site/type", array("type"=>$type->link)) ?>"><?php echo $type->name->name?></a>
+        <a href="<?php echo Yii::app()->createUrl("site/type", array("type"=>$type->link, "language"=>  Language::getCurrentZone())) ?>"><?php echo $type->name->name?></a>
         <span class="divider">/</span>
     </li>
     <li itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-2" itemref="breadcrumb-3">

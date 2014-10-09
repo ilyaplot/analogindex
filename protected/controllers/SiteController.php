@@ -36,12 +36,7 @@ class SiteController extends Controller
             )
         );
     }
-    
-    public function actionTest()
-    {
-        $product = Goods::model()->findByPk(10562);
-        var_dump($product->getCharacteristics());
-    }
+
     
     public function actionIndex()
     {
@@ -245,7 +240,7 @@ class SiteController extends Controller
         
         $goods = array();
         
-        if ($resIterator->getTotal())
+        if (!empty($resIterator) && $resIterator->getTotal())
         {
             $pages->setItemCount($resIterator->getTotalFound());
             $criteria = new CDbCriteria();
@@ -261,6 +256,63 @@ class SiteController extends Controller
         }
         
         $this->render("search", array("goods"=>$goods, "pages"=>$pages));
+    }
+    
+    public function actionType($type)
+    {
+        $typeString = $type;
+        if (!$type = GoodsTypes::model()->findByAttributes(array("link"=>$typeString)))
+            throw new CHttpExceprion(404, "Страница не найдена");
+        $type = $type->id;
+        $brandsCriteria = new CDbCriteria();
+        $brandsCriteria->order = "t.name asc";
+        $brandsCriteria->group = "t.id";
+        $formBrands = Yii::app()->request->getParam("Brands");
+        $brands = Brands::model()->with(array("goods"=>array(
+            "joinType"=>"inner join",
+            "on"=> "goods.type = :type",
+            "params"=>array("type"=>$type),
+            "select"=>false,
+            //"condition"=>"goods.id = null",
+        )))->findAll($brandsCriteria);
+        foreach ($brands as &$brand)
+            $brand->checked = isset($formBrands[$brand->id]) ? 1 : 0;
+        $selector = new Selector($type);
+        $params = $selector->getParams();
+
+        $goodsCriteria = new CDbCriteria();
+        $goodsCriteria->condition = $params['condition'];
+        if (!empty($params['params']))
+            $goodsCriteria->params = $params['params'];
+        //$goodsCriteria->select = "goods";
+        $goodsIds = CharacteristicsSelector::model()->findAll($goodsCriteria);
+        $in = array();
+        foreach($goodsIds as $id)
+        {
+            $in[] = $id->goods;
+        }
+        $pages = new CPagination();
+        if (!empty($in))
+        {
+            
+            $criteria = new CDbCriteria();
+            $criteria->addInCondition("t.id", $in);
+            $criteria->addCondition("t.type = {$type}");
+            $pages = new CPagination(Goods::model()->count($criteria));
+            $pages->pageSize = 10;
+            $pages->applyLimit($criteria);
+            $criteria->group = "t.id, rating.value";
+            $goods = Goods::model()->with(array(
+                "brand_data"=>array(
+                    "joinType"=>"inner join"
+                ),
+                "primary_image",
+                "rating"
+            ))->findAll($criteria); 
+        } else {
+            $goods = array();
+        }
+        $this->render("form", array("selector"=>$selector, "brands"=>$brands, "goods"=>$goods, "pages"=>$pages, "type"=>$typeString));
     }
 }
 

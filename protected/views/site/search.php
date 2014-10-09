@@ -12,7 +12,7 @@
                     <?php foreach ($goods as $key=>$product) : ?>
                     <li>
                         <div class="flLeft">
-                            <div class="search_result-id"><?php echo $key+1?>.</div>
+                            <div class="search_result-id"><?php echo $key+1+$pages->getCurrentPage()*10?>.</div>
                             <div class="search_result-photo">
                                 <a href="<?php echo Yii::app()->createUrl("site/goods", array('link'=>$product->link, 'brand'=>$product->brand_data->link, 'type'=>$product->type_data->link, 'language'=>Language::getCurrentZone()))?>">
                                     <?php if (isset($product->primary_image->image_data->size3_data->id)):?>

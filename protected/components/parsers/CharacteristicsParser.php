@@ -55,7 +55,7 @@ class CharacteristicsParser
                     // Если завершение, не перебираем языки
                     if ($success && !isset($params['nobreak']))
                     {
-                        echo "CONTINUE {$pattern}".PHP_EOL;
+                        //echo "CONTINUE {$pattern}".PHP_EOL;
                         continue;
                     }
                     // Перебор языков характеристик
@@ -64,7 +64,7 @@ class CharacteristicsParser
                         // Выполняем регулярку
                         if (preg_match("~{$pattern}~i", $line, $matches))
                         {
-                            echo "PATTERN RUN {$pattern} {$lang}".PHP_EOL;
+                            //echo "PATTERN RUN {$pattern} {$lang}".PHP_EOL;
                             // Значение возвращает функция из правила
                             $value = $params['function']($matches, $lang);
                             

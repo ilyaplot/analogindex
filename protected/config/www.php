@@ -54,6 +54,12 @@ return array(
                 'http://analogindex.<language:\w+>/user/registration'=>'user/registration',
                 'http://analogindex.<language:\w+>/user/confirm'=>'user/confirm',
                 
+                
+                'http://analogindex.<language:\w+>/type/<type:[\d\w\-_]*>'=>
+                    array('site/type', 'urlSuffix'=>'.html'),
+                'http://analogindex.<language:\w+>/type/<type:[\d\w\-_]*>/page<page:\d+>'=>
+                    array('site/type', 'urlSuffix'=>'.html'),
+                
                 'http://analogindex.<language:\w+>/review/<goods:[\d\w\-_]*>/<link:[\d\w\-_]+>_<id:\d+>'=>
                     array('site/review', 'urlSuffix'=>'.html'),
                 'http://analogindex.<language:\w+>/brand/<link:[\d\w\-_]*>/page<page:\d+>'=>

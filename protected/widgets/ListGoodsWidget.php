@@ -12,7 +12,6 @@ class ListGoodsWidget extends CWidget
     }
     public function run() 
     {
-        
         $criteria = new CDbCriteria();
         $criteria->order = "brand_data.name asc, t.name asc";
         $criteria->limit = $this->limit;

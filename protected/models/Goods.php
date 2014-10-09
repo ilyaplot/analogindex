@@ -4,7 +4,7 @@
  */
 class Goods extends CActiveRecord
 {    
-    public $generalCharacteristics = array(5,6,8,9,11,13,14,18,22);
+    public $generalCharacteristics = array(5,6,7,8,9,11,13,14,18,22);
     public $appendVideos = 3;
     
     public static function model($className = __CLASS__) 
@@ -152,7 +152,7 @@ class Goods extends CActiveRecord
         return $result;
     }
     
-    public function getCharacteristics($ids = array())
+    public function getCharacteristics($ids = array(), $noCache = false)
     {
         if (!empty($ids) && is_array($ids))
         {
@@ -161,6 +161,7 @@ class Goods extends CActiveRecord
             $ids = '';
         }
         $query="select 
+                c.id as id,
                 ccn.name as catalog_name, 
                 cn.name as characteristic_name,
                 gc.value as value,
@@ -181,7 +182,8 @@ class Goods extends CActiveRecord
         $params = array("lang"=>Yii::app()->language, "goods"=>$this->getPrimaryKey());
         
         $result = array();
-        if (!$result = Yii::app()->cache->get("goods.characteristics".serialize($params).$ids))
+        
+        if ($noCache || !$result = Yii::app()->cache->get("goods.characteristics".serialize($params).$ids))
         {
             $connection = $this->getDbConnection();
             $items = $connection->createCommand($query)->queryAll(true, $params);
@@ -189,12 +191,13 @@ class Goods extends CActiveRecord
                 $result = array();
             foreach ($items as $item)
             {
+                $item['raw'] = $item['value'];
                 $item['value'] = Yii::app()->format->$item['formatter']($item['value']);
                 $result[$item['catalog_name']][] = $item;
             }
         }
-        
-        Yii::app()->cache->set("goods.characteristics".serialize($params).$ids, $result, 60*60*12);
+        if (!$noCache)
+            Yii::app()->cache->set("goods.characteristics".serialize($params).$ids, $result, 60*60*12);
         return $result;
     }
 }

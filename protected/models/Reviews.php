@@ -62,7 +62,7 @@ class Reviews extends CActiveRecord
                 $key++;
             else 
                 break;
-            if (mb_strlen($description.$words[$key]) > 250)
+            if (!isset($words[$key]) || mb_strlen($description.$words[$key]) > 250)
                 break;
             $description.=" ".$words[$key];
         } while (mb_strlen($description) < 245);

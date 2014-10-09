@@ -21,6 +21,10 @@ $(document).ready(function(){
 <div class="clear" ></div>
 <div class="infoGoodItem-wp-photos_all">
     <?php foreach ($product->images as $image): ?>
+    <?php 
+        if (!isset($image->image_data->size3_data) || !isset($image->image_data->file_data))
+            continue;
+    ?>
     <div class="slide">
         <a title="<?php echo $brand->name?> <?php echo $product->name?>" 
            href="<?php echo Yii::app()->createUrl("files/image", array(

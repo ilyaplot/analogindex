@@ -11,6 +11,7 @@ class LinkPager extends CLinkPager
     
     public function run()
     {
+            $this->selectedPageCssClass = self::CSS_SELECTED_PAGE;
             $this->registerClientScript();
             $buttons=$this->createPageButtons();
             if(empty($buttons))

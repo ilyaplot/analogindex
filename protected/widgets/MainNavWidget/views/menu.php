@@ -1,7 +1,7 @@
 <menu id="nav-top">
     <ul class="clr">
         <?php foreach ($types as $key=>$type):?>
-        <li class="item<?php echo $key+1?>"><a href="#"><?php echo $type->name->name?></a>
+        <li class="item<?php echo $key+1?>"><a href="<?php echo Yii::app()->createUrl("site/type", array("type"=>$type->link, "language"=>  Language::getCurrentZone())) ?>"><?php echo $type->name->name?></a>
         <!--<ul>
             <li><a href="#">iOS</a></li>
             <li><a href="#">Windows</a></li>

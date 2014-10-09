@@ -134,4 +134,48 @@ class SystemCommand extends ConsoleCommand
         }
         echo PHP_EOL;
     }
+    
+    
+    public function actionFillSelector()
+    {
+        $ids = array(3,5,6,8,9,13,14,22);
+        $goods = Goods::model()->findAll();
+        foreach ($goods as $product)
+        {
+            $attributes = array(
+                "goods"=>$product->id,
+                "type"=>$product->type,
+                "brand"=>$product->brand,
+            );
+            foreach ($ids as $id)
+            {
+                $attributes["ch".$id] = 0;
+            }
+            $notEmpty = false;
+            if (!$model = CharacteristicsSelector::model()->findByAttributes(array("goods"=>$product->id)))
+                $model = new CharacteristicsSelector();
+            //$model->scenario = "fill";
+            $characteristics = $product->getCharacteristics($ids, true);
+            if (!empty($characteristics))
+            {
+                foreach ($characteristics as $category)
+                {
+                    foreach ($category as $item)
+                    {
+                        if (isset($attributes['ch'.$item['id']]))
+                        {
+                            if ($item['id'] == 22)
+                                $item['raw'] = intval($item['raw']);
+                            echo 'ch'.$item['id'].":".$item['raw'].PHP_EOL;
+                            $attributes['ch'.$item['id']] = $item['raw'];
+                            $notEmpty = true;
+                        }
+                    }
+                }
+            }
+            $model->attributes = $attributes;
+            if ($notEmpty)
+                $model->save();
+        }
+    }
 }

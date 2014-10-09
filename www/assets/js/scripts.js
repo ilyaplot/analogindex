@@ -71,7 +71,10 @@ $(function(){
 
         // Определение позиции обекта от верхней границы сайта
         function offsetPosition(e) {
-          return e.offset().top;
+            if (typeof(e.offset()) != 'undefined')
+                return e.offset().top;
+            else 
+                return 0;
         }
 
       // Объявляем переменные и находим позицию блоков

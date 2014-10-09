@@ -155,6 +155,76 @@ class ParseCommand extends CConsoleCommand
                 //var_dump($goodsCharacteristic->getErrors());
             }
         }
+        
+        $imagesContent = pq($html)->find("#specs-cp-pic > a")->attr("href");
+ 
+        if (!empty($imagesContent)){
+            sleep(1);
+            $imagesContent = $this->getContent("http://www.gsmarena.com/".$imagesContent);
+        }
+
+        if ($imagesContent)
+        {
+            echo "Images...".PHP_EOL;
+            $html = phpQuery::newDocumentHTML($imagesContent);
+            $pictures = pq($html)->find("#pictures p");
+            foreach ($pictures as $picture)
+            {
+                $image = pq($picture)->find("img")->attr("src");
+                if (!empty($image))
+                {
+                    $goodsImage = GoodsImages::model()->with(array(
+                    "image_data"=>array(
+                        "joinType"=>"INNER JOIN",
+                        "condition"=>"image_data.source  = :source",
+                        "params"=>array("source"=>$image),
+                    )
+                    ))->count();
+                    if (!$goodsImage)
+                    {
+                        $ext = explode(".", $image);
+                        $ext = end($ext);
+                        $file = new Files();
+                        $file->name = "{$brand->name} {$goods->name}.{$ext}";
+                        $file->save();
+                        $filename = $file->getFilename();
+                        if (!$this->getFile($image, $filename))
+                        {
+                            echo "Не удалось скачать {$image}".PHP_EOL;
+                            $file->delete();
+                            continue;
+                        }
+                        sleep(1);
+                        $file->size = $file->getFilesize();
+                        $file->mime_type = $file->getMimeType();
+                        if (!preg_match("~image.*~", $file->mime_type))
+                        {
+                            $file->delete();
+                            echo "Тип изображения не соответствует image. {$file->mime_type}".PHP_EOL;
+                            continue;
+                        }
+                        echo "Добавлено изображение {$image}".PHP_EOL;
+                        $file->save();
+                        $imageModel = new Images();
+                        $imageModel->file = $file->id;
+                        $imageModel->size = 1;
+                        $size = getimagesize($filename);
+                        $imageModel->width = $size[0];
+                        $imageModel->height = $size[1];
+                        $imageModel->source = $image;
+                        $imageModel->save();
+                        $goodsImage = new GoodsImages();
+                        $goodsImage->goods = $goods->id;
+                        $goodsImage->image = $imageModel->id;
+                        $goodsImage->save();
+                    } else {
+                        echo "Image exists".PHP_EOL;
+                    }
+                }
+            }
+        }
+        
+        
         $task->completed = 1;
         $task->save();
         $this->actionGsmArena();
@@ -417,5 +487,30 @@ class ParseCommand extends CConsoleCommand
             return false;
         curl_close($ch);
         return true;
+    }
+    
+    public function getContent($url)
+    {
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.153 Safari/537.36");
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, '1');
+        curl_setopt($ch, CURLOPT_TIMEOUT, 40);
+        $content = curl_exec($ch);
+        if (curl_errno($ch))
+        {
+            echo "Curl error ".curl_error($ch).PHP_EOL;
+            curl_close($ch);
+            return false;
+        }
+        
+        $info = curl_getinfo($ch);
+        if ($info['http_code'] !== 200)
+        {
+            echo "Http code: {$info['http_code']}".PHP_EOL;
+            return false;
+        }
+        curl_close($ch);
+        return $content;
     }
 }

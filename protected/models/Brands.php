@@ -4,6 +4,9 @@
  */
 class Brands extends CActiveRecord
 {
+    // Параметр для формы поиска
+    public $checked = false;
+    
     public static function model($className = __CLASS__) 
     {
         return parent::model($className);
