@@ -1,30 +1,30 @@
 <?php
+
 class ParseCommand extends CConsoleCommand
 {
+
     public function actionGsmArena()
     {
-        $task = SourcesGsmarena::model()->with("file_data")->findByAttributes(array("completed"=>0));
-        if (!$task)
-        {
-            echo "No tasks for parse".PHP_EOL;
+        $task = SourcesGsmarena::model()->with("file_data")->findByAttributes(array("completed" => 0));
+        if (!$task) {
+            echo "No tasks for parse" . PHP_EOL;
             exit();
         }
         $content = $task->file_data->getContent();
-        if (!$content)
-        {
+        if (!$content) {
             $task->completed = -1;
             $task->save();
-            echo "Null content for task".PHP_EOL;
+            echo "Null content for task" . PHP_EOL;
             exit();
         }
         $html = phpQuery::newDocumentHTML($content);
         // Производитель
 
-        $brand = trim(str_replace(" phones", "" ,pq($html)->find("#all-phones h2 a")->text()));
+        $brand = trim(str_replace(" phones", "", pq($html)->find("#all-phones h2 a")->text()));
         if (!$brand)
-            $brand = trim(str_replace(" phones", "" ,pq($html)->find("#all-phones-small h2 a")->text()));
-        
-        $brand = trim(str_replace(" PHONES", "" ,$brand));
+            $brand = trim(str_replace(" phones", "", pq($html)->find("#all-phones-small h2 a")->text()));
+
+        $brand = trim(str_replace(" PHONES", "", $brand));
 
         // Модель
         $name = pq($html)->find("#ttl h1")->text();
@@ -34,22 +34,18 @@ class ParseCommand extends CConsoleCommand
         $synonimsText = pq($html)->find("#specs-list p:first-child")->html();
         $synonimsText = explode("<br>", $synonimsText);
         $synonims = "";
-        foreach ($synonimsText as $synonim)
-        {
-            if (preg_match("~Also known as~", $synonim))
-            {
+        foreach ($synonimsText as $synonim) {
+            if (preg_match("~Also known as~", $synonim)) {
                 $synonims = trim($synonim);
                 break;
             }
         }
-        
+
         $synonims = str_replace("Also known as ", "", $synonims);
-               
-        if ($synonims)
-        {
+
+        if ($synonims) {
             $synonims = explode(", ", $synonims);
-            foreach ($synonims as &$item)
-            {
+            foreach ($synonims as &$item) {
                 $item = trim(str_replace($brand, "", $item));
                 if (empty($item))
                     unset($item);
@@ -57,63 +53,55 @@ class ParseCommand extends CConsoleCommand
         } else {
             $synonims = array();
         }
-        
+
         // Характеристики
         $characteristics_tables = pq($html)->find("#specs-list > table");
         $characteristicsLines = array();
-        foreach ($characteristics_tables as $index=>$table)
-        {
+        foreach ($characteristics_tables as $index => $table) {
             $characteristicHeader = pq($table)->find("tr:first-child th");
             $chHeader = trim($characteristicHeader->text($header));
             $characteristicHeader->remove();
-            
+
             $rows = pq($table)->find("> tr");
             $lastRowName = '';
-            foreach ($rows as $row)
-            {
+            foreach ($rows as $row) {
                 $rowIndex = trim(pq($row)->find("td:first-child")->text());
-                if (empty($rowIndex))
-                {
+                if (empty($rowIndex)) {
                     $rowIndex = $lastRowName;
                 }
                 $lastRowName = $rowIndex;
                 $rowValue = pq($row)->find("td:last-child")->html();
-                $characteristicsLines[] = $chHeader.".".$rowIndex."::::".trim($rowValue);
+                $characteristicsLines[] = $chHeader . "." . $rowIndex . "::::" . trim($rowValue);
             }
         }
         $parser = new GsmarenaCharacteristicsParser($characteristicsLines);
         $result = $parser->run();
-        
-        //var_dump($result);
 
+        //var_dump($result);
         // Ищем модель в бд
         $criteria = new CDbCriteria();
-        $criteria->condition = 
-                "(CONCAT(brand_data.name, ' ', t.name) LIKE :search "
+        $criteria->condition = "(CONCAT(brand_data.name, ' ', t.name) LIKE :search "
                 . "OR CONCAT(brand_data.name, ' ', synonims.name) LIKE :search) ";
-        $search = $brand." ".$name;
+        $search = $brand . " " . $name;
         $search = htmlspecialchars($search);
         $search = str_replace("&nbsp;", " ", $search);
         $search = "{$search}";
         $criteria->params = array(
-            "search"=>$search,
+            "search" => $search,
         );
         $urlManager = new UrlManager();
-        echo $search.PHP_EOL;
-        $goods = Goods::model()->with("brand_data","synonims")->find($criteria);
+        echo $search . PHP_EOL;
+        $goods = Goods::model()->with("brand_data", "synonims")->find($criteria);
         // Если что-то нашли
-        Yii::app()->language  = 'ru';
-        if (!$goods)
-        {
-            if (!$brandModel = Brands::model()->findByAttributes(array("name"=>$brand)))
-            {
-                
+        Yii::app()->language = 'ru';
+        if (!$goods) {
+            if (!$brandModel = Brands::model()->findByAttributes(array("name" => $brand))) {
+
                 $brandModel = new Brands();
                 $brandModel->name = $brand;
                 $brandModel->link = $urlManager->translitUrl($brand);
-                if ($brandModel->validate())
-                {
-                    echo "Добавлен бренд {$brand}".PHP_EOL;
+                if ($brandModel->validate()) {
+                    echo "Добавлен бренд {$brand}" . PHP_EOL;
                     $brandModel->save();
                 } else {
                     var_dump($brandModel->getErrors());
@@ -127,83 +115,74 @@ class ParseCommand extends CConsoleCommand
             $goods->name = $name;
             $goods->link = $urlManager->translitUrl($name);
             $goods->type = 1;
-            echo $urlManager->translitUrl($name).PHP_EOL;
-            if ($goods->validate())
-            {
-                echo "Добавлен товар {$brand} {$name}".PHP_EOL;
+            echo $urlManager->translitUrl($name) . PHP_EOL;
+            if ($goods->validate()) {
+                echo "Добавлен товар {$brand} {$name}" . PHP_EOL;
                 $goods->save();
             } else {
-                echo "Не добавлен товар {$brand} {$name}".PHP_EOL;
+                echo "Не добавлен товар {$brand} {$name}" . PHP_EOL;
                 var_dump($goods->getErrors());
                 $task->completed = -1;
                 $task->save();
                 return $this->actionGsmArena();
             }
         }
-        
-        foreach ($result as $characteristic)
-        {
+
+        foreach ($result as $characteristic) {
             $goodsCharacteristic = new GoodsCharacteristics();
             $goodsCharacteristic->goods = $goods->id;
             $goodsCharacteristic->characteristic = $characteristic['id'];
             $goodsCharacteristic->lang = $characteristic['lang'];
             $goodsCharacteristic->value = is_array($characteristic['values']) ? json_encode($characteristic['values']) : $characteristic['values'];
-            if ($goodsCharacteristic->validate())
-            {
+            if ($goodsCharacteristic->validate()) {
                 $goodsCharacteristic->save();
             } else {
                 //var_dump($goodsCharacteristic->getErrors());
             }
         }
-        
+
         $imagesContent = pq($html)->find("#specs-cp-pic > a")->attr("href");
- 
-        if (!empty($imagesContent)){
+
+        if (!empty($imagesContent)) {
             sleep(1);
-            $imagesContent = $this->getContent("http://www.gsmarena.com/".$imagesContent);
+            $imagesContent = $this->getContent("http://www.gsmarena.com/" . $imagesContent);
         }
 
-        if ($imagesContent)
-        {
-            echo "Images...".PHP_EOL;
+        if ($imagesContent) {
+            echo "Images..." . PHP_EOL;
             $html = phpQuery::newDocumentHTML($imagesContent);
             $pictures = pq($html)->find("#pictures p");
-            foreach ($pictures as $picture)
-            {
+            foreach ($pictures as $picture) {
                 $image = pq($picture)->find("img")->attr("src");
-                if (!empty($image))
-                {
+                if (!empty($image)) {
                     $goodsImage = GoodsImages::model()->with(array(
-                    "image_data"=>array(
-                        "joinType"=>"INNER JOIN",
-                        "condition"=>"image_data.source  = :source",
-                        "params"=>array("source"=>$image),
-                    )
-                    ))->count();
-                    if (!$goodsImage)
-                    {
+                                "image_data" => array(
+                                    "joinType" => "INNER JOIN",
+                                    "condition" => "image_data.source  = :source",
+                                    "params" => array("source" => $image),
+                                )
+                            ))->count();
+                    if (!$goodsImage) {
                         $ext = explode(".", $image);
                         $ext = end($ext);
                         $file = new Files();
                         $file->name = "{$brand->name} {$goods->name}.{$ext}";
                         $file->save();
                         $filename = $file->getFilename();
-                        if (!$this->getFile($image, $filename))
-                        {
-                            echo "Не удалось скачать {$image}".PHP_EOL;
+                        if (!$this->getFile($image, $filename)) {
+                            echo "Не удалось скачать {$image}" . PHP_EOL;
                             $file->delete();
                             continue;
                         }
                         sleep(1);
                         $file->size = $file->getFilesize();
                         $file->mime_type = $file->getMimeType();
-                        if (!preg_match("~image.*~", $file->mime_type))
-                        {
+                        if (!preg_match("~image.*~", $file->mime_type)) {
                             $file->delete();
-                            echo "Тип изображения не соответствует image. {$file->mime_type}".PHP_EOL;
+                            echo "Тип изображения не соответствует image. {$file->mime_type}" . PHP_EOL;
                             continue;
                         }
-                        echo "Добавлено изображение {$image}".PHP_EOL;
+                        echo "Добавлено изображение {$image}" . PHP_EOL;
                         $file->save();
                         $imageModel = new Images();
                         $imageModel->file = $file->id;
@@ -218,150 +197,132 @@ class ParseCommand extends CConsoleCommand
                         $goodsImage->image = $imageModel->id;
                         $goodsImage->save();
                     } else {
-                        echo "Image exists".PHP_EOL;
+                        echo "Image exists" . PHP_EOL;
                     }
                 }
             }
         }
-        
-        
+
+
         $task->completed = 1;
         $task->save();
         $this->actionGsmArena();
     }
-    
-    
+
     public function actionSmartphoneua()
     {
-        $task = SourcesSmartphoneua::model()->with("file_data")->findByAttributes(array("completed"=>0));
+        $task = SourcesSmartphoneua::model()->with("file_data")->findByAttributes(array("completed" => 0));
         //$task = SourcesSmartphoneua::model()->with("file_data")->findByAttributes(array("completed"=>1, "id"=>2098));
-        if (!$task)
-        {
-            echo "No tasks for parse".PHP_EOL;
+        if (!$task) {
+            echo "No tasks for parse" . PHP_EOL;
             exit();
         }
         $content = $task->file_data->getContent();
-        if (!$content)
-        {
+        if (!$content) {
             $task->completed = -1;
             $task->save();
-            echo "Null content for task".PHP_EOL;
+            echo "Null content for task" . PHP_EOL;
             exit();
         }
         $html = phpQuery::newDocumentHTML($content);
         $crumbs = pq($html)->find("#breadcramps > div");
         $types = array(
-            "Каталог телефонов"=>array(1, "Телефоны"),
-            "Каталог планшетов"=>array(2, "Планшеты"),
-            "Каталог электронных книг"=>array(3, "Электронные книги"),
+            "Каталог телефонов" => array(1, "Телефоны"),
+            "Каталог планшетов" => array(2, "Планшеты"),
+            "Каталог электронных книг" => array(3, "Электронные книги"),
         );
         $type_replaces = array(
-            1=>" ",
-            2=>"Планшет ",
-            3=>"Электронная книга ",
+            1 => " ",
+            2 => "Планшет ",
+            3 => "Электронная книга ",
         );
         $type = 0;
         $brand = '';
-        foreach ($crumbs as $key=>$crumb)
-        {
+        foreach ($crumbs as $key => $crumb) {
             // Тип
-            if ($key == 0)
-            {
+            if ($key == 0) {
                 $text = pq($crumb)->text();
                 $type = isset($types[$text]) ? $types[$text][0] : 0;
-                
             }
             // Производитель
-            if ($key == 1)
-            {
+            if ($key == 1) {
                 $brand = isset($types[$text]) ? str_replace($types[$text][1], '', pq($crumb)->text()) : '';
                 $brand = trim($brand);
             }
         }
-        
-        
-        
-        if (!$type)
-        {
-            echo "Не удалось определить тип товара.".PHP_EOL;
+
+
+
+        if (!$type) {
+            echo "Не удалось определить тип товара." . PHP_EOL;
             return $this->actionSmartphoneua();
         }
-        
-        
-        if (!$brand)
-        {
-            echo "Не удалось определить производителя.".PHP_EOL;
+
+
+        if (!$brand) {
+            echo "Не удалось определить производителя." . PHP_EOL;
             return $this->actionSmartphoneua();
         }
-        
-        $name = pq($html)->find("div.padding h1")->text();   
-        $name = trim(substr($name, strlen($brand)+strlen($type_replaces[$type]), strlen($name)));
-        
-        if (!$brand)
-        {
-            echo "Не удалось определить наименование товара.".PHP_EOL;
+
+        $name = pq($html)->find("div.padding h1")->text();
+        $name = trim(substr($name, strlen($brand) + strlen($type_replaces[$type]), strlen($name)));
+
+        if (!$brand) {
+            echo "Не удалось определить наименование товара." . PHP_EOL;
             return $this->actionSmartphoneua();
         }
-        
-        echo "$type $brand $name".PHP_EOL;
-        
+
+        echo "$type $brand $name" . PHP_EOL;
+
         // Картинки
         $images = pq($html)->find("#fotos ul > li");
         $imagesList = array();
-        foreach ($images as $image)
-        {
+        foreach ($images as $image) {
             $imagesList[] = pq($image)->find("a")->attr("href");
         }
-       
-        
+
+
         // Характеристики
         $characteristics_elems = pq($html)->find("#allspecs > *");
         $characteristics_lines = array();
-        $currentCatalog ='';
-        foreach ($characteristics_elems as $elem)
-        {
-            $text =  pq($elem)->text();
+        $currentCatalog = '';
+        foreach ($characteristics_elems as $elem) {
+            $text = pq($elem)->text();
             if ($text == '* Найденные неточности в описании просьба сообщать на help@smartphone.ua')
                 break;
             if ($elem->tagName == "strong")
-                $currentCatalog = trim(substr($text, 0 ,strlen($text) - strlen("$brand $name ")));
-            else
-            {
+                $currentCatalog = trim(substr($text, 0, strlen($text) - strlen("$brand $name ")));
+            else {
                 //echo "$currentCatalog::::$text".PHP_EOL;
                 $characteristics_lines[] = "$currentCatalog::::$text";
             }
-        }      
+        }
         //var_dump($characteristics_lines);
-        
+
         $parser = new SmartphoneuaCharacteristicsParser($characteristics_lines);
         $result = $parser->run();
         //var_dump($result);
-
         // Ищем модель в бд
         $criteria = new CDbCriteria();
-        $criteria->condition = 
-                "(CONCAT(brand_data.name, ' ', t.name) LIKE :search "
+        $criteria->condition = "(CONCAT(brand_data.name, ' ', t.name) LIKE :search "
                 . "OR CONCAT(brand_data.name, ' ', synonims.name) LIKE :search) ";
-        $search = $brand." ".$name;
+        $search = $brand . " " . $name;
         $search = htmlspecialchars($search);
         $search = str_replace("&nbsp;", " ", $search);
         $search = "{$search}";
         $criteria->params = array(
-            "search"=>$search,
+            "search" => $search,
         );
-        $goods = Goods::model()->with("brand_data","synonims")->find($criteria);
+        $goods = Goods::model()->with("brand_data", "synonims")->find($criteria);
         // Если что-то нашли
-        Yii::app()->language  = 'ru';
-        if (!$goods)
-        {
-            if (!$brandModel = Brands::model()->findByAttributes(array("name"=>$brand)))
-            {
+        Yii::app()->language = 'ru';
+        if (!$goods) {
+            if (!$brandModel = Brands::model()->findByAttributes(array("name" => $brand))) {
                 $brandModel = new Brands();
                 $brandModel->name = $brand;
                 $brandModel->link = $urlManager->translitUrl($brand);
-                if ($brandModel->validate())
-                {
-                    echo "Добавлен бренд {$brand}".PHP_EOL;
+                if ($brandModel->validate()) {
+                    echo "Добавлен бренд {$brand}" . PHP_EOL;
                     $brandModel->save();
                 } else {
                     var_dump($brandModel->getErrors());
@@ -376,13 +337,12 @@ class ParseCommand extends CConsoleCommand
             $goods->name = $name;
             $goods->link = $urlManager->translitUrl($name);
             $goods->type = $type;
-            echo $goods->link.PHP_EOL;
-            if ($goods->validate())
-            {
-                echo "Добавлен товар {$brand} {$name}".PHP_EOL;
+            echo $goods->link . PHP_EOL;
+            if ($goods->validate()) {
+                echo "Добавлен товар {$brand} {$name}" . PHP_EOL;
                 $goods->save();
             } else {
-                echo "Не добавлен товар {$brand} {$name}".PHP_EOL;
+                echo "Не добавлен товар {$brand} {$name}" . PHP_EOL;
                 var_dump($goods->getErrors());
                 $task->completed = -1;
                 $task->save();
@@ -392,55 +352,49 @@ class ParseCommand extends CConsoleCommand
             $goods->type = $type;
             $goods->save();
         }
-        
-        foreach ($result as $characteristic)
-        {
+
+        foreach ($result as $characteristic) {
             $goodsCharacteristic = new GoodsCharacteristics();
             $goodsCharacteristic->goods = $goods->id;
             $goodsCharacteristic->characteristic = $characteristic['id'];
             $goodsCharacteristic->lang = $characteristic['lang'];
             $goodsCharacteristic->value = is_array($characteristic['values']) ? json_encode($characteristic['values']) : $characteristic['values'];
-            if ($goodsCharacteristic->validate())
-            {
+            if ($goodsCharacteristic->validate()) {
                 $goodsCharacteristic->save();
             } else {
                 //var_dump($goodsCharacteristic->getErrors());
             }
         }
 
-        foreach ($imagesList as $image)
-        {
+        foreach ($imagesList as $image) {
             $goodsImage = GoodsImages::model()->with(array(
-                "image_data"=>array(
-                    "joinType"=>"INNER JOIN",
-                    "condition"=>"image_data.source  = :source",
-                    "params"=>array("source"=>$image),
-                )
-            ))->count();
-            if (!$goodsImage)
-            {
+                        "image_data" => array(
+                            "joinType" => "INNER JOIN",
+                            "condition" => "image_data.source  = :source",
+                            "params" => array("source" => $image),
+                        )
+                    ))->count();
+            if (!$goodsImage) {
                 $ext = explode(".", $image);
                 $ext = end($ext);
                 $file = new Files();
                 $file->name = "{$brand} {$name}.{$ext}";
                 $file->save();
                 $filename = $file->getFilename();
-                if (!$this->getFile($image, $filename))
-                {
-                    echo "Не удалось скачать {$image}".PHP_EOL;
+                if (!$this->getFile($image, $filename)) {
+                    echo "Не удалось скачать {$image}" . PHP_EOL;
                     $file->delete();
                     continue;
                 }
                 sleep(1);
                 $file->size = $file->getFilesize();
                 $file->mime_type = $file->getMimeType();
-                if (!preg_match("~image.*~", $file->mime_type))
-                {
+                if (!preg_match("~image.*~", $file->mime_type)) {
                     $file->delete();
-                    echo "Тип изображения не соответствует image. {$file->mime_type}".PHP_EOL;
+                    echo "Тип изображения не соответствует image. {$file->mime_type}" . PHP_EOL;
                     continue;
                 }
-                echo "Добавлено изображение {$image}".PHP_EOL;
+                echo "Добавлено изображение {$image}" . PHP_EOL;
                 $file->save();
                 $imageModel = new Images();
                 $imageModel->file = $file->id;
@@ -460,7 +414,7 @@ class ParseCommand extends CConsoleCommand
         $task->save();
         $this->actionSmartphoneua();
     }
-    
+
     public function getFile($url, $filename)
     {
         if (empty($filename))
@@ -475,20 +429,19 @@ class ParseCommand extends CConsoleCommand
         curl_setopt($ch, CURLOPT_FILE, $file);
         curl_exec($ch);
         fclose($file);
-        if (curl_errno($ch))
-        {
-            echo "Curl error ".curl_error($ch).PHP_EOL;
+        if (curl_errno($ch)) {
+            echo "Curl error " . curl_error($ch) . PHP_EOL;
             curl_close($ch);
             return false;
         }
-        
+
         $info = curl_getinfo($ch);
         if ($info['http_code'] !== 200)
             return false;
         curl_close($ch);
         return true;
     }
-    
+
     public function getContent($url)
     {
         $ch = curl_init($url);
@@ -497,20 +450,19 @@ class ParseCommand extends CConsoleCommand
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, '1');
         curl_setopt($ch, CURLOPT_TIMEOUT, 40);
         $content = curl_exec($ch);
-        if (curl_errno($ch))
-        {
-            echo "Curl error ".curl_error($ch).PHP_EOL;
+        if (curl_errno($ch)) {
+            echo "Curl error " . curl_error($ch) . PHP_EOL;
             curl_close($ch);
             return false;
         }
-        
+
         $info = curl_getinfo($ch);
-        if ($info['http_code'] !== 200)
-        {
-            echo "Http code: {$info['http_code']}".PHP_EOL;
+        if ($info['http_code'] !== 200) {
+            echo "Http code: {$info['http_code']}" . PHP_EOL;
             return false;
         }
         curl_close($ch);
         return $content;
     }
+
 }

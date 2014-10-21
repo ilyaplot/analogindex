@@ -258,7 +258,238 @@ class SiteController extends Controller
         $this->render("search", array("goods"=>$goods, "pages"=>$pages));
     }
     
-    public function actionType($type)
+    public function actionType($type, $brands=array(), $os = array(), $screensizes=array(), $cores=array(), $cpufreq=array(), $ram=array())
+    {
+        $brands = !empty($brands) ? explode(".", $brands) : array();
+        $os = !empty($os) ? explode(".", $os) : array();
+        $screensizes = !empty($screensizes) ? explode(".", $screensizes) : array();
+        $cores = !empty($cores) ? explode(".", $cores) : array();
+        $cpufreq = !empty($cpufreq) ? explode(".", $cpufreq) : array();
+        $ram = !empty($ram) ? explode(".", $ram) : array();
+        
+        $urlOptions = array(
+            "language"=>  Language::getCurrentZone(),
+            "type" => $type,
+        );
+        
+        $typeString = $type;
+        if (!$type = GoodsTypes::model()->findByAttributes(array("link"=>$typeString)))
+            throw new CHttpExceprion(404, "Страница не найдена");
+        
+        $type = $type->id;
+        
+        if ($filterBrands = Yii::app()->request->getPost("brands"))
+        {
+            array_multisort($filterBrands);
+            $filterBrands = array_unique($filterBrands);
+            $urlOptions['brands'] = implode(".", $filterBrands);
+        }
+        
+        if ($filterOs = Yii::app()->request->getPost("os"))
+        {
+            array_multisort($filterOs);
+            $filterOs = array_unique($filterOs);
+            $urlOptions['os'] = implode(".",$filterOs);
+        }
+    
+        if ($filterScreenSizes = Yii::app()->request->getPost("screensizes"))
+        {
+            array_multisort($filterScreenSizes);
+            $filterScreenSizes = array_unique($filterScreenSizes);
+            $urlOptions['screensizes'] = implode(".", $filterScreenSizes);
+        }
+        
+        if ($filterCores = Yii::app()->request->getPost("cores"))
+        {
+            array_multisort($filterCores);
+            $filterCores = array_unique($filterCores);
+            $urlOptions['cores'] = implode(".", $filterCores);
+        }
+        
+        if ($filterCpuFreq = Yii::app()->request->getPost("cpufreq"))
+        {
+            array_multisort($filterCpuFreq);
+            $filterCpuFreq = array_unique($filterCpuFreq);
+            $urlOptions['cpufreq'] = implode(".", $filterCpuFreq);
+        }
+        
+        if ($filterRam = Yii::app()->request->getPost("ram"))
+        {
+            array_multisort($filterRam);
+            $filterCpuFreq = array_unique($filterRam);
+            $urlOptions['ram'] = implode(".", $filterRam);
+        }
+        
+        if (count($urlOptions) > 2)
+        {
+            $url = Yii::app()->createUrl("site/type", $urlOptions);
+            Yii::app()->request->redirect($url);
+            exit();
+        }
+        $brandsCriteria = new CDbCriteria();
+        $brandsCriteria->order = "t.name asc";
+        $brandsCriteria->group = "t.id";
+        $brandsList = Brands::model()->with(array("goods"=>array(
+            "joinType"=>"inner join",
+            "on"=> "goods.type = :type",
+            "params"=>array("type"=>$type),
+            "select"=>array("name", "link"),
+            //"condition"=>"goods.id = null",
+        )))->findAll($brandsCriteria);
+        
+       
+        
+        $osList = Os::model()->findAll(array(
+            "order"=>"t.name asc",
+            "select"=>array("name", "link"),
+        ));
+        
+        $screenSizesList = array(
+            (object) array(
+                "name"=>" до 5 дюймов",
+                "link"=>"0-5",
+            ),
+            (object) array(
+                "name"=>" от 5 до 7 дюймов",
+                "link"=>"5-7",
+            ),
+            (object) array(
+                "name"=>" от 7 до 10 дюймов",
+                "link"=>"7-10",
+            ),
+            (object) array(
+                "name"=>" больше 10 дюймов",
+                "link"=>"10plus",
+            ),
+        );
+        
+        $coresList = array(
+            (object) array(
+                "name"=>"1 ядро",
+                "link"=>"1",
+            ),
+            (object) array(
+                "name"=>"2 ядра",
+                "link"=>"2",
+            ),
+            (object) array(
+                "name"=>"3 и более",
+                "link"=>"3plus",
+            ),
+        );
+        
+        $cpuFreqList = array(
+            (object) array(
+                "name"=>"до 1 Ггц",
+                "link"=>"1",
+            ),
+            (object) array(
+                "name"=>"от 1 до 2 Ггц",
+                "link"=>"2",
+            ),
+            (object) array(
+                "name"=>"2 Ггц и более",
+                "link"=>"2plus",
+            ),
+        );
+        
+        $ramList = array(
+            (object) array(
+                "name"=>"до 512 Мб",
+                "link"=>"512",
+            ),
+            (object) array(
+                "name"=>"от 512 Мб до 1 Гб",
+                "link"=>"512-1024",
+            ),
+            (object) array(
+                "name"=>"от 1 Гб до 2 Гб",
+                "link"=>"1024-2048",
+            ),
+            (object) array(
+                "name"=>"от 2 Гб до 4 Гб",
+                "link"=>"2048-4096",
+            ),
+            (object) array(
+                "name"=>"более 4 Гб",
+                "link"=>"4096plus",
+            ),
+        );
+        
+        
+        
+        $criteria = new CDbCriteria();
+        $criteria->addCondition("type = {$type}");
+        
+        if (!empty($brands))
+        {
+            $criteria->addInCondition("brand", $brands);
+        }
+        
+        if (!empty($os))
+        {
+            $criteria->addInCondition("os", $os);
+        }
+        
+        if (!empty($screensizes))
+        {
+            $criteria->addInCondition("screensize", $screensizes);
+        }
+        
+        if (!empty($cores))
+        {
+            $criteria->addInCondition("cores", $cores);
+        }
+        
+        if (!empty($cpufreq))
+        {
+            $criteria->addInCondition("cpufreq", $cpufreq);
+        }
+        
+        if (!empty($ram))
+        {
+            $criteria->addInCondition("ram", $ram);
+        }
+        
+        $goodsSelector = CharacteristicsSelector::model()->cache(60*60)->findAll($criteria);
+        $goodsSelector = CHtml::listData($goodsSelector, "id", "id");
+        
+        $criteria = new CDbCriteria();
+        $criteria->addInCondition("t.id", $goodsSelector);
+        $criteria->addCondition("t.type = {$type}");
+        $pages = new CPagination(Goods::model()->cache(60*60)->count($criteria));
+        $pages->pageSize = 10;
+        $pages->applyLimit($criteria);
+        $criteria->group = "t.id, rating.value";
+        $goods = Goods::model()->cache(60*60)->with(array(
+            "brand_data"=>array(
+                "joinType"=>"inner join"
+            ),
+            "primary_image",
+            "rating"
+        ))->findAll($criteria); 
+        
+        $this->render("type", array(
+            "brands"=>$brandsList,
+            "os"=>$osList,
+            "screenSizes"=>$screenSizesList,
+            "cores"=>$coresList,
+            "cpufreq"=>$cpuFreqList,
+            "ram"=>$ramList,
+            
+            "brandsSelected"=>$brands,
+            "osSelected"=>$os,
+            "screenSizesSelected"=>$screensizes,
+            "coresSelected"=>$cores,
+            "cpuFreqSelected"=>$cpufreq,
+            "ramSelected"=>$ram,
+            
+            "goods"=>$goods,
+            "pages"=>$pages,
+        ));
+    }
+    
+    public function actionType1($type)
     {
         $typeString = $type;
         if (!$type = GoodsTypes::model()->findByAttributes(array("link"=>$typeString)))
@@ -314,5 +545,6 @@ class SiteController extends Controller
         }
         $this->render("form", array("selector"=>$selector, "brands"=>$brands, "goods"=>$goods, "pages"=>$pages, "type"=>$typeString));
     }
+    
 }
 

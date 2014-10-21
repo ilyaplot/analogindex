@@ -1,28 +1,31 @@
 <?php
+
 /**
  * Наследует форматтер от Yii и расширяет его
  */
 class Formatter extends CFormatter
 {
+
     /**
      * Формат частоты процессора
      * @var type 
      */
-    public $freqFormat=array(
-        'base'=>1000,
-        'decimals'=>2,
-        'decimalSeparator'=>null,
+    public $freqFormat = array(
+        'base' => 1000,
+        'decimals' => 2,
+        'decimalSeparator' => null,
     );
-    
+
     /**
      * Формат частоты процессора
      * @var type 
      */
-    public $weightFormat=array(
-        'base'=>1000,
-        'decimals'=>2,
-        'decimalSeparator'=>null,
+    public $weightFormat = array(
+        'base' => 1000,
+        'decimals' => 2,
+        'decimalSeparator' => null,
     );
+
     /**
      * Пустой формат
      * @param type $value
@@ -32,7 +35,7 @@ class Formatter extends CFormatter
     {
         return $value;
     }
-    
+
     public function formatArrayComma($values)
     {
         $values = @json_decode($values, true);
@@ -40,7 +43,7 @@ class Formatter extends CFormatter
             return false;
         return implode(", ", $values);
     }
-    
+
     /**
      * Формат частоты процессора
      * @param type $value
@@ -50,33 +53,32 @@ class Formatter extends CFormatter
     {
         $sourceLanguage = Yii::app()->sourceLanguage;
         Yii::app()->sourceLanguage = 'en';
-        $base=$this->freqFormat['base'];
-        for($i=0; $base<=$value && $i<5; $i++)
-            $value=$value/$base;
-        $value=round($value, $this->freqFormat['decimals']);
-        $formattedValue=isset($this->freqFormat['decimalSeparator']) ? str_replace('.',$this->freqFormat['decimalSeparator'],$value) : $value;
-	$params=array($value,'{n}'=>$formattedValue);
-        switch($i)
-        {
+        $base = $this->freqFormat['base'];
+        for ($i = 0; $base <= $value && $i < 5; $i++)
+            $value = $value / $base;
+        $value = round($value, $this->freqFormat['decimals']);
+        $formattedValue = isset($this->freqFormat['decimalSeparator']) ? str_replace('.', $this->freqFormat['decimalSeparator'], $value) : $value;
+        $params = array($value, '{n}' => $formattedValue);
+        switch ($i) {
             case 0:
-                $return = Yii::t('formatter','{n} Hz',$params);
-            break;
+                $return = Yii::t('formatter', '{n} Hz', $params);
+                break;
             case 1:
-                $return =  Yii::t('formatter','{n} KHz',$params);
-            break;
+                $return = Yii::t('formatter', '{n} KHz', $params);
+                break;
             case 2:
-                $return =  Yii::t('formatter','{n} MHz',$params);
-            break;
+                $return = Yii::t('formatter', '{n} MHz', $params);
+                break;
             case 3:
-                $return =  Yii::t('formatter','{n} GHz',$params);
-            break;
+                $return = Yii::t('formatter', '{n} GHz', $params);
+                break;
             default :
-                $return = Yii::t('formatter','{n} THz',$params);
+                $return = Yii::t('formatter', '{n} THz', $params);
         }
         Yii::app()->sourceLanguage = $sourceLanguage;
         return $return;
     }
-    
+
     /**
      * Формат веса
      * @param type $value
@@ -86,31 +88,29 @@ class Formatter extends CFormatter
     {
         $sourceLanguage = Yii::app()->sourceLanguage;
         Yii::app()->sourceLanguage = 'en';
-        $base=$this->weightFormat['base'];
-        for($i=0; $base<=$value && $i<5; $i++)
-            $value=$value/$base;
-        $value=round($value, $this->weightFormat['decimals']);
-        $formattedValue=isset($this->weightFormat['decimalSeparator']) ? str_replace('.',$this->weightFormat['decimalSeparator'],$value) : $value;
-	$params=array($value,'{n}'=>$formattedValue);
-        switch($i)
-        {
+        $base = $this->weightFormat['base'];
+        for ($i = 0; $base <= $value && $i < 5; $i++)
+            $value = $value / $base;
+        $value = round($value, $this->weightFormat['decimals']);
+        $formattedValue = isset($this->weightFormat['decimalSeparator']) ? str_replace('.', $this->weightFormat['decimalSeparator'], $value) : $value;
+        $params = array($value, '{n}' => $formattedValue);
+        switch ($i) {
             case 0:
-                $return = Yii::t('formatter','{n} g',$params);
-            break;
+                $return = Yii::t('formatter', '{n} g', $params);
+                break;
             case 1:
-                $return =  Yii::t('formatter','{n} kg',$params);
-            break;
+                $return = Yii::t('formatter', '{n} kg', $params);
+                break;
             case 2:
-                $return =  Yii::t('formatter','{n} t',$params);
-            break;
+                $return = Yii::t('formatter', '{n} t', $params);
+                break;
             default :
-                $return = Yii::t('formatter','{n} kt',$params);
+                $return = Yii::t('formatter', '{n} kt', $params);
         }
         Yii::app()->sourceLanguage = $sourceLanguage;
         return $return;
     }
-    
-    
+
     /**
      * Формат размера трех сторон
      * @param type $values
@@ -125,7 +125,6 @@ class Formatter extends CFormatter
         return implode(" , ", $values);
     }
 
-    
     /**
      * Формат размера экрана
      * @param type $values
@@ -138,17 +137,18 @@ class Formatter extends CFormatter
             return null;
         $sourceLanguage = Yii::app()->sourceLanguage;
         Yii::app()->sourceLanguage = 'en';
-        $return = Yii::t('formatter','{n} px',array(implode(" x ", $values), '{n}'=>implode(" x ", $values)));
+        $return = Yii::t('formatter', '{n} px', array(implode(" x ", $values), '{n}' => implode(" x ", $values)));
         Yii::app()->sourceLanguage = $sourceLanguage;
         return $return;
     }
-        
+
     public function formatDimension($value)
     {
         $sourceLanguage = Yii::app()->sourceLanguage;
         Yii::app()->sourceLanguage = 'en';
-        $return = Yii::t('formatter','{n} mm',array($value, '{n}'=>$value));
+        $return = Yii::t('formatter', '{n} mm', array($value, '{n}' => $value));
         Yii::app()->sourceLanguage = $sourceLanguage;
         return $return;
     }
+
 }

@@ -1,11 +1,12 @@
 <?php
+
 class SystemCommand extends ConsoleCommand
 {
+
     public function actionSendEmails()
     {
-        $notifications = Notifications::model()->findAllByAttributes(array("sended"=>0));
-        foreach ($notifications as $notify)
-        {
+        $notifications = Notifications::model()->findAllByAttributes(array("sended" => 0));
+        foreach ($notifications as $notify) {
             $to = $notify->email;
             $subject = $notify->subject;
             $message = $notify->message;
@@ -17,47 +18,40 @@ class SystemCommand extends ConsoleCommand
             $mailer->AddAddress($to);
             $mailer->Body = $message;
 
-            if (!$mailer->Send())
-            {
+            if (!$mailer->Send()) {
                 //$notify->sended = ;
-                echo $mailer->ErrorInfo.PHP_EOL;
+                echo $mailer->ErrorInfo . PHP_EOL;
             } else {
                 $notify->sended = 1;
                 $notify->save();
-                Echo 'EMail OK'.PHP_EOL;
+                Echo 'EMail OK' . PHP_EOL;
             }
         }
     }
-    
-    
+
     public function actionImportReviews()
     {
         $connection = Yii::app()->reviews;
         $urlManager = new UrlManager;
         $goods = Goods::model()->with(array(
-            "brand_data",
-            "synonims",
-        ))->findAll();
-        foreach ($goods as $product)
-        {
+                    "brand_data",
+                    "synonims",
+                ))->findAll();
+        foreach ($goods as $product) {
             $query = "select * from reviews where product like :name ";
-            $queryParams = array("name"=>$product->brand_data->name." ".$product->name);
+            $queryParams = array("name" => $product->brand_data->name . " " . $product->name);
             $params = array();
-            foreach ($product->synonims as $synonim)
-            {
-                $params[] = $product->brand_data->name." ".$synonim->name;
+            foreach ($product->synonims as $synonim) {
+                $params[] = $product->brand_data->name . " " . $synonim->name;
             }
-            
-            foreach ($params as $paramKey=>$paramValue)
-            {
-                $query .= ' or product like :name'.$paramKey;
-                $queryParams["name".$paramKey] = $paramValue;
+
+            foreach ($params as $paramKey => $paramValue) {
+                $query .= ' or product like :name' . $paramKey;
+                $queryParams["name" . $paramKey] = $paramValue;
             }
             $reviews = $connection->createCommand($query)->queryAll(true, $queryParams);
-            foreach ($reviews as $review)
-            {
-                if (!Reviews::model()->countByAttributes(array("source"=>$review['url'])))
-                {
+            foreach ($reviews as $review) {
+                if (!Reviews::model()->countByAttributes(array("source" => $review['url']))) {
                     $reviewModel = new Reviews("import");
                     $reviewModel->source = $review['url'];
                     $reviewModel->goods = $product->id;
@@ -67,8 +61,7 @@ class SystemCommand extends ConsoleCommand
                     $reviewModel->content = $review['content'];
                     $reviewModel->disabled = 0;
                     $reviewModel->save();
-                    if ($review['rating'])
-                    {
+                    if ($review['rating']) {
                         $rating = new RatingsGoods("import");
                         $rating->goods = $product->id;
                         $rating->user = 0;
@@ -81,26 +74,21 @@ class SystemCommand extends ConsoleCommand
         }
         echo PHP_EOL;
     }
-    
+
     public function actionReviewFilter()
     {
-        $reviews = Reviews::model()->findAllByAttributes(array('filtered'=>0));
-        foreach ($reviews as $review)
-        {
+        $reviews = Reviews::model()->findAllByAttributes(array('filtered' => 0));
+        foreach ($reviews as $review) {
             $review->title = ucfirst(trim(strip_tags($review->title)));
             $html = phpQuery::newDocumentHTML($review->content);
-            foreach ($html->find("a") as $a)
-            {
+            foreach ($html->find("a") as $a) {
                 // Удаляем Lightbox ссылки и заменяем на изображения
                 $image = (string) pq($a)->find("img");
-                if (!empty($image))
-                {
+                if (!empty($image)) {
                     $rel = pq($a)->attr("rel");
-                    if (!empty($rel))
-                    {
-                        if (preg_match("~light~", $rel))
-                        {
-                            
+                    if (!empty($rel)) {
+                        if (preg_match("~light~", $rel)) {
+
                             pq($a)->find("img")->attr("src", pq($a)->attr("href"));
                             $image = (string) pq($a)->find("img");
                         }
@@ -111,22 +99,20 @@ class SystemCommand extends ConsoleCommand
                         pq($a)->replaceWith(pq($a)->html());
                 }
             }
-            
+
             // Заменяем div на p
-            while(count($html->find('div')))
-            {
-                foreach ($html->find('div') as $div)
-                {
+            while (count($html->find('div'))) {
+                foreach ($html->find('div') as $div) {
                     $divHtml = pq($div)->html();
                     if (!empty($divHtml))
-                        pq($div)->replaceWith("<p>".pq($div)->html()."<p>");
+                        pq($div)->replaceWith("<p>" . pq($div)->html() . "<p>");
                     else
                         pq($div)->remove();
                 }
             }
-            
+
             pq($html)->find("p:empty")->remove();
-            
+
             $review->content = (string) $html;
             $review->filtered = 1;
             $review->save();
@@ -134,48 +120,38 @@ class SystemCommand extends ConsoleCommand
         }
         echo PHP_EOL;
     }
-    
-    
+
     public function actionFillSelector()
     {
-        $ids = array(3,5,6,8,9,13,14,22);
+        $ids = array(5, 6, 8, 13, 14);
         $goods = Goods::model()->findAll();
-        foreach ($goods as $product)
-        {
+
+
+
+
+        foreach ($goods as $product) {
             $attributes = array(
-                "goods"=>$product->id,
-                "type"=>$product->type,
-                "brand"=>$product->brand,
+                "id" => $product->id,
+                "type" => $product->type,
+                "brand" => $product->brand_data->link,
+                "os" => "any",
+                "screensize" => 0,
+                "cores" => 0,
+                "cpufreq" => 0,
+                "ram" => 0,
             );
-            foreach ($ids as $id)
-            {
-                $attributes["ch".$id] = 0;
-            }
-            $notEmpty = false;
-            if (!$model = CharacteristicsSelector::model()->findByAttributes(array("goods"=>$product->id)))
+
+            if (!$model = CharacteristicsSelector::model()->findByPk($product->id))
                 $model = new CharacteristicsSelector();
-            //$model->scenario = "fill";
-            $characteristics = $product->getCharacteristics($ids, true);
-            if (!empty($characteristics))
-            {
-                foreach ($characteristics as $category)
-                {
-                    foreach ($category as $item)
-                    {
-                        if (isset($attributes['ch'.$item['id']]))
-                        {
-                            if ($item['id'] == 22)
-                                $item['raw'] = intval($item['raw']);
-                            echo 'ch'.$item['id'].":".$item['raw'].PHP_EOL;
-                            $attributes['ch'.$item['id']] = $item['raw'];
-                            $notEmpty = true;
-                        }
-                    }
-                }
-            }
+
+
+            $characteristics = $product->getCharacteristics(array(), true);
+
+            $characteristicsLinks = new CharacteristicsLinks($characteristics);
+            $attributes = $characteristicsLinks->getLinks($attributes);
             $model->attributes = $attributes;
-            if ($notEmpty)
-                $model->save();
+            $model->save();
         }
     }
+
 }

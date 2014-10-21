@@ -1,123 +1,114 @@
 <?php
+
 class DownloadCommand extends CConsoleCommand
 {
 
-    public function actionAntutu($type=1)
+    public function actionAntutu($type = 1)
     {
         $types = array(
-            1=>array(
-                "source"=>"mobile",
-                "system"=>1,
+            1 => array(
+                "source" => "mobile",
+                "system" => 1,
             ),
-            2=>array(
-                "source"=>"pad",
-                "system"=>2,
+            2 => array(
+                "source" => "pad",
+                "system" => 2,
             ),
         );
         $url = "http://www.antutu.com/en/Ranking.shtml?cmd={$types[$type]['source']}&page=";
         $startPage = 1;
-        $content = $this->getContent($url.$startPage);
+        $content = $this->getContent($url . $startPage);
         if (!$content)
             exit();
         $html = phpQuery::newDocumentHTML($content);
         $lastUrl = pq($html)->find(".pagination>strong:last-child>a")->attr("href");
         $lastUrl = explode("=", $lastUrl);
         $maxPage = end($lastUrl);
-        echo $maxPage.PHP_EOL;
+        echo $maxPage . PHP_EOL;
         $page = 1;
         do {
             $page++;
             $devices = pq($html)->find("div.rank>ul>li");
-            foreach ($devices as $device)
-            {
+            foreach ($devices as $device) {
                 $name = pq($device)->find("div.fl.mobiletext>div.mobileT>a")->text();
                 $value = pq($device)->find("div.fl.mobiletext>div.score>div.fl")->text();
                 $value = intval(str_replace("Score:", '', $value));
                 $criteria = new CDbCriteria();
-                $criteria->condition = 
-                        "(CONCAT(brand_data.name, ' ', t.name) LIKE :search "
+                $criteria->condition = "(CONCAT(brand_data.name, ' ', t.name) LIKE :search "
                         . "OR CONCAT(brand_data.name, ' ', synonims.name) LIKE :search) ";
                 $search = $name;
                 $criteria->params = array(
-                    "search"=>$search,
+                    "search" => $search,
                 );
-                echo $search.PHP_EOL;
-                
-                $product = Goods::model()->with("brand_data","synonims")->find($criteria);
-                if ($product)
-                {
-                    echo $search.": ";
-                    if (!$rank = GoodsRanking::model()->findByAttributes(array("source"=>"antutu", "goods"=>$product->id)))
+                echo $search . PHP_EOL;
+
+                $product = Goods::model()->with("brand_data", "synonims")->find($criteria);
+                if ($product) {
+                    echo $search . ": ";
+                    if (!$rank = GoodsRanking::model()->findByAttributes(array("source" => "antutu", "goods" => $product->id)))
                         $rank = new GoodsRanking();
                     $rank->source = "antutu";
                     $rank->goods = $product->id;
                     $rank->value = $value;
                     $rank->type = $types[$type]['system'];
                     $rank->save();
-                    echo $rank->id.PHP_EOL;
+                    echo $rank->id . PHP_EOL;
                 }
             }
-            $content = $this->getContent($url.$page);
+            $content = $this->getContent($url . $page);
             if (!$content)
                 exit();
             $html = phpQuery::newDocumentHTML($content);
             sleep(1);
-        } while ($page < $maxPage+1);
-        echo "Done".PHP_EOL;
+        } while ($page < $maxPage + 1);
+        echo "Done" . PHP_EOL;
     }
-    
+
     public function actionSmartphoneuaList($source)
     {
         $sources = array(
-            1=>"http://www.smartphone.ua/phones/",
-            2=>"http://www.smartphone.ua/tablet-pc/",
-            3=>"http://www.smartphone.ua/e-books/",
+            1 => "http://www.smartphone.ua/phones/",
+            2 => "http://www.smartphone.ua/tablet-pc/",
+            3 => "http://www.smartphone.ua/e-books/",
         );
         $brandsPage = $this->getContent($sources[$source]);
-        if (!$brandsPage)
-        {
+        if (!$brandsPage) {
             echo "No main page. Exit.";
             exit();
         }
         $html = phpQuery::newDocumentHTML($brandsPage);
         $brands = array();
         $menu = pq($html)->find("#firms li > a");
-        foreach ($menu as $menuItem)
-        {
+        foreach ($menu as $menuItem) {
             $brands[] = pq($menuItem)->attr("href");
         }
         $brands = array_unique($brands);
         shuffle($brands);
         $urls = array();
-        foreach ($brands as $brand)
-        {
+        foreach ($brands as $brand) {
             sleep(1);
             $content = $this->getContent($brand);
-            if (!$content)
-            {
-                echo "ERROR download brand's page. {$brand}".PHP_EOL;
+            if (!$content) {
+                echo "ERROR download brand's page. {$brand}" . PHP_EOL;
                 continue;
             }
-            
-            $urls = array_merge($urls ,$this->_getSmartphoneuaItems($content));
+
+            $urls = array_merge($urls, $this->_getSmartphoneuaItems($content));
             $html = phpQuery::newDocumentHtml($content);
             $pages = pq($html)->find("div.pages > a.digit");
-            foreach ($pages as $page)
-            {
+            foreach ($pages as $page) {
                 sleep(1);
                 $href = pq($page)->attr("href");
-                $page = $brand.substr($href, 2, strlen($href));
+                $page = $brand . substr($href, 2, strlen($href));
                 $content = $this->getContent($page);
-                if (!$content)
-                {
-                    echo "ERROR download brand's subpage. {$page}".PHP_EOL;
+                if (!$content) {
+                    echo "ERROR download brand's subpage. {$page}" . PHP_EOL;
                     continue;
                 }
                 $urls = array_merge($urls, $this->_getSmartphoneuaItems($content));
             }
         }
-        foreach ($urls as $url)
-        {
+        foreach ($urls as $url) {
             echo ".";
             $model = new SourcesSmartphoneua();
             $model->url = $url;
@@ -128,54 +119,47 @@ class DownloadCommand extends CConsoleCommand
         }
         echo PHP_EOL;
     }
-    
+
     public function actionGsmarenaList()
     {
         $brandsPage = $this->getContent("http://www.gsmarena.com/makers.php3");
-        if (!$brandsPage)
-        {
+        if (!$brandsPage) {
             echo "No main page. Exit.";
             exit();
         }
         $html = phpQuery::newDocumentHTML($brandsPage);
         $menu = pq($html)->find(".st-text tr td > a");
         $brands = array();
-        foreach ($menu as $menuItem)
-        {
-            $brands[] = "http://www.gsmarena.com/".pq($menuItem)->attr("href");
+        foreach ($menu as $menuItem) {
+            $brands[] = "http://www.gsmarena.com/" . pq($menuItem)->attr("href");
         }
         $brands = array_unique($brands);
         shuffle($brands);
         $urls = array();
-        foreach ($brands as $brand)
-        {
+        foreach ($brands as $brand) {
             sleep(1);
             $content = $this->getContent($brand);
-            if (!$content)
-            {
-                echo "ERROR download brand's page. {$brand}".PHP_EOL;
+            if (!$content) {
+                echo "ERROR download brand's page. {$brand}" . PHP_EOL;
                 continue;
             }
-            
-            $urls = array_merge($urls ,$this->_getGsmarenaItems($content));
-            
+
+            $urls = array_merge($urls, $this->_getGsmarenaItems($content));
+
             $html = phpQuery::newDocumentHtml($content);
             $pages = pq($html)->find("div.nav-pages > a");
-            foreach ($pages as $page)
-            {
+            foreach ($pages as $page) {
                 sleep(1);
-                $page = "http://www.gsmarena.com/".pq($page)->attr("href");
+                $page = "http://www.gsmarena.com/" . pq($page)->attr("href");
                 $content = $this->getContent($page);
-                if (!$content)
-                {
-                    echo "ERROR download brand's subpage. {$page}".PHP_EOL;
+                if (!$content) {
+                    echo "ERROR download brand's subpage. {$page}" . PHP_EOL;
                     continue;
                 }
                 $urls = array_merge($urls, $this->_getGsmarenaItems($content));
             }
         }
-        foreach ($urls as $url)
-        {
+        foreach ($urls as $url) {
             echo ".";
             $model = new SourcesGsmarena();
             $model->url = $url;
@@ -186,26 +170,23 @@ class DownloadCommand extends CConsoleCommand
         }
         echo PHP_EOL;
     }
-    
+
     public function actionGsmArena()
     {
         $urls = SourcesGsmarena::model()->findAllByAttributes(array(
-            "file"=>0
+            "file" => 0
         ));
-        foreach ($urls as $url)
-        {
+        foreach ($urls as $url) {
             sleep(1);
             echo ".";
             $content = $this->getContent($url->url);
-            if (!$content)
-            {
+            if (!$content) {
                 echo "Not downloaded {$url->url}";
                 continue;
             }
             $file = new SourcesGsmarenaFiles();
             $file->save();
-            if (!$file->putFile($content))
-            {
+            if (!$file->putFile($content)) {
                 echo "Not put downloaded {$url->url}";
                 $file->delete();
                 continue;
@@ -220,26 +201,23 @@ class DownloadCommand extends CConsoleCommand
         }
         echo PHP_EOL;
     }
-    
+
     public function actionSmartphoneua()
     {
         $urls = SourcesSmartphoneua::model()->findAllByAttributes(array(
-            "file"=>0
+            "file" => 0
         ));
-        foreach ($urls as $url)
-        {
+        foreach ($urls as $url) {
             sleep(1);
             echo ".";
             $content = $this->getContent($url->url);
-            if (!$content)
-            {
+            if (!$content) {
                 echo "Not downloaded {$url->url}";
                 continue;
             }
             $file = new SourcesSmartphoneuaFiles();
             $file->save();
-            if (!$file->putFile($content))
-            {
+            if (!$file->putFile($content)) {
                 echo "Not put downloaded {$url->url}";
                 $file->delete();
                 continue;
@@ -254,34 +232,31 @@ class DownloadCommand extends CConsoleCommand
         }
         echo PHP_EOL;
     }
-    
+
     private function _getSmartphoneuaItems($content)
     {
         $html = phpQuery::newDocumentHTML($content);
         $items = pq($html)->find("#ph_list div > a.green");
         $urls = array();
-        foreach ($items as $item)
-        {
+        foreach ($items as $item) {
             $urls[] = pq($item)->attr("href");
         }
-        
+
         return array_unique($urls);
     }
-    
+
     private function _getGsmarenaItems($content)
     {
         $html = phpQuery::newDocumentHTML($content);
         $items = pq($html)->find("div.makers ul > li a");
         $urls = array();
-        foreach ($items as $item)
-        {
-            $urls[] = "http://www.gsmarena.com/".pq($item)->attr("href");
+        foreach ($items as $item) {
+            $urls[] = "http://www.gsmarena.com/" . pq($item)->attr("href");
         }
-        
+
         return array_unique($urls);
     }
-    
-    
+
     public function getContent($url)
     {
         $ch = curl_init($url);
@@ -292,9 +267,8 @@ class DownloadCommand extends CConsoleCommand
         //curl_setopt($ch, CURLOPT_PROXY, $proxy);
         curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
         $content = curl_exec($ch);
-        if (curl_errno($ch))
-        {
-            echo "Curl error ".curl_error($ch).PHP_EOL;
+        if (curl_errno($ch)) {
+            echo "Curl error " . curl_error($ch) . PHP_EOL;
             curl_close($ch);
             return false;
         }
@@ -304,7 +278,7 @@ class DownloadCommand extends CConsoleCommand
         curl_close($ch);
         return $content;
     }
-    
+
     public function getFile($url, $filename)
     {
         $proxy = Proxy::getAlive();
@@ -323,17 +297,17 @@ class DownloadCommand extends CConsoleCommand
         curl_setopt($ch, CURLOPT_FILE, $file);
         curl_exec($ch);
         fclose($file);
-        if (curl_errno($ch))
-        {
-            echo "Curl error ".curl_error($ch).PHP_EOL;
+        if (curl_errno($ch)) {
+            echo "Curl error " . curl_error($ch) . PHP_EOL;
             curl_close($ch);
             return false;
         }
-        
+
         $info = curl_getinfo($ch);
         if ($info['http_code'] !== 200)
             return false;
         curl_close($ch);
         return true;
     }
+
 }

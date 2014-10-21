@@ -1,8 +1,12 @@
-<div class="infoGoodItem-wp-settings" id="item2">
+<?php
+$characteristics = $product->getCharacteristics();
+$characteristicsLinks = new CharacteristicsLinks($characteristics);
+$characteristics = $characteristicsLinks->getCharacteristics($product->type_data->link);
+?><div class="infoGoodItem-wp-settings" id="item2">
     <section class="infoGoodItem_content">
         <h3 class="infoGoodItem-infoTitle"><?php echo Yii::t('goods', 'Характеристики')?></h3>
         <div class="item-set-bl">
-            <?php foreach ($product->getCharacteristics() as $catalog=>$items):?>
+            <?php foreach ($characteristics as $catalog=>$items):?>
             
                 <div class="item-set-bl_title"><?php echo $catalog;?></div>
                 <?php foreach ($items as $characteristic):?>
