@@ -51,5 +51,11 @@ return array(
             'CharSet'=>"utf-8",
             'SMTPAuth'=>true, 
         ),
+        'urlManager' => array(
+            'urlFormat' => 'path',
+            'showScriptName' => false,
+            'urlSuffix' => '.html',
+            'class' => 'UrlManager',
+        ),
     ),
 );

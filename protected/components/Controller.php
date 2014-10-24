@@ -6,6 +6,9 @@ class Controller extends CController
     public $pageDescription;
     public $pageKeywords;
 
+    protected $keywordsArray = array();
+    protected $descriptionArray = array();
+    
     public function beforeAction($action)
     {
 
@@ -21,5 +24,36 @@ class Controller extends CController
 
         return parent::beforeAction($action);
     }
+    
+    
+    public function addKeywords($keywords)
+    {
+        if (empty($keywords) || !is_array($keywords))
+            return;
+        
+        $this->keywordsArray = array_merge($this->keywordsArray, $keywords);
+        $this->keywordsArray = array_unique($this->keywordsArray);
+        $this->pageKeywords = mb_substr(implode(", ", $this->keywordsArray), 0 ,250);
+    }
+    
+    public function addKeyword($keyword)
+    {
+        if (empty($keyword))
+            return;
+        
+        $this->keywordsArray[] = trim(strip_tags($keyword));
+        $this->keywordsArray = array_unique($this->keywordsArray);
+        $this->pageKeywords = mb_substr(implode(", ", $this->keywordsArray), 0 ,250);
+    }
 
+    
+    public function addDescription($decription)
+    {
+        if (empty($decription))
+            return;
+        
+        $this->descriptionArray[] = trim(strip_tags($decription));
+        $this->descriptionArray = array_unique($this->descriptionArray);
+        $this->pageDescription = mb_substr(implode(" ", $this->descriptionArray), 0 ,250);
+    }
 }

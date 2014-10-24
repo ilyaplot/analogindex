@@ -23,6 +23,7 @@ class CharacteristicsSelector extends CActiveRecord
             array('cores', 'length', 'allowEmpty' => true, 'max' => 6),
             array('cpufreq', 'length', 'allowEmpty' => true, 'max' => 6),
             array('ram', 'length', 'allowEmpty' => true, 'max' => 10),
+            array('processor, gpu', 'length', 'allowEmpty' => true, 'max' => 100),
         );
     }
 

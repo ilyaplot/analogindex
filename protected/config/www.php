@@ -67,10 +67,11 @@ return array(
                 array('files/image', 'urlSuffix' => ''),
                 'http://analogindex.<language:\w+>/brand/<link:[\d\w\-_]*>/<type:[\d\w\-_]*>/page<page:\d+>' =>
                 array('site/brand', 'urlSuffix' => '.html'),
-                'http://analogindex.<language:\w+>/brand/<link:[\d\w\-_]*>/<type:[\d\w\-_]*>' =>
-                array('site/brand', 'urlSuffix' => '.html'),
                 'http://analogindex.<language:\w+>/brand/<link:[\d\w\-_]*>/page<page:\d+>' =>
                 array('site/brand', 'urlSuffix' => '.html'),
+                'http://analogindex.<language:\w+>/brand/<link:[\d\w\-_]*>/<type:[\d\w\-_]*>' =>
+                array('site/brand', 'urlSuffix' => '.html'),
+                
                 'http://analogindex.<language:\w+>/brand/<link:[\d\w\-_]*>' =>
                 array('site/brand', 'urlSuffix' => '.html'),
                 'http://analogindex.<language:\w+>/<link:[\d\w\-_]*>/img/id<id:\d+>/<filename:.*>/<size:\d+>' =>

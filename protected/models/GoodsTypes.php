@@ -28,6 +28,10 @@ class GoodsTypes extends CActiveRecord
             "page_goods" => array(self::HAS_ONE, "Goods", "type",
                 "joinType" => "INNER JOIN",
             ),
+            "keywords" => array(self::HAS_MANY, "KeywordsType", "type",
+                "on" => "keywords.lang = :lang",
+                "params" => array("lang" => Yii::app()->language),
+            ),
         );
     }
 

@@ -14,6 +14,14 @@ class CharacteristicsLinks
     {
         $os = Os::model()->findAll();
         $os = CHtml::listData($os, "link", "name");
+
+        $processors = Processors::model()->findAll();
+        $processors = CHtml::listData($processors, "link", "name");
+
+        
+        $gpu = Gpu::model()->findAll();
+        $gpu = CHtml::listData($gpu, "link", "name");
+        
         foreach ($this->characteristics as $catalog) {
             foreach ($catalog as $characteristic) {
 
@@ -58,6 +66,16 @@ class CharacteristicsLinks
                         $attributes['cpufreq'] = '2plus';
 
 
+                        break;
+                    case 7 : // cpu model
+                        foreach ($processors as $link => $processor) {
+
+                            if (false !== strripos($characteristic['value'], $processor)) {
+                                echo ".";
+                                $attributes['processor'] = $link;
+                                break;
+                            }
+                        }
                         break;
                     case 8 : // ram
                         $ram = round($characteristic['raw'] / 1024 / 1024, 2);
@@ -118,6 +136,16 @@ class CharacteristicsLinks
                             }
                         }
                         break;
+                    case 31 : // gpu model
+                        foreach ($gpu as $link => $processor) {
+
+                            if (false !== strripos($characteristic['value'], $processor)) {
+                                echo ".";
+                                $attributes['processor'] = $link;
+                                break;
+                            }
+                        }
+                        break;
                     default:
                         break;
                 }
@@ -130,6 +158,9 @@ class CharacteristicsLinks
     {
         $os = Os::model()->findAll();
         $os = CHtml::listData($os, "link", "name");
+        $processors = Processors::model()->findAll();
+        $processors = CHtml::listData($processors, "link", "name");
+
         foreach ($this->characteristics as &$catalog) {
             foreach ($catalog as &$characteristic) {
 
@@ -191,6 +222,19 @@ class CharacteristicsLinks
                                     "language" => Language::getCurrentZone(),
                                     "cpufreq" => '2plus',
                                 )) . '">' . $characteristic['value'] . "</a>";
+                        break;
+                    case 7 : // cpu model
+                        foreach ($processors as $link => $processor) {
+
+                            if (false !== strripos($characteristic['value'], $processor)) {
+                                $characteristic['value'] = '<a href="' . Yii::app()->createUrl("site/type", array(
+                                    "type" => $type,
+                                    "language" => Language::getCurrentZone(),
+                                    "processor" => $link,
+                                )) . '">' . $characteristic['value'] . "</a>";
+                                break;
+                            }
+                        }
                         break;
                     case 8 : // ram
                         $ram = round($characteristic['raw'] / 1024 / 1024, 2);

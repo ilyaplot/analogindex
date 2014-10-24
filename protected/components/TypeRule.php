@@ -32,6 +32,7 @@ class TypeRule extends CBaseUrlRule
 
     public function parseUrl($manager, $request, $pathInfo, $rawPathInfo)
     {
+        
         // url подходит под правило type
         if (preg_match("~type/(?P<type>[\d\w\-_]+)/(?P<url>[/\-\.\w\d]+)~", $pathInfo, $matches)) {
             $_GET['type'] = $matches['type'];
@@ -40,12 +41,22 @@ class TypeRule extends CBaseUrlRule
             foreach ($this->getAssocParams($url) as $key => $value) {
                 $_GET[$key] = $value;
             }
+            
+            if (preg_match("~analogindex\.(?P<zone>\w+)~", $request->hostInfo, $matches))
+            {
+                $_GET['language'] = $matches['zone'];
+            }
+            
             return "site/type";
         }
 
         // Простой url без дополнительных параметров
         if (preg_match("~type/(?P<type>[\d\w\-_]+)~", $pathInfo, $matches)) {
             $_GET['type'] = $matches['type'];
+            if (preg_match("~analogindex\.(?P<zone>\w+)~", $request->hostInfo, $matches))
+            {
+                $_GET['language'] = $matches['zone'];
+            }
             return "site/type";
         }
 

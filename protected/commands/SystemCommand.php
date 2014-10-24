@@ -123,7 +123,7 @@ class SystemCommand extends ConsoleCommand
 
     public function actionFillSelector()
     {
-        $ids = array(5, 6, 8, 13, 14);
+        $ids = array(5, 6, 7, 8, 13, 14, 31);
         $goods = Goods::model()->findAll();
 
 
@@ -139,6 +139,8 @@ class SystemCommand extends ConsoleCommand
                 "cores" => 0,
                 "cpufreq" => 0,
                 "ram" => 0,
+                "processor" => 'any',
+                'gpu' => 'any',
             );
 
             if (!$model = CharacteristicsSelector::model()->findByPk($product->id))
@@ -151,6 +153,73 @@ class SystemCommand extends ConsoleCommand
             $attributes = $characteristicsLinks->getLinks($attributes);
             $model->attributes = $attributes;
             $model->save();
+        }
+        echo PHP_EOL;
+    }
+    
+    public function actionFillProcessors()
+    {
+        $criteria = new CDbCriteria();
+        $criteria->select = "round(count(id)/2) as characteristic, value";
+        $criteria->condition = "characteristic = 7";
+        $criteria->group = "value";
+        $criteria->order = "value";
+        $processors = GoodsCharacteristics::model()->findAll($criteria);
+        $cnt = 0;
+        foreach ($processors as $processor)
+        {
+            if ($processor->characteristic > 2)
+            {
+                $model = new Processors("fill");
+                $model->name = $processor->value;
+                if ($model->validate())
+                    $model->save();
+                $cnt++;
+                echo $cnt." - ".$processor->characteristic." - ".str_replace("\t", " ", $processor->value).PHP_EOL;
+            }
+        }
+    }
+    
+    public function actionFillGPU()
+    {
+        $criteria = new CDbCriteria();
+        $criteria->select = "round(count(id)/2) as characteristic, value";
+        $criteria->condition = "characteristic = 31";
+        $criteria->group = "value";
+        $criteria->order = "value";
+        $processors = GoodsCharacteristics::model()->findAll($criteria);
+        $cnt = 0;
+        foreach ($processors as $processor)
+        {
+            if ($processor->characteristic > 2)
+            {
+                $model = new Gpu("fill");
+                $model->name = $processor->value;
+                if ($model->validate())
+                    $model->save();
+                $cnt++;
+                echo $cnt." - ".$processor->characteristic." - ".str_replace("\t", " ", $processor->value).PHP_EOL;
+            }
+        }
+    }
+
+    public function actionCharacteristicsLinks()
+    {
+        $reviews = Reviews::model()->findAll();
+        $rules = CharacteristicsRules::model()->findAll();
+        $limit = 10;
+        foreach ($reviews as $review) {
+            foreach ($rules as $rule) {
+                if (preg_match_all("~{$rule->rule}~", $review->content, $matches))
+                {
+                    echo $review->content.PHP_EOL;
+                    var_dump($matches);
+                    echo PHP_EOL;
+                    $limit--;
+                    if (!$limit)
+                        exit();
+                }
+            }
         }
     }
 

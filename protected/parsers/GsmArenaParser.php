@@ -109,16 +109,6 @@ class GsmArenaParser
         );
         foreach($characteristics as $key=>&$characteristic)
         {
-            /**
-             * ["category"]=>
-    string(4) "Misc"
-    ["name"]=>
-    string(11) "Price group"
-    ["value"]=>
-    string(75) "<img src=http://cdn2.gsmarena.com/vv/price/pg10.gif title="About 5000 EUR">"
-
-             */
-            
             
             $characteristic['category'] = ucfirst(trim($characteristic['category']));
             $characteristic['name'] = ucfirst(trim($characteristic['name']));
@@ -155,8 +145,6 @@ class GsmArenaParser
             }
             
         }
-        //var_dump($characteristics);
-        //exit();
         return $characteristics;
             
     }

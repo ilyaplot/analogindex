@@ -105,7 +105,7 @@ class SmartphoneuaCharacteristicsParser extends CharacteristicsParser
                                                 "Общие характеристики::::Процессор:.*[^\d\.,]{1,}(?P<freq>[\d,\.]+) МГц" => array(
                                                     "function" => function($matches, $lang) {
                                                         $matches['freq'] = str_replace(",", ".", $matches['freq']);
-                                                        return doubleval($matches['freq'] * 1000 * 1000 * 1000);
+                                                        return doubleval($matches['freq'] * 1000 * 1000);
                                                     }
                                                 ),
                                             ),

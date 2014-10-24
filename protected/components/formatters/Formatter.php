@@ -151,4 +151,14 @@ class Formatter extends CFormatter
         return $return;
     }
 
+    public function formatBatteryTime($value)
+    {
+        return $value;
+    }
+
+    public function formatCameraMegapixels($value)
+    {
+        return $value;
+    }
+
 }

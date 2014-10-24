@@ -37,7 +37,7 @@
         <div class="infoGoodItem">
             <div class="infoGoodItem-title">
                 <div class="infoGoodItem-title-1">
-                    <h1><?php echo $brand->name ?> <?php echo $product->name ?></h1>
+                    <h1><?php echo $product->type_data->name->item_name?> <?php echo $brand->name ?> <?php echo $product->name ?></h1>
                 </div>
                 <div class="infoGoodItem-title-2 clr">
                     <div class="flLeft">

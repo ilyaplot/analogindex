@@ -16,6 +16,8 @@
                     $display = true;
                     if (in_array($item->link, $itemsSelected))
                     {
+                        $this->addKeyword($item->name);
+                        $this->addDescription($title);
                         $selected[$id][] = $item;
                         $display = false;
                     }       
