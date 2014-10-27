@@ -157,7 +157,8 @@ class Goods extends CActiveRecord
                 cn.name as characteristic_name,
                 gc.value as value,
                 c.formatter as formatter,
-                cn.description as characteristic_description
+                cn.description as characteristic_description,
+                c.link as link
             from {{goods_characteristics}} gc 
             inner join {{characteristics}} c on gc.characteristic = c.id 
             inner join {{characteristics_names}} cn on c.id = cn.characteristic 
@@ -187,6 +188,85 @@ class Goods extends CActiveRecord
         }
         if (!$noCache)
             Yii::app()->cache->set("goods.characteristics" . serialize($params) . $ids, $result, 60 * 60 * 12);
+        return $result;
+    }
+    
+    /**
+     * Получает характеристики
+     * @param array $params
+     * @return array CharacteristicItem
+     * 
+     * @example $characteristics = new getCharacteristicsNew(array(
+     *  "in" => array(1,2,3,44,55,66) // Список id для выборки
+     *  "cache" => false // не кэшировать список характеристик
+     * ));
+     */
+    public function getCharacteristicsNew($params=array())
+    {
+        // Если указан список id характеристик для выбора дополняем условие
+        if (!empty($params['in']) && is_array($params['in'])) {
+            $ids = " and c.id in (" . implode(", ", $params['in']) . ") ";
+        } else {
+            $ids = '';
+        }
+        
+        // Параметр кэширования зависит от явно указанного и наличия компонента cache
+        $params['cache'] = isset($params['cache']) && Yii::app()->cache !== null ? $params['cache'] : (Yii::app()->cache !== null);
+        
+        $query = "select 
+                c.id as id,
+                ccn.name as catalog_name, 
+                cn.name as characteristic_name,
+                gc.value as value,
+                c.formatter as formatter,
+                cn.description as characteristic_description,
+                c.link as link
+            from {{goods_characteristics}} gc 
+            inner join {{characteristics}} c on gc.characteristic = c.id 
+            inner join {{characteristics_names}} cn on c.id = cn.characteristic 
+            inner join {{characteristics_catalogs}} cc on c.catalog = cc.id 
+            inner join {{characteristics_catalogs_names}} ccn on ccn.catalog = cc.id 
+            where 
+                ccn.lang=:lang
+                and gc.lang = :lang 
+                and cn.lang = :lang 
+                and gc.goods = :goods
+                {$ids}
+            order by cc.priority desc, c.priority desc";
+                
+        $queryParams = array("lang" => Yii::app()->language, "goods" => $this->getPrimaryKey());
+
+        $result = array();
+        
+        if ($params['cache'] == false || !$result = Yii::app()->cache->get("goods.characteristics" . serialize($queryParams) . $ids)) {
+            $connection = $this->getDbConnection();
+            $items = $connection->createCommand($query)->queryAll(true, $queryParams);
+            if (!empty($items)) {
+                $characteristicsSelector = CharacteristicsSelector::model()->findByPk($this->id);
+                
+                foreach ($items as $item) {
+                    $item['link_value'] = (!empty($item['link']) && !empty($characteristicsSelector->$item['link'])) ? $characteristicsSelector->$item['link'] : 0;
+                    $result[$item['id']] = new CharacteristicItem(
+                        $item['id'], 
+                        $item['catalog_name'], 
+                        $item['characteristic_name'], 
+                        $item['formatter'], 
+                        $item['characteristic_description'], 
+                        $item['link'], 
+                        $item['link_value'],
+                        $item['value'],
+                        $this,
+                        array(
+                            "createLinks" => isset($params['createLinks']) ? $params['createLinks'] : null
+                        )
+                    );
+                }
+            }
+        }
+        
+        if ($params['cache'] == true)
+            Yii::app()->cache->set("goods.characteristics" . serialize($params) . $ids, $result, 60 * 60 * 12);
+        
         return $result;
     }
 

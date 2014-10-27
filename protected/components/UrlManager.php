@@ -1,7 +1,7 @@
 <?php
 class UrlManager extends CUrlManager
 {
-	/**
+    /**
 	 * Преобразует любой текст в транслит для ссылки
 	 * @param string $str
 	 * @return string

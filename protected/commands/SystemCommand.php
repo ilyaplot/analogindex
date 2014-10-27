@@ -156,7 +156,7 @@ class SystemCommand extends ConsoleCommand
         }
         echo PHP_EOL;
     }
-    
+
     public function actionFillProcessors()
     {
         $criteria = new CDbCriteria();
@@ -166,20 +166,18 @@ class SystemCommand extends ConsoleCommand
         $criteria->order = "value";
         $processors = GoodsCharacteristics::model()->findAll($criteria);
         $cnt = 0;
-        foreach ($processors as $processor)
-        {
-            if ($processor->characteristic > 2)
-            {
+        foreach ($processors as $processor) {
+            if ($processor->characteristic > 2) {
                 $model = new Processors("fill");
                 $model->name = $processor->value;
                 if ($model->validate())
                     $model->save();
                 $cnt++;
-                echo $cnt." - ".$processor->characteristic." - ".str_replace("\t", " ", $processor->value).PHP_EOL;
+                echo $cnt . " - " . $processor->characteristic . " - " . str_replace("\t", " ", $processor->value) . PHP_EOL;
             }
         }
     }
-    
+
     public function actionFillGPU()
     {
         $criteria = new CDbCriteria();
@@ -189,37 +187,32 @@ class SystemCommand extends ConsoleCommand
         $criteria->order = "value";
         $processors = GoodsCharacteristics::model()->findAll($criteria);
         $cnt = 0;
-        foreach ($processors as $processor)
-        {
-            if ($processor->characteristic > 2)
-            {
+        foreach ($processors as $processor) {
+            if ($processor->characteristic > 2) {
                 $model = new Gpu("fill");
                 $model->name = $processor->value;
                 if ($model->validate())
                     $model->save();
                 $cnt++;
-                echo $cnt." - ".$processor->characteristic." - ".str_replace("\t", " ", $processor->value).PHP_EOL;
+                echo $cnt . " - " . $processor->characteristic . " - " . str_replace("\t", " ", $processor->value) . PHP_EOL;
             }
         }
     }
 
     public function actionCharacteristicsLinks()
     {
-        $reviews = Reviews::model()->findAll();
-        $rules = CharacteristicsRules::model()->findAll();
-        $limit = 10;
-        foreach ($reviews as $review) {
-            foreach ($rules as $rule) {
-                if (preg_match_all("~{$rule->rule}~", $review->content, $matches))
-                {
-                    echo $review->content.PHP_EOL;
-                    var_dump($matches);
-                    echo PHP_EOL;
-                    $limit--;
-                    if (!$limit)
-                        exit();
+        $products = Goods::model()->findAll();
+        foreach ($products as $product) {
+            $rules = array();
+            $characteristics = $product->getCharacteristics($product->generalCharacteristics, true);
+            foreach ($characteristics as $catalog) {
+                foreach ($catalog as $characteristic) {
+                    var_dump($characteristic);
+                    exit();
+                    $rules[$characteristic['id']] = $characteristic['value'];
                 }
             }
+            var_dump($rules);
         }
     }
 

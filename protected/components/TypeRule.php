@@ -4,6 +4,8 @@ class TypeRule extends CBaseUrlRule
 {
 
     public $urlSuffix;
+    // Специально для консольных приложений
+    public $hasHostInfo = true;
 
     public function createUrl($manager, $route, $params, $ampersand)
     {
@@ -16,7 +18,9 @@ class TypeRule extends CBaseUrlRule
         if (empty($params['type']))
             return false;
         // Строим базовый url
-        $url = "//analogindex.{$params['language']}/type/{$params['type']}";
+        
+        $url = "http://analogindex.{$params['language']}/type/{$params['type']}";
+        
         // Удаляем параметры, которые уже были применены
         unset($params['language'], $params['type']);
 
@@ -29,6 +33,7 @@ class TypeRule extends CBaseUrlRule
 
         return $url . $manager->urlSuffix;
     }
+
 
     public function parseUrl($manager, $request, $pathInfo, $rawPathInfo)
     {
