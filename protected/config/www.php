@@ -64,6 +64,21 @@ return array(
         //),
         'request' => array(
         //'enableCsrfValidation'=>true,
-        )
+        ),
+        'log'=>array(
+            'class'=>'CLogRouter',
+            'routes'=>array(
+                array( // -- CWebLogRoute ---------------------------
+                    'class'=>'CWebLogRoute',
+                    'levels'=>'error, warning, trace, profile, info',
+                    'enabled'=>false,
+                ),
+                array( // -- CProfileLogRoute -----------------------
+                    'class'=>'CProfileLogRoute',
+                    'levels'=>'profile',
+                    'enabled'=>true,
+                ),
+            ),
+        ),
     ),
 );
