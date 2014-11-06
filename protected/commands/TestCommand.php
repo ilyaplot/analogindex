@@ -148,7 +148,7 @@ class TestCommand extends CConsoleCommand
     
     public function replaceRecursive($content, $pattern, $value, $id)
     {
-        $exp = "~(<[^aA][^>]*?>[^<\"]*?[\s\.\,!\?\t\n]{1})({$pattern})([\s\.\,!\?\t\n]{1}[^>\"]*?<)~iu";
+        $exp = "~(<[^aA][^>]*?>[^<\"]*?[^\w\d\-:])({$pattern})([^\w\d\-][^>\"]*?<)~iu";
         //"~(.{0,10}[^>\"/\-\w\d\._\[\]#]{1})({$pattern})([^<\"/\-\w\d_\[\]#]{1}.{0,10})~iu"
         if (preg_match_all($exp, $content, $matches, PREG_SET_ORDER)) {
             $match = $matches[0];
