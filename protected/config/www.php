@@ -36,7 +36,7 @@ return array(
             'developerKey' => 'AIzaSyBMrwCo6ilsyiAzJjhtXccjqke6eU-Pd3Q',
         ),
         'format' => array(
-            'class' => 'Formatter',
+            'class' => 'application.components.Formatter',
         ),
         'urlManager' => require dirname(__FILE__) . '/url.php',
         'authManager' => array(

@@ -16,7 +16,7 @@ return array(
     'preload'=>array('log'),
     'components'=>array(
         'format'=>array(
-            'class'=>'Formatter',
+            'class' => 'application.components.Formatter',
         ),
         'log'=>array(
             'class'=>'CLogRouter',
