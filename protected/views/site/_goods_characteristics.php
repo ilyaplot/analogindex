@@ -6,8 +6,23 @@ $characteristics = $characteristicsLinks->getCharacteristics($product->type_data
     <section class="infoGoodItem_content">
         <h3 class="infoGoodItem-infoTitle"><?php echo Yii::t('goods', 'Характеристики')?></h3>
         <div class="item-set-bl">
+            <?php if (!empty($product->synonims)):?>
+                <div class="item-set-bl_title"><?php echo Yii::t('goods', 'Другие наименования')?></div>
+                    <div class="item-set-bl_lineText clr">
+                    <?php $synonims = [] ?>
+                    <?php foreach ($product->synonims as $synonim):?>
+                        <?php if ($synonim->visibled) :?>
+                        <?php $synonims[] = $product->brand_data->name." ".$synonim->name?>
+                        <?php endif;?>
+                    <?php endforeach;?>
+                    <div class="flRight">
+                        <span>
+                            <?php echo implode(", ", $synonims)?>
+                        </span>
+                    </div>
+                </div>
+            <?php endif;?>
             <?php foreach ($characteristics as $catalog=>$items):?>
-            
                 <div class="item-set-bl_title"><?php echo $catalog;?></div>
                 <?php foreach ($items as $characteristic):?>
                     <div class="item-set-bl_lineText clr">

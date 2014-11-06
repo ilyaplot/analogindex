@@ -125,7 +125,7 @@
                         <?php endif; ?>
                         <div class="clear"></div>
                     </div>
-                    <?php $this->renderPartial("_goods_ characteristics", array("product" => $product)) ?>
+                    <?php $this->renderPartial("_goods_characteristics", array("product" => $product)) ?>
                     <div class="infoGoodItem-wp-news" id="item3">
                         <section class="infoGoodItem_content">
                             <h3 class="infoGoodItem-infoTitle"><?php echo Yii::t('goods', 'Новости') ?></h3>
@@ -213,7 +213,7 @@
                     <div class="infoGoodItem-wp-comments" id="item6">
                         <section class="infoGoodItem_content view-title">
                             <div class="infoGoodItem_title-2 clr">
-                                <div class="flLeft"><h3 class="infoGoodItem-infoTitle"><?php echo Yii::t('goods', 'FAQ') ?></h3></div> 
+                                <div class="flLeft"><h3 class="infoGoodItem-infoTitle"><?php echo Yii::t('goods', 'FAQ') ?></h3><small><?php echo $product->id?></small></div> 
                             </div>
                         </section>
 

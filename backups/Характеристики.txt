@@ -20,7 +20,11 @@
 5	Операционная система +
 	.14	Наименование +
 6	Связь +
-	.15	Стандарты GSM +
+	//.15	Стандарты GSM +
+        .32     2G +
+        .33     3G +
+        .34     4G (LTE) +
+        .35     5G +
 	.17	SIM +
 	.18	Wi-Fi +
 	.19	Bluetooth +
@@ -41,7 +45,6 @@
 10	Сенсоры и датчики
 	.30 +
 
-Разбить на 3g и 2g
 Анонс, статус (доступность) с датой, 
 плотность пикселей
 звук
@@ -50,3 +53,96 @@
 wifi hotspot
 usb
 особенности камеры
+
+
+array(48) {
+  string(23) "General.SIM::::Nano-SIM"
+  [7]=>
+  string(34) "General.Announced::::2014, October"
+  [8]=>
+  string(57) "General.Status::::Coming soon. Exp. release 2014, October"
+  [9]=>
+  string(63) "Body.Dimensions::::159.3 x 83 x 10.1 mm (6.27 x 3.27 x 0.40 in)"
+  [10]=>
+  string(30) "Body.Weight::::184 g (6.49 oz)"
+  [11]=>
+  string(28) "Body. ::::- Water resistant"
+  [12]=>
+  string(57) "Display.Type::::AMOLED capacitive touchscreen, 16M colors"
+  [13]=>
+  string(72) "Display.Size::::1440 x 2560 pixels, 5.96 inches (~493 ppi pixel density)"
+  [14]=>
+  string(25) "Display.Multitouch::::Yes"
+  [15]=>
+  string(45) "Display.Protection::::Corning Gorilla Glass 3"
+  [16]=>
+  string(50) "Sound.Alert types::::Vibration; MP3, WAV ringtones"
+  [17]=>
+  string(46) "Sound.Loudspeaker::::Yes, with stereo speakers"
+  [18]=>
+  string(23) "Sound.3.5mm jack::::Yes"
+  [19]=>
+  string(22) "Memory.Card slot::::No"
+  [20]=>
+  string(37) "Memory.Internal::::32/64 GB, 3 GB RAM"
+  [21]=>
+  string(16) "Data.GPRS::::Yes"
+  [22]=>
+  string(16) "Data.EDGE::::Yes"
+  [23]=>
+  string(101) "Data.Speed::::DC-HSDPA, 42 Mbps; HSDPA, 21 Mbps; HSUPA, 5.76 Mbps; LTE, Cat6, 50 Mbps UL, 300 Mbps DL"
+  [24]=>
+  string(82) "Data.WLAN::::Wi-Fi 802.11 a/b/g/n/ac, dual-band, Wi-Fi Direct, DLNA, Wi-Fi hotspot"
+  [25]=>
+  string(32) "Data.Bluetooth::::v4.1, A2DP, LE"
+  [26]=>
+  string(15) "Data.NFC::::Yes"
+  [27]=>
+  string(61) "Data.USB::::microUSB v2.0 (SlimPort), USB Host, USB On-the-go"
+  [28]=>
+  string(106) "Camera.Primary::::13 MP, 4128 x 3096 pixels, autofocus, optical image stabilization, dual-LED (ring) flash"
+  [29]=>
+  string(104) "Camera.Features::::Dual recording, geo-tagging, touch focus, face detection, photo sphere, panorama, HDR"
+  [30]=>
+  string(50) "Camera.Video::::2160p@30fps, optical stabilization"
+  [31]=>
+  string(24) "Camera.Secondary::::2 MP"
+  [32]=>
+  string(42) "Features.OS::::Android OS, v5.0 (Lollipop)"
+  [33]=>
+  string(43) "Features.Chipset::::Qualcomm Snapdragon 805"
+  [34]=>
+  string(43) "Features.CPU::::Quad-core 2.7 GHz Krait 450"
+  [35]=>
+  string(26) "Features.GPU::::Adreno 420"
+  [36]=>
+  string(70) "Features.Sensors::::Accelerometer, gyro, proximity, compass, barometer"
+  [37]=>
+  string(67) "Features.Messaging::::SMS(threaded view), MMS, Email, Push Mail, IM"
+  [38]=>
+  string(25) "Features.Browser::::HTML5"
+  [39]=>
+  string(20) "Features.Radio::::No"
+  [40]=>
+  string(40) "Features.GPS::::Yes, with A-GPS, GLONASS"
+  [41]=>
+  string(44) "Features.Java::::Yes, via Java MIDP emulator"
+  [42]=>
+  string(45) "Features.Colors::::Midnight Blue, Cloud White"
+  [43]=>
+  string(232) "Features. ::::- Wireless Charging (Qi-enabled)<br>
+- Active noise cancellation with dedicated mic<br>
+- MP4/H.264 player<br>
+- MP3/WAV/eAAC+ player<br>
+- Photo/video editor<br>
+- Document editor<br>
+- Voice memo/dial/commands"
+  [44]=>
+  string(50) "Battery. ::::Non-removable Li-Po 3220 mAh battery"
+  [45]=>
+  string(31) "Battery.Stand-by::::Up to 330 h"
+  [46]=>
+  string(31) "Battery.Talk time::::Up to 24 h"
+  [47]=>
+  string(95) "Misc.Price group::::<img src="http://cdn2.gsmarena.com/vv/price/pg9.gif" title="About 570 EUR">"
+}

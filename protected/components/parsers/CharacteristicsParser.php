@@ -60,7 +60,7 @@ class CharacteristicsParser
                     // Перебор языков характеристик
                     foreach ($this->_langs as $lang) {
                         // Выполняем регулярку
-                        if (preg_match("~{$pattern}~i", $line, $matches)) {
+                        if (preg_match("~{$pattern}~iu", $line, $matches)) {
                             //echo "PATTERN RUN {$pattern} {$lang}".PHP_EOL;
                             // Значение возвращает функция из правила
                             $value = $params['function']($matches, $lang);
@@ -79,6 +79,9 @@ class CharacteristicsParser
                                     $resultItem[$id . $lang]['values'] = array_merge($resultItem[$id . $lang]['values'], $value);
                                     if (isset($params['unique']))
                                         $resultItem[$id . $lang]['values'] = array_unique($resultItem[$id . $lang]['values'], SORT_STRING);
+                                    
+                                    if (isset($params['sort']))
+                                        sort($resultItem[$id . $lang]['values'], SORT_NATURAL);
                                 }
                             }
                             // Если получили результат, добавляем его к общему массиву

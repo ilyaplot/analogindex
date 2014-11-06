@@ -1,6 +1,6 @@
 <?php
 
-class GsmarenaCharacteristicsParser extends CharacteristicsParser
+class GsmarenaCharacteristicsParserTest extends CharacteristicsParser
 {
 
     public function getRules()

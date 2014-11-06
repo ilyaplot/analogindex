@@ -41,6 +41,13 @@ class Reviews extends CActiveRecord
         );
     }
     
+    public function rules()
+    {
+        return array(
+            array("content", "filter", 'filter'=>array($obj=new CHtmlPurifier(),'purify'))
+        );
+    }
+    
     public function beforeSave() {
         $this->preview = $this->getWords($this->content);
         return parent::beforeSave();

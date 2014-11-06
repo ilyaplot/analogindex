@@ -61,9 +61,9 @@ class SiteController extends Controller
         $product = Goods::model()->with(array(
                     "rating",
                     //"images",
-                    "synonims" => array(
-                        "on" => "synonims.visibled = 1"
-                    ),
+                    //"synonims" => array(
+                    //    "on" => "synonims.visibled = 1"
+                    //),
                     "primary_image",
                     "reviews" => array(
                         "select" => "reviews.link, reviews.id, reviews.preview, reviews.title, reviews.created",
@@ -261,9 +261,7 @@ class SiteController extends Controller
         $this->render("search", array("goods" => $goods, "pages" => $pages));
     }
 
-    public function actionType($type, $brands = array(), $os = array(), 
-            $screensizes = array(), $cores = array(), $cpufreq = array(), 
-            $ram = array(), $processor = array(), $gpu=array())
+    public function actionType($type, $brands = array(), $os = array(), $screensizes = array(), $cores = array(), $cpufreq = array(), $ram = array(), $processor = array(), $gpu = array())
     {
         $brands = !empty($brands) ? explode(".", $brands) : array();
         $os = !empty($os) ? explode(".", $os) : array();
@@ -273,7 +271,7 @@ class SiteController extends Controller
         $ram = !empty($ram) ? explode(".", $ram) : array();
         $processor = !empty($processor) ? explode(".", $processor) : array();
         $gpu = !empty($gpu) ? explode(".", $gpu) : array();
-        
+
         $urlOptions = array(
             "language" => Language::getCurrentZone(),
             "type" => $type,
@@ -326,7 +324,7 @@ class SiteController extends Controller
             $filterProcessor = array_unique($filterProcessor);
             $urlOptions['processor'] = implode(".", $filterProcessor);
         }
-        
+
         if ($filterGpu = Yii::app()->request->getPost("gpu")) {
             array_multisort($filterGpu);
             $filterGpu = array_unique($filterGpu);
@@ -338,7 +336,7 @@ class SiteController extends Controller
             Yii::app()->request->redirect($url);
             exit();
         }
-        
+
         $brandsCriteria = new CDbCriteria();
         $brandsCriteria->order = "t.name asc";
         $brandsCriteria->group = "t.id";
@@ -366,7 +364,7 @@ class SiteController extends Controller
             "order" => "t.name asc",
             "select" => array("name", "link"),
         ));
-        
+
         $screenSizesList = array(
             (object) array(
                 "name" => " до 5 дюймов",
@@ -471,7 +469,7 @@ class SiteController extends Controller
         if (!empty($processor)) {
             $criteria->addInCondition("processor", $processor);
         }
-        
+
         if (!empty($gpu)) {
             $criteria->addInCondition("gpu", $gpu);
         }
@@ -517,4 +515,13 @@ class SiteController extends Controller
             "pages" => $pages,
         ));
     }
+
+    public function actionTest()
+    {
+        $reviews = Reviews::model()->findAll();
+        foreach ($reviews as $review) {
+            echo $review->id . ' <a href="' . Yii::app()->createUrl("site/review", array("goods" => $review->goods_data->brand_data->link . "-" . $review->goods_data->link, "link" => $review->link, "id" => $review->id, "language" => Language::getCurrentZone())) . '" class="link-replyView">' . $review->title . '</a><br />' . PHP_EOL;
+        }
+    }
+
 }

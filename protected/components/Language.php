@@ -10,12 +10,13 @@ class Language
     
     public static function getZoneForLang($lang)
     {
-        
+        $langs = array_flip(self::$zones);
+        return isset($langs[$lang]) ? $langs[$lang] : null;
     }
 
     public static function getLangForZone($zone)
     {
-        
+        return isset(self::$zones[$zone]) ? self::$zones[$zone] : null;
     }
     
     public static function getCurrentZone()

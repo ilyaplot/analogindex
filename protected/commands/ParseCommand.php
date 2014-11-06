@@ -25,11 +25,11 @@ class ParseCommand extends CConsoleCommand
             $brand = trim(str_replace(" phones", "", pq($html)->find("#all-phones-small h2 a")->text()));
 
         $brand = trim(str_replace(" PHONES", "", $brand));
-
+        echo "Brand: {$brand}".PHP_EOL;
         // Модель
         $name = pq($html)->find("#ttl h1")->text();
         $name = trim(str_replace($brand, "", $name));
-
+        echo "Model: {$name}".PHP_EOL;
         // Синонимы
         $synonimsText = pq($html)->find("#specs-list p:first-child")->html();
         $synonimsText = explode("<br>", $synonimsText);
@@ -53,7 +53,7 @@ class ParseCommand extends CConsoleCommand
         } else {
             $synonims = array();
         }
-
+        echo "Synonims: ".implode(", ",$synonims).PHP_EOL;
         // Характеристики
         $characteristics_tables = pq($html)->find("#specs-list > table");
         $characteristicsLines = array();
@@ -128,6 +128,21 @@ class ParseCommand extends CConsoleCommand
             }
         }
 
+        
+        foreach ($synonims as $synonim)
+        {
+            echo $synonim.PHP_EOL;
+            $synModel = new GoodsSynonims();
+            $synModel->goods = $goods->id;
+            $synModel->name = $synonim;
+            $synModel->visibled = 1;
+            if ($synModel->validate()) {
+                $synModel->save();
+            } else {
+                var_dump($synModel->getErrors());
+            }
+        }
+        
         foreach ($result as $characteristic) {
             $goodsCharacteristic = new GoodsCharacteristics();
             $goodsCharacteristic->goods = $goods->id;
@@ -149,7 +164,7 @@ class ParseCommand extends CConsoleCommand
         }
 
         if ($imagesContent) {
-            echo "Images..." . PHP_EOL;
+            //echo "Images..." . PHP_EOL;
             $html = phpQuery::newDocumentHTML($imagesContent);
             $pictures = pq($html)->find("#pictures p");
             foreach ($pictures as $picture) {
@@ -197,7 +212,7 @@ class ParseCommand extends CConsoleCommand
                         $goodsImage->image = $imageModel->id;
                         $goodsImage->save();
                     } else {
-                        echo "Image exists" . PHP_EOL;
+                        //echo "Image exists" . PHP_EOL;
                     }
                 }
             }
