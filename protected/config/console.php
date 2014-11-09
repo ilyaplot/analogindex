@@ -13,6 +13,12 @@ return array(
         'application.helpers.*'
      ),
     //'basePath' => dirname(__FILE__) . DIRECTORY_SEPARATOR ,
+    'modules' => array('yml'),
+    'commandMap' => array(
+        'yml_download'=>array(
+            'class'=>'application.modules.yml.commands.DownloadCommand',
+        ),
+    ),
     'preload'=>array('log'),
     'components'=>array(
         'format'=>array(

@@ -6,6 +6,7 @@ return array(
     'urlSuffix' => '.html',
     'class' => 'UrlManager',
     'rules' => array(
+        'yml/manager/index'=>'yml/manager/index',
         'http://search.analogindex.<language:\w+>' => array('site/search', 'urlSuffix' => ''),
         'http://search.analogindex.<language:\w+>/lang' => 'site/language',
         'http://analogindex.<language:\w+>/lang' => 'site/language',

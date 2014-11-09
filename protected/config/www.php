@@ -13,6 +13,7 @@ return array(
         'application.helpers.*',
     ),
     'basePath' => dirname(__FILE__) . DIRECTORY_SEPARATOR . '..',
+    'modules' => array('yml'),
     'components' => array(
         'user' => array(
             'loginUrl' => array('user/login'),

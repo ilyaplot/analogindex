@@ -148,7 +148,7 @@ class TestCommand extends CConsoleCommand
     
     public function replaceRecursive($content, $pattern, $value, $id)
     {
-        $exp = "~(<[^aA][^>]*?>[^<\"]*?[^\w\d\-:])({$pattern})([^\w\d\-][^>\"]*?<)~iu";
+        $exp = "~(<[^aA][^>]*?>[^<\"]*?[^\w\d\-:])({$pattern})([^\w\d\-][^>\"]*?)~iu";
         //"~(.{0,10}[^>\"/\-\w\d\._\[\]#]{1})({$pattern})([^<\"/\-\w\d_\[\]#]{1}.{0,10})~iu"
         if (preg_match_all($exp, $content, $matches, PREG_SET_ORDER)) {
             $match = $matches[0];
@@ -324,4 +324,17 @@ class TestCommand extends CConsoleCommand
         }
     }
 
+    
+    public function actionTest()
+    {
+        $review = Reviews::model()->findByPk(1601);
+        $content =  $review->original;
+        $pattern = preg_quote("LG G2");
+        echo $content.PHP_EOL;
+        
+        $exp = "~(<[^aA][^>]*?>[^<\"]*?[^\w\d\-:])({$pattern})([^\w\d\-][^>\"]*?<)~iu";
+        echo $exp.PHP_EOL;
+        if (!preg_match($exp, $content))
+            echo "FAIL".PHP_EOL;
+    }
 }
