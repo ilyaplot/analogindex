@@ -9,7 +9,9 @@ class DownloadCommand extends CConsoleCommand
 
     public function actionIndex()
     {
-        $sources = YmlSources::model()->findAll();
+        $criteria = new CDbCriteria();
+        $criteria->condition = "status = 0";
+        $sources = YmlSources::model()->findAll($criteria);
         foreach ($sources as &$source) {
             $listUrl = $source->url;
             $listFile = "/inktomia/db/analogindex/yml/catalogs/{$source->id}.yml";
@@ -17,7 +19,7 @@ class DownloadCommand extends CConsoleCommand
             $fp = fopen ($listFile, 'w');
             $ch = curl_init($listUrl);
             curl_setopt($ch, CURLOPT_TIMEOUT, 1000);
-            curl_setopt($ch, CURLOPT_FILE, $fp); 
+            curl_setopt($ch, CURLOPT_FILE, $fp);
             curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
             curl_exec($ch); 
 
@@ -27,12 +29,14 @@ class DownloadCommand extends CConsoleCommand
                 echo "Ошибка: ".  curl_error($ch).PHP_EOL;
                 $source->status = 0;
                 $source->status_message = "Не удалось скачать файл.";
+                $source->status_time = new CDbExpression("NOW()");
                 $source->save();
                 continue;
             }
 
             curl_close($ch);
             fclose($fp);
+            $source->status_time = new CDbExpression("NOW()");
             $source->status_message = "Файл успешно загружен.";
             $source->status = 1;
             $source->save();

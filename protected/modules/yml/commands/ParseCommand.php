@@ -1,7 +1,8 @@
 <?php
 class ParseCommand extends CConsoleCommand
 {
-
+    protected $sourceId;
+    
     public function beforeAction($action, $params)
     {
         Yii::import("application.modules.yml.components.YmlParser");
@@ -11,30 +12,46 @@ class ParseCommand extends CConsoleCommand
 
     public function actionIndex()
     {
-        //yml_catalog.shop.categories
-        //yml_catalog.shop.offers.offer
-        //
+        $criteria = new CDbCriteria();
+        $criteria->condition = "status = 1";
         
-        $ymlFile = "/inktomia/db/analogindex/yml/catalogs/1.yml";
-        $parser = new YmlParser($ymlFile);
-        
+        $sources = YmlSources::model()->findAll($criteria);
+        foreach ($sources as &$source) {
+            echo "Parsing {$source->name}...".PHP_EOL;
+            $this->sourceId = $source->id;
+            $ymlFile = "/inktomia/db/analogindex/yml/catalogs/{$this->sourceId}.yml";
+            $parser = new YmlParser($ymlFile);
 
-        $parser->registerEvent("yml_catalog.shop.categories.category", function($elem, $items){
-            var_dump([$elem,$items]);
-        }, false);
-        
-        
-        $parser->registerEvent("yml_catalog.shop.offers.offer", function($elem, $items){
-            var_dump([$elem,$items]);
-           
-        }, true);
+            $parser->registerEvent("yml_catalog.shop.categories.category", function($elem, $items){
+                $model = (YmlCatalog::model()->countByAttributes(["source"=>$this->sourceId, "catalog_id"=>$elem->attrs['id']])) 
+                        ? YmlCatalog::model()->findByAttributes(["source"=>$this->sourceId, "catalog_id"=>$elem->attrs['id']]) :
+                        new YmlCatalog();
+                $model->source = $this->sourceId;
+                $model->catalog_id = $elem->attrs['id'];
+                $model->parent_id = $elem->attrs['parentId'];
+                $model->name = $elem->data;
+                $model->save();
+                
+            }, false);
 
-        $parser->run();
+
+            $parser->registerEvent("yml_catalog.shop.offers.offer", function($elem, $items){
+                //var_dump([$elem,$items]);
+            }, true);
+
+            $parser->run();
+            unset($parser);
+            $source->status_time = new CDbExpression("NOW()");
+            $source->status_message = "Файл успешно импортирован.";
+            $source->status = 2;
+            $source->save();
+        }
     }
     
     public function actionList()
     {
         $listFile = "/inktomia/db/analogindex/yml/lists/1.yml";
+        
         $parser = new YmlParser($listFile);
         $parser->registerEvent("list.adv", function($elem, $items){
             
@@ -45,6 +62,7 @@ class ParseCommand extends CConsoleCommand
             $model->url = $items['url']->data;
             $model->name = $items['name']->data;
             $model->save();
+            
         }, true);
         $parser->run();
     }
