@@ -18,6 +18,9 @@ return array(
         'yml_download'=>array(
             'class'=>'application.modules.yml.commands.DownloadCommand',
         ),
+        'yml_parse'=>array(
+            'class'=>'application.modules.yml.commands.ParseCommand',
+        ),
     ),
     'preload'=>array('log'),
     'components'=>array(
