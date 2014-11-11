@@ -36,7 +36,41 @@ class ParseCommand extends CConsoleCommand
 
 
             $parser->registerEvent("yml_catalog.shop.offers.offer", function($elem, $items){
-                //var_dump([$elem,$items]);
+                if (!empty($items['categoryId'])) {
+                    if ($catalog = YmlCatalog::model()->findByAttributes([
+                        "source"=>$this->sourceId,
+                        "catalog_id"=>$items['categoryId']->data,
+                        "enabled"=>true
+                    ]) && !empty($elem->attrs['id'])) {
+                        $model = (YmlItems::model()->countByAttributes(["source"=>$this->sourceId, "offer_id"=>$elem->attrs['id']])) 
+                            ? YmlItems::model()->findByAttributes(["source"=>$this->sourceId, "offer_id"=>$elem->attrs['id']]) :
+                            new YmlItems();
+                        $model->source = $this->sourceId;
+                        $model->offer_id = $elem->attrs['id'];
+                        $model->available = !empty($elem->attrs['available']) ? (bool) $elem->attrs['available'] : false;
+                        $model->ppc = !empty($elem->attrs['ppc']) ? (float) $elem->attrs['ppc'] : 0;
+                        $model->category_id = $items['categoryId']->data;
+                        $model->url = !empty($items['url']->data) ? $items['url']->data : '';
+                        $model->price = !empty($items['price']->data) ? (float) $items['price']->data : 0;
+                        $model->currency = !empty($items['currencyId']->data) ? $items['currencyId']->data : '';
+                        $model->picture = !empty($items['picture']->data) ? $items['picture']->data : '';
+                        $model->name = !empty($items['name']->data) ? $items['name']->data : ''; 
+                        $model->description = !empty($items['description']->data) ? $items['description']->data : ''; 
+                        
+                        if (empty($model->name) && !empty($items['typePrefix']->data) && !empty($items['vendor']->data) && !empty($items['model']->data)) {
+                            $model->name = $items['typePrefix']->data." ".$items['vendor']->data." ".$items['model']->data;
+                        } else if (empty($model->name) && !empty($items['vendor']->data) && !empty($items['model']->data)) {
+                            $model->name = $items['vendor']->data." ".$items['model']->data;
+                        }
+                        
+                        if (empty($model->name)) {
+                            var_dump([$elem,$items]);
+                        } else {
+                            echo (($model->isNewRecord) ? "Added " : "Updated").": ".$model->name.PHP_EOL;
+                            $model->save();
+                        }
+                    }
+                }
             }, true);
 
             $parser->run();

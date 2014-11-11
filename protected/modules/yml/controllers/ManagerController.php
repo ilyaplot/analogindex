@@ -14,6 +14,7 @@ class ManagerController extends CController
         } else {
             if (Yii::app()->request->getPost("catalogs-save")) {
                 YmlCatalog::model()->setChecked($catalog, (array) Yii::app()->request->getPost("catalogs"));
+                YmlSources::model()->updateByPk($catalog, ["status"=>1]);
             }
             $data = YmlCatalog::model()->getTree($catalog);
         }

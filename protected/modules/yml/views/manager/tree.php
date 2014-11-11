@@ -13,7 +13,7 @@
         });
     });
 </script>
-<?php echo CHtml::beginForm('', 'get')?>
+<?php echo CHtml::beginForm(Yii::app()->createUrl("/yml/manager/index"), 'get')?>
 <?php echo CHtml::label("Выбор каталога: ", "sources");?>
 <?php echo CHtml::dropDownList("catalog", $catalog, $sources, ["id"=>"catalog-select"]);?>
 <?php echo CHtml::endForm();?>
