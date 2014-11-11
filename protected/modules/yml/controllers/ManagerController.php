@@ -3,26 +3,23 @@
 
 class ManagerController extends CController
 {
-    public function actionIndex()
-    {
-        $my_data = array(
-            array(
-                'text'     => 'Node 1',
-                'expanded' => true, // будет развернута ветка или нет (по умолчанию)
-                    'children' => array(
-                         array(
-                            'text'     => 'Node 1.1',
-                         ),   
-                         array(
-                            'text'     => 'Node 1.2',
-                         ),   
-                         array(
-                            'text'     => 'Node 1.3',
-                         ),             
-                    )
-            ),
-        );
+    public $layout = "yml";
 
-        $this->widget('CTreeView', array('data' => $my_data));
+    public function actionIndex($catalog = null)
+    {
+        set_time_limit(300);
+        
+        if (!$catalog) {
+            $data = [];
+        } else {
+            if (Yii::app()->request->getPost("catalogs-save")) {
+                YmlCatalog::model()->setChecked($catalog, (array) Yii::app()->request->getPost("catalogs"));
+            }
+            $data = YmlCatalog::model()->getTree($catalog);
+        }
+        
+        $sources = YmlSources::model()->getList();
+        
+        $this->render("tree", ["data"=>$data, "sources"=>$sources, "catalog"=>$catalog]);
     }
 }
