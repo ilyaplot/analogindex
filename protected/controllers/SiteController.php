@@ -518,10 +518,19 @@ class SiteController extends Controller
 
     public function actionTest()
     {
+        $colors = Colors::model()->getAll(false);
+        echo "<table>";
+        foreach ($colors as $color) {
+            echo "<tr style='padding: 1px; background-color: {$color->code};'><td>{$color->ru}</td><td>{$color->en}</td></tr>";
+        }
+        echo "</table>";
+        /**
         $reviews = Reviews::model()->findAll();
         foreach ($reviews as $review) {
             echo $review->id . ' <a href="' . Yii::app()->createUrl("site/review", array("goods" => $review->goods_data->brand_data->link . "-" . $review->goods_data->link, "link" => $review->link, "id" => $review->id, "language" => Language::getCurrentZone())) . '" class="link-replyView">' . $review->title . '</a><br />' . PHP_EOL;
         }
+         * 
+         */
     }
 
 }

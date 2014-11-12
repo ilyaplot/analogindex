@@ -61,9 +61,7 @@ class ParseCommand extends CConsoleCommand
                         $model->model = !empty($items['model']->data) ? $items['model']->data : ''; 
                         
                         
-                        if (empty($model->name) && !empty($items['typePrefix']->data) && !empty($items['vendor']->data) && !empty($items['model']->data)) {
-                            $model->name = $items['typePrefix']->data." ".$items['vendor']->data." ".$items['model']->data;
-                        } else if (empty($model->name) && !empty($items['vendor']->data) && !empty($items['model']->data)) {
+                        if (empty($model->name) && !empty($items['vendor']->data) && !empty($items['model']->data)) {
                             $model->name = $items['vendor']->data." ".$items['model']->data;
                         }
                         

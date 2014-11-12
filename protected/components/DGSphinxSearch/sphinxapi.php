@@ -949,7 +949,7 @@ class SphinxClient
 	/// and return the search results
 	function Query ( $query, $index="*", $comment="" )
 	{
-		assert ( empty($this->_reqs) );
+		//assert ( empty($this->_reqs) );
 
 		$this->AddQuery ( $query, $index, $comment );
 		$results = $this->RunQueries ();

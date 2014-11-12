@@ -160,5 +160,21 @@ class Formatter extends CFormatter
     {
         return $value;
     }
+    
+    public function formatColors($values) 
+    {
+        $language = Yii::app()->language;
+        $values = json_decode($values);
+        $criteria = new CDbCriteria();
+        $criteria->order = "{$language} asc";
+        $criteria->condition = "id in (".implode(", ", $values).")";
+        $colors = Colors::model()->cache(60*60*48)->findAll($criteria);
+        $result = [];
+        foreach ($colors as $color) {
+            $result[]= "<span class=\"color-label\" style=\"background-color: {$color->code};\">{$color->$language}</span> ";
+        }
+        $result = implode(", ", $result);
+        return $result;
+    }
 
 }

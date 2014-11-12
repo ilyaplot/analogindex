@@ -325,106 +325,6 @@ class TestCommand extends CConsoleCommand
     }
 
     
-    public function actionTest()
-    {
-        $review = Reviews::model()->findByPk(1601);
-        $content =  $review->original;
-        $pattern = preg_quote("LG G2");
-        echo $content.PHP_EOL;
-        
-        $exp = "~(<[^aA][^>]*?>[^<\"]*?[^\w\d\-:])({$pattern})([^\w\d\-][^>\"]*?<)~iu";
-        echo $exp.PHP_EOL;
-        if (!preg_match($exp, $content))
-            echo "FAIL".PHP_EOL;
-    }
-    
-    
-    public function actionTrends()
-    {
-        $service = "trendspro";
-        $serviceUrl = "http://www.google.com/trends/";
-        $downloadUrl = $serviceUrl + "trendsReport?";
-        $useragent = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0";
-        $headers = [
-            "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Accept-Language: en-gb,en;q=0.5",
-            "Accept-Encoding: gzip, deflate",
-            "Connection: keep-alive",
-        ];
-        $loginUrl = 'https://accounts.google.com/ServiceLogin?service='.$service.'&passive=1209600&continue='.$serviceUrl.'&followup='.$serviceUrl;
-        $authUrl = 'https://accounts.google.com/accounts/ServiceLoginAuth';
-        
-        $ch = curl_init($loginUrl);
-        curl_setopt($ch, CURLOPT_COOKIE, "version=0; name='I4SUserLocale'; value='en_US'; port=None; port_specified=False; domain='www.google.com'; domain_specified=False; domain_initial_dot=False; path='/trends'; path_specified=True; secure=False; expires=None; discard=False; comment=None; comment_url=None; rest=None");
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $form = curl_exec($ch);
-        $html = phpQuery::newDocumentHTML($form);
-        $inputs = pq($html)->find("#gaia_loginform input");
-        $fields = [];
-        foreach ($inputs as $input) {
-            $fields[pq($input)->attr("name")] = pq($input)->val();
-        }
-        $fields['Email'] = "ilyaplot@gmail.com";
-        $fields['Passwd'] = "3qeruj3qeruj";
-        curl_setopt($ch, CURLOPT_URL, $authUrl);
-        curl_setopt($ch, CURLOPT_COOKIE, "version=0; name='PREF'; value=''; port=None; port_specified=False; domain='www.google.com'; domain_specified=False; domain_initial_dot=False; path='/trends'; path_specified=True; secure=False; expires=None; discard=False; comment=None; comment_url=None; rest=None");
-        curl_setopt($ch, CURLOPT_COOKIEJAR, "/home/ilyaplot/cookie.txt");
-        curl_setopt($ch, CURLOPT_COOKIEFILE, "/home/ilyaplot/cookie.txt");
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
-        curl_setopt($ch, CURLOPT_COOKIESESSION, true);
-        echo curl_exec($ch);
-        
-        /**
-         * '''
-        Authenticate to Google:
-        1 - make a GET request to the Login webpage so we can get the login form
-        2 - make a POST request with email, password and login form input values
-        '''
-        
-        # Make sure we get CSV results in English
-        ck = Cookie(version=0, name='I4SUserLocale', value='en_US', port=None, port_specified=False, domain='www.google.com', domain_specified=False,domain_initial_dot=False, path='/trends', path_specified=True, secure=False, expires=None, discard=False, comment=None, comment_url=None, rest=None)
-        ck_pref = Cookie(version=0, name='PREF', value='', port=None, port_specified=False, domain='www.google.com', domain_specified=False,domain_initial_dot=False, path='/trends', path_specified=True, secure=False, expires=None, discard=False, comment=None, comment_url=None, rest=None) 
-
-        self.cj = CookieJar()                            
-        self.cj.set_cookie(ck)
-        self.cj.set_cookie(ck_pref)
-        self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cj))
-        self.opener.addheaders = self.headers
-        
-        # Get all of the login form input values
-        find_inputs = etree.XPath("//form[@id='gaia_loginform']//input")
-        try:
-            #
-            resp = self.opener.open(self.url_login)
-            
-            if resp.info().get('Content-Encoding') == 'gzip':
-                buf = StringIO( resp.read())
-                f = gzip.GzipFile(fileobj=buf)
-                data = f.read()
-            else:
-                data = resp.read()
-            
-            xmlTree = etree.fromstring(data, parser=html.HTMLParser(recover=True, remove_comments=True))
-            
-            for input in find_inputs(xmlTree):
-                name = input.get('name')
-                if name:
-                    name = name.encode('utf8')
-                    value = input.get('value', '').encode('utf8')
-                    self.login_params[name] = value
-        except:
-            print("Exception while parsing: %s\n" % traceback.format_exc())    
-        
-        self.login_params["Email"] = username
-        self.login_params["Passwd"] = password
-        
-        params = urllib.urlencode(self.login_params)
-        self.opener.open(self.url_authenticate, params)
-         */
-    }
-    
     public function actionMarkList()
     {
         $connection = Yii::app()->db;
@@ -433,6 +333,48 @@ class TestCommand extends CConsoleCommand
         foreach ($res as $r)
         {
             echo $r['name'].PHP_EOL;
+        }
+    }
+    
+    /**
+     * Парсинг цветов с wiki
+     */
+    public function actionColors()
+    {
+        //http://ru.wikipedia.org/wiki/%D0%A1%D0%BF%D0%B8%D1%81%D0%BE%D0%BA_%D1%86%D0%B2%D0%B5%D1%82%D0%BE%D0%B2
+        $ch = curl_init("http://ru.wikipedia.org/wiki/%D0%A1%D0%BF%D0%B8%D1%81%D0%BE%D0%BA_%D1%86%D0%B2%D0%B5%D1%82%D0%BE%D0%B2");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $content = curl_exec($ch);
+        $html = phpQuery::newDocumentHTML($content);
+        $tables = pq($html)->find("table");
+        foreach ($tables as $table) {
+            $rows = pq($table)->find("tr");
+            foreach($rows as $row) {
+                $eng = pq($row)->find("th:eq(0)")->text();
+                $ru = pq($row)->find("td:eq(0)")->text();
+                $code = pq($row)->find("td:eq(2)")->text();
+                $code = preg_replace("/\[.*\]/isu", '', $code);
+                $ru = preg_replace("/\[.*\]/isu", '', $ru);
+                $ru = preg_replace("/\(.*\)/isu", '', $ru);
+                $ru = explode(", ", $ru);
+                
+                if (empty($eng) || empty($ru) || empty($code))
+                    continue;
+                foreach ($ru as $name) {
+                    $attributes = [
+                        'code'=>trim($code),
+                        'ru'=>trim($name),
+                        'en'=>trim($eng),
+                    ];
+                    if (!Colors::model()->countByAttributes($attributes)) {
+                        $color = new Colors();
+                        $color->code = $attributes['code'];
+                        $color->ru = $attributes['ru'];
+                        $color->en = $attributes['en'];
+                        //$color->save();
+                    }
+                }
+            }
         }
     }
 }

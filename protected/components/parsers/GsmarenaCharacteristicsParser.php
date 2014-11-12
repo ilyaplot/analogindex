@@ -39,6 +39,29 @@ class GsmarenaCharacteristicsParser extends CharacteristicsParser
                     }
                 )
             ),
+            36 => [
+                "Features.Colors::::(?P<colors>[\w\s,\-]+)" => [
+                    "function" => function($matches, $lang) {
+                        $dbColors = [];
+                        $colors = explode(",", $matches['colors']);
+                        $colors = array_map(function($item) {return trim($item);}, $colors);
+                        foreach ($colors as $color) {
+                            $criteria = new CDbCriteria();
+                            $criteria->select = "id";
+                            $criteria->condition = "en like :color";
+                            $criteria->params = ["color"=>$color];
+                            $criteria->limit = 1;
+                            $dbColor = Colors::model()->find($criteria);
+                            if (!empty($dbColor->id)) {
+                                $dbColors[] = $dbColor->id;
+                            }
+                        }
+                        $dbColors = array_unique($dbColors);
+                       
+                        return $dbColors;
+                    }
+                ]
+            ],
             // Размеры (в д ш)
             4 => array(
                 "Body.Dimensions::::(?P<h>[\d\.]+) x (?P<l>[\d\.]+) x (?P<w>[\d\.]+)\smm.*" => array(
