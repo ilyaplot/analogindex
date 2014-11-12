@@ -2,6 +2,18 @@
 
 class YmlCatalog extends CActiveRecord
 {
+    /**
+     * Массив всех категорий category_id=>item
+     * @var array
+     */
+    
+    protected $treeItems = [];
+    /**
+     * Массив подчинения категорий parent_id=>[catalog_id,...]
+     * @var array
+     */
+    protected $parentItemsKeys = [];
+    
     
     public static function model($className = __CLASS__)
     {
@@ -13,24 +25,44 @@ class YmlCatalog extends CActiveRecord
         return "{{yml_catalog}}";
     }
     
-    public function getChildren($parent, $source=null)
+    public function getChildren($parent)
     {
-        $condition = "parent_id = :parent";
-        $params = ["parent"=>$parent];
-        if ($source !== null) {
-            $condition.=" and source = :source";
-            $params['source'] = $source;
+        $items = [];
+        if (!empty($this->parentItemsKeys[$parent])) {
+            foreach ($this->parentItemsKeys[$parent] as $key) {
+                $items[$key] = $this->treeItems[$key];
+            }
         }
 
-        $criteria = new CDbCriteria();
-        $criteria->condition = $condition;
-        $criteria->params = $params;
-        return self::model()->findAll($criteria);
+        return $items;
     }
     
     public function getTree($source, $parent = 0)
     {
-        $items = $this->getChildren($parent, $source);
+        $criteria = new CDbCriteria();
+        $criteria->condition = "source = :source";
+        $criteria->params = ["source" => $source];
+        $criteria->order = "parent_id asc, id asc";
+        $this->treeItems = [];
+        $treeItems = self::model()->findAll($criteria);
+        foreach ($treeItems as $item) {
+            /**
+             * @todo Допилить!
+             */
+            $this->treeItems[$item->catalog_id] = $item;
+            $this->parentItemsKeys[(int) $item->parent_id][] = $item->catalog_id;
+        }
+        unset ($treeItems);
+        $items = $this->getTreeRecursive($parent);
+
+        return $items;
+    }
+    
+    protected function getTreeRecursive($parent)
+    {
+ 
+        $items = $this->getChildren($parent);
+        
         $arrayItem = [];
         foreach ($items as &$item)
         {
@@ -40,12 +72,12 @@ class YmlCatalog extends CActiveRecord
                 "expanded" => (bool) $item->enabled,
             ];
             
-            $children = $this->getTree($source, $item->catalog_id);
-            
+            $children = $this->getTreeRecursive($item->catalog_id);
             if (!empty($children)) {
                 $arrayItem['children'] = $children;
             }
             $item = $arrayItem;
+            
         }
         return $items;
     }
