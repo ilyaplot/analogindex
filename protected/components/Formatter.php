@@ -165,6 +165,8 @@ class Formatter extends CFormatter
     {
         $language = Yii::app()->language;
         $values = json_decode($values);
+        if (empty($values))
+            return;
         $criteria = new CDbCriteria();
         $criteria->order = "{$language} asc";
         $criteria->condition = "id in (".implode(", ", $values).")";
