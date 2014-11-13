@@ -269,6 +269,12 @@ class Goods extends CActiveRecord
         
         return $result;
     }
+    
+    
+    public function merge($to, $from) 
+    {
+        
+    }
 
 }
 

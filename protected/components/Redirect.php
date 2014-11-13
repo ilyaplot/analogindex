@@ -11,7 +11,7 @@ class Redirect extends CBaseUrlRule
     {
         if ($redirect = Redirects::model()->findByAttributes(["from"=>$rawPathInfo])) {
             Yii::app()->request->redirect("http://analogindex.". Language::getCurrentZone()
-                ."/".$redirect->to, $redirect->code);
+                ."/".$redirect->to, true, $redirect->code);
         }
         return false;  
     }

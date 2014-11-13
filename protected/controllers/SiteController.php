@@ -49,12 +49,13 @@ class SiteController extends Controller
     public function actionGoods($language, $type, $brand, $link)
     {
         $type = GoodsTypes::model()->findByAttributes(array("link" => $type));
-        if (!$type)
+        if (!$type) 
             throw new CHttpException(404, Yii::t("errors", "Страница не найдена"));
 
         $brand = Brands::model()->findByAttributes(array("link" => $brand));
         if (!$brand)
             throw new CHttpException(404, Yii::t("errors", "Страница не найдена"));
+        
         $criteria = new CDbCriteria();
         $criteria->condition = "t.link = :link and t.brand = :brand and t.type = :type";
         $criteria->params = array("link" => $link, "brand" => $brand->id, "type" => $type->id);
@@ -71,8 +72,10 @@ class SiteController extends Controller
                     )
                 ))->find($criteria);
 
-        if (!$product)
-            throw new CHttpException(404, Yii::t("errors", "Страница не найдена"));
+        if (!$product) {
+            Yii::app()->request->redirect("/", true, 302);
+            exit();
+        }
 
 
         $this->setPageTitle($product->type_data->name->item_name . " " . $brand->name . " " . $product->name);
