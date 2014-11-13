@@ -6,6 +6,11 @@ return array(
     'urlSuffix' => '.html',
     'class' => 'UrlManager',
     'rules' => array(
+        'http://analogindex.<language:\w+>/<url:.*>' => [
+            'class' => 'application.components.Redirect',
+        ],
+        
+        
         'yml/manager/index'=>'yml/manager/index',
         'yml/manager/search'=>'yml/manager/search',
         'http://search.analogindex.<language:\w+>' => array('site/search', 'urlSuffix' => ''),
