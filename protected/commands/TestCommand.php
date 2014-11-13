@@ -377,4 +377,70 @@ class TestCommand extends CConsoleCommand
             }
         }
     }
+    
+    public function actionGoodsFilter()
+    {
+        $goods = Goods::model()->with(["brand_data"])->findAll();
+        $patterns = [
+            "/[^\d](?P<cut>\s\d+gb)/isu",
+            "/[^\d](?P<cut>\s\d+\sgb)/isu",
+            "/(?P<cut>\swi[\-\s]{0,1}fi)/isu",
+            "/(?P<cut>\sDual.SIM)/isu",
+            //"/galaxy.*(?P<cut>\sgt\-\w{1}\d{3,4})/isu",
+            //"/galaxy.*[^\w](?P<cut>t\-\w{1}\d{3,4})/isu",
+            //"/galaxy.*[^\w](?P<cut>g\-\w{1}\d{3,4})/isu",
+            //"/galaxy.*[^\w](?P<cut>g\-\w{1}\d{3,4})/isu",
+            //"/galaxy.*[^\w](?P<cut>i\d{4}\w{0,1})/isu",
+            //"/.*(?P<cut>\s4g[^b])/isu",
+            "/.*(?P<cut>\s\(\d{4}\))/isu",
+        ];
+        $colors = Colors::model()->findAll();
+        foreach ($colors as $color) {
+            $color = preg_quote($color->en);
+            //$patterns[] = "/(?P<cut>{$color})/isu";
+        }
+        
+        $count = 0;
+        foreach ($goods as &$product) {
+            // Если название товара - одно слово, пропускаем
+            if (preg_match("/^\w+$/isu", $product->name)) {
+                //echo $product->brand_data->name." - ".$product->name.PHP_EOL;
+                continue;
+            }
+            $detect = false;
+            $cuts = [];
+            foreach ($patterns as $pattern) {
+                
+                
+                if (preg_match($pattern, $product->name, $matches)) {
+                    $detect = true;
+                    $product->name = str_replace($matches['cut'], '', $product->name);
+                    $cuts[] = $matches['cut'];
+                    
+                }
+                
+            }
+            if ($detect) {
+                //if (Goods::model()->countByAttributes(["brand"=>$product->brand, "name"=>$product->name])) {
+                    $count++;
+                    echo $product->brand_data->name." ".$product->name." # ".implode(", ", $cuts).PHP_EOL;
+                //}
+            }
+        }
+        
+        echo $count.PHP_EOL;
+        
+    }
+    
+    
+    public function actionDeleteNotImages()
+    {
+        $query = "select id from ai_goods where id not in (select g.id from ai_goods g inner join ai_goods_images gi on g.id = gi.goods)";
+        $connection = Yii::app()->db;
+        $results = $connection->createCommand($query)->queryAll();
+        foreach($results as $result) {
+            echo $result['id'].PHP_EOL;
+            Goods::model()->deleteByPk($result['id']);
+        }
+    }
 }

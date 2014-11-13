@@ -200,7 +200,7 @@
                         <?php foreach ($product->comments as $comment): ?>
                             <div><?php echo $comment->text ?></div>
                         <?php endforeach; ?>
-                            <iframe width="500" height="290" scrolling="no" src="http://www.google.com/trends/fetchComponent?hl=ru&q=samsung+galaxy+s5,lg+g3,<?php echo urlencode($brand->name." ".$product->name)?>&cmpt=q&content=1&cid=TIMESERIES_GRAPH_0&export=5&w=500&h=330&date=today+12-m"></iframe>
+                            <iframe width="500" height="290" scrolling="no" src="http://www.google.com/trends/fetchComponent?hl=ru&q=<?php echo urlencode($brand->name." ".$product->name)?>&cmpt=q&content=1&cid=TIMESERIES_GRAPH_0&export=5&w=500&h=330&date=today+12-m"></iframe>
                         <?php if (Yii::app()->user->checkAccess(Users::ROLE_USER)): ?>
                             <section class="infoGoodItem_content">
                                 <div class="infoGoodItem_title-2 clr">
