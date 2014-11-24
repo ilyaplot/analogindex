@@ -21,6 +21,7 @@ return array(
             'allowAutoLogin' => true,
         ),
         'db' => require dirname(__FILE__) . '/mysql.php',
+        'teta'=>  require dirname(__FILE__).'/teta.php',
         'search' => array(
             'class' => 'SphinxSearch',
             'server' => '127.0.0.1',

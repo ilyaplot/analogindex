@@ -13,4 +13,5 @@ class UrlManager extends CUrlManager
 		$translit = transliterator_transliterate('Any-Latin; Lower()', $str);
 		return substr(preg_replace("~[^a-z0-9_\-]+~", "-", trim($translit)), 0, 200);
 	}
+    
 }

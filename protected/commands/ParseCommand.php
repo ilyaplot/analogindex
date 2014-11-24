@@ -6,6 +6,7 @@ class ParseCommand extends CConsoleCommand
     public function actionGsmArena()
     {
         $task = SourcesGsmarena::model()->with("file_data")->findByAttributes(array("completed" => 0));
+        $source_url = $task->url;
         if (!$task) {
             echo "No tasks for parse" . PHP_EOL;
             exit();
@@ -92,7 +93,7 @@ class ParseCommand extends CConsoleCommand
         $urlManager = new UrlManager();
         echo $search . PHP_EOL;
         $goods = Goods::model()->with("brand_data", "synonims")->find($criteria);
-        // Если что-то нашли
+        
         Yii::app()->language = 'ru';
         if (!$goods) {
             if (!$brandModel = Brands::model()->findByAttributes(array("name" => $brand))) {
@@ -111,6 +112,7 @@ class ParseCommand extends CConsoleCommand
                 }
             }
             $goods = new Goods();
+            
             $goods->brand = $brandModel->id;
             $goods->name = $name;
             $goods->link = $urlManager->translitUrl($name);
@@ -118,6 +120,7 @@ class ParseCommand extends CConsoleCommand
             echo $urlManager->translitUrl($name) . PHP_EOL;
             if ($goods->validate()) {
                 echo "Добавлен товар {$brand} {$name}" . PHP_EOL;
+                $goods->source_url = $source_url;
                 $goods->save();
             } else {
                 echo "Не добавлен товар {$brand} {$name}" . PHP_EOL;
@@ -126,6 +129,9 @@ class ParseCommand extends CConsoleCommand
                 $task->save();
                 return $this->actionGsmArena();
             }
+        } else {
+            $goods->source_url = $source_url;
+            $goods->save();
         }
 
         
@@ -480,4 +486,32 @@ class ParseCommand extends CConsoleCommand
         return $content;
     }
 
+    public function actionReviewsTags()
+    {
+        $reviews = Reviews::model()->findAll();
+        $criteria = new CDbCriteria();
+        $criteria->condition = "disabled = 0";
+        $tags = Tags::model()->findAll($criteria);
+        foreach ($reviews as $review) {
+            foreach ($tags as $tag) {
+                if ($this->hasTag($review->title." ".$review->content, $tag->name)) {
+                    $model = new ReviewsTags();
+                    $model->tag = $tag->id;
+                    $model->review = $review->id;
+                    if ($model->validate()) {
+                        $model->save();
+                        echo $tag->type."_".$tag->link.PHP_EOL;
+                    }
+                }
+            }
+        }
+        echo PHP_EOL;
+    }
+    
+    protected function hasTag($content, $tag) 
+    {
+        $pattern = preg_quote($tag, '/');
+        $exp = "/[^\w]{1}{$pattern}[^\w]{1}/isu";
+        return preg_match($exp, $content);
+    }
 }

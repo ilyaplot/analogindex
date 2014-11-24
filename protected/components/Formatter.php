@@ -164,9 +164,10 @@ class Formatter extends CFormatter
     public function formatColors($values) 
     {
         $language = Yii::app()->language;
-        $values = json_decode($values);
-        if (empty($values))
+        $values = json_decode($values, true);
+        if (empty($values) || !is_array($values)) {
             return;
+        }
         $criteria = new CDbCriteria();
         $criteria->order = "{$language} asc";
         $criteria->condition = "id in (".implode(", ", $values).")";

@@ -10,6 +10,7 @@ return array(
             'class' => 'application.components.Redirect',
         ],
         
+        'http://analogindex.<language:\w+>/tag/<type:[\w\_\-]+>_<tag:[\w\-]+>/reviews' => 'tag/reviews',
         
         'yml/manager/index'=>'yml/manager/index',
         'yml/manager/search'=>'yml/manager/search',

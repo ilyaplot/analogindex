@@ -20,6 +20,7 @@ class Reviews extends CActiveRecord
             "rating"=>array(self::HAS_ONE, "RatingsReviews", "review", 
                 "select"=>"AVG(rating.value) as value",
             ),
+            'tags'=>[self::HAS_MANY, 'ReviewsTags', 'review'],
             "goods_data"=>array(self::BELONGS_TO, "Goods", "goods"),
             "images"=>array(self::HAS_MANY, "ReviewsImages", "review"),
             "comments"=>array(self::HAS_MANY, "CommentsReviews", "review"),

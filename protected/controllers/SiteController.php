@@ -518,22 +518,44 @@ class SiteController extends Controller
             "pages" => $pages,
         ));
     }
-
-    public function actionTest()
+    
+    public function actionTest($query)
     {
-        $colors = Colors::model()->getAll(false);
-        echo "<table>";
-        foreach ($colors as $color) {
-            echo "<tr style='padding: 1px; background-color: {$color->code};'><td>{$color->ru}</td><td>{$color->en}</td></tr>";
-        }
-        echo "</table>";
-        /**
-        $reviews = Reviews::model()->findAll();
-        foreach ($reviews as $review) {
-            echo $review->id . ' <a href="' . Yii::app()->createUrl("site/review", array("goods" => $review->goods_data->brand_data->link . "-" . $review->goods_data->link, "link" => $review->link, "id" => $review->id, "language" => Language::getCurrentZone())) . '" class="link-replyView">' . $review->title . '</a><br />' . PHP_EOL;
-        }
-         * 
-         */
-    }
 
+        $searchCriteria = new stdClass();
+        $search = Yii::app()->search;
+
+
+
+        $pages = new CPagination(10000000000000);
+        $pages->pageSize = 10000000000000;
+        
+
+        $searchCriteria->paginator = $pages;
+       
+        $searchCriteria->from = 'topics_index';
+        try {
+            $query = $search->escape($query);
+            $searchCriteria->query = "{$query}";
+            $pages->applyLimit($searchCriteria);
+            $search->setMatchMode(SPH_MATCH_EXTENDED2);
+            $resIterator = $search->search($searchCriteria); // interator result
+        } catch (Exception $ex) {
+            
+        }
+        $items = [];
+        if (!empty($resIterator) && $resIterator->getTotal()) {
+            $pages->setItemCount($resIterator->getTotalFound());
+            $criteria = new CDbCriteria();
+            $criteria->select = "topic_id, topic_title";
+            $criteria->addInCondition("topic_id", $resIterator->getIdList());
+            $criteria->order = "FIELD(topic_id, ".implode($resIterator->getIdList()).")";
+            $items = Topics::model()->findAll($criteria);
+        }
+
+        foreach ($items as $item)
+        {
+            echo $item->topic_id.": ".$item->topic_title."<br />".PHP_EOL;
+        }
+    }
 }

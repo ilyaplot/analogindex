@@ -214,7 +214,11 @@
                     <div class="infoGoodItem-wp-comments" id="item6">
                         <section class="infoGoodItem_content view-title">
                             <div class="infoGoodItem_title-2 clr">
-                                <div class="flLeft"><h3 class="infoGoodItem-infoTitle"><?php echo Yii::t('goods', 'FAQ') ?></h3><small><?php echo $product->id?></small></div> 
+                                <div class="flLeft">
+                                    <h3 class="infoGoodItem-infoTitle"><?php echo Yii::t('goods', 'FAQ') ?></h3>
+                                    <small><?php //echo $product->id?></small>
+                                    <small><?php //echo $product->source_url?></small>
+                                </div> 
                             </div>
                         </section>
 

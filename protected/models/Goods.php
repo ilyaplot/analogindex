@@ -72,7 +72,8 @@ class Goods extends CActiveRecord
             "link" => Yii::t("model", "Ссылка"),
             "type" => Yii::t("model", "Тип"),
             "brand" => Yii::t("model", "Производитель"),
-            "is_modification" => Yii::t("model", "Модификация"),
+            "source_url" => Yii::t("model", "Url источника"),
+            "updated" => Yii::t("model", "Время последнего обновления"),
         );
     }
 
@@ -86,8 +87,13 @@ class Goods extends CActiveRecord
             array('name', 'unique', 'allowEmpty' => false),
             array('link', 'unique', 'allowEmpty' => false),
             array('brand', 'exist', 'allowEmpty' => false, 'attributeName' => 'id', 'className' => 'Brands'),
-            array('is_modification', 'boolean'),
         );
+    }
+
+    public function beforeSave()
+    {
+        $this->updated = new CDbExpression("NOW()");
+        return parent::beforeSave();
     }
 
     public function getPrimaryImage($size = null)
@@ -270,30 +276,4 @@ class Goods extends CActiveRecord
         return $result;
     }
     
-    
-    public function merge($to, $from) 
-    {
-        
-    }
-
 }
-
-/**
- * Сравнение моделей
- * 
- select CONCAT(b.name, ' ', g.name), gc.value as characteristic
-from ai_goods_characteristics gc 
-inner join ai_characteristics c on gc.characteristic = c.id 
-inner join ai_characteristics_names cn on c.id = cn.characteristic 
-inner join ai_characteristics_catalogs cc on c.catalog = cc.id 
-inner join ai_characteristics_catalogs_names ccn on ccn.catalog = cc.id 
-inner join ai_goods g on gc.goods = g.id
-inner join ai_brands b on g.brand = b.id
-where 
-ccn.lang='ru'
-and gc.lang = 'ru'
-and cn.lang = 'ru'
-and c.id = 8
-and gc.value > 1*1024*1024*1024 and gc.value < 2.1*1024*1024*1024 
-order by cc.priority desc, c.priority desc;
- */

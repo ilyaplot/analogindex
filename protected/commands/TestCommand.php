@@ -3,23 +3,6 @@
 class TestCommand extends CConsoleCommand
 {
 
-    public function actionCharacteristicItem()
-    {
-        //public function __construct($id, $catalog, $name, $formatter, $description, $raw, $product = null)
-        $item = new CharacteristicItem(1, "Пробный", "Тест", "formatSize", "Описание", "memory", "1024", Goods::model()->findByPk(1));
-        echo $item->getValue(true);
-        echo PHP_EOL;
-    }
-
-    public function actionIndex()
-    {
-        $product = Goods::model()->findByPk(1640);
-        $characteristics = $product->getCharacteristicsNew(array("in" => $product->generalCharacteristics, "createLinks" => true));
-        foreach ($characteristics as $characteristic) {
-            echo $characteristic->getValue(false) . " - " . $characteristic->getValue() . PHP_EOL;
-        }
-    }
-
     public function actionParse()
     {
         $reviews = Reviews::model()->with(array("goods_data"))->findAll();
@@ -432,15 +415,96 @@ class TestCommand extends CConsoleCommand
         
     }
     
-    
-    public function actionDeleteNotImages()
+    public function actionFillTags()
     {
-        $query = "select id from ai_goods where id not in (select g.id from ai_goods g inner join ai_goods_images gi on g.id = gi.goods)";
-        $connection = Yii::app()->db;
-        $results = $connection->createCommand($query)->queryAll();
-        foreach($results as $result) {
-            echo $result['id'].PHP_EOL;
-            Goods::model()->deleteByPk($result['id']);
+        $goods = Goods::model()->with(["brand_data", "type_data"])->findAll();
+        $brands = Brands::model()->findAll();
+            
+        /**
+         * Ссылки на товары
+         */
+        foreach ($goods as $item) {
+            $url = "http://".Yii::app()->createUrl("site/goods", [
+                'link' => $item->link,
+                'brand' => $item->brand_data->link,
+                'type' => $item->type_data->link,
+                'language' => Language::getZoneForLang('ru'),
+            ]);
+            $name = "{$item->brand_data->name} {$item->name}";
+            $tag = new Tags();
+            $tag->url = $url;
+            $tag->name = $name;
+            $tag->lang = 'ru';
+            $tag->save();
+
+            $url = "http://".Yii::app()->createUrl("site/goods", [
+                'link' => $item->link,
+                'brand' => $item->brand_data->link,
+                'type' => $item->type_data->link,
+                'language' => Language::getZoneForLang('en'),
+            ]);
+
+            $tag = new Tags();
+            $tag->url = $url;
+            $tag->name = $name;
+            $tag->lang = 'en';
+            $tag->save();
+
+            foreach ($item->synonims as $synonim) {
+                $name = "{$item->brand_data->name} {$synonim->name}";
+                $url = "http://".Yii::app()->createUrl("site/goods", [
+                    'link' => $product->link,
+                    'brand' => $product->brand_data->link,
+                    'type' => $product->type_data->link,
+                    'language' => Language::getZoneForLang('ru'),
+                ]);
+                $tag = new Tags();
+                $tag->url = $url;
+                $tag->name = $name;
+                $tag->lang = 'ru';
+                $tag->save();
+                
+                $url = "http://".Yii::app()->createUrl("site/goods", [
+                    'link' => $product->link,
+                    'brand' => $product->brand_data->link,
+                    'type' => $product->type_data->link,
+                    'language' => Language::getZoneForLang('en'),
+                ]);
+                
+                $tag = new Tags();
+                $tag->url = $url;
+                $tag->name = $name;
+                $tag->lang = 'en';
+                $tag->save();
+            }
+        }
+
+        /**
+         * Расставляем ссылки на бренды
+         */
+        foreach ($brands as $brand) {
+            $name = $brand->name;
+            $url = "http://".Yii::app()->createUrl("site/brand", [
+                "language" => Language::getZoneForLang('ru'),
+                "type" => $product->type_data->link,
+                "link" => $brand->link,
+            ]);
+            $tag = new Tags();
+            $tag->url = $url;
+            $tag->name = $name;
+            $tag->lang = 'ru';
+            $tag->save();
+            
+            $url = "http://".Yii::app()->createUrl("site/brand", [
+                "language" => Language::getZoneForLang('en'),
+                "type" => $product->type_data->link,
+                "link" => $brand->link,
+            ]);
+            $tag = new Tags();
+            $tag->url = $url;
+            $tag->name = $name;
+            $tag->lang = 'en';
+            $tag->save();
         }
     }
 }

@@ -215,5 +215,67 @@ class SystemCommand extends ConsoleCommand
             var_dump($rules);
         }
     }
+    
+    /**
+     * Создает несуществующие тэги
+     */
+    public function actionFillTags()
+    {
+        $brands = Brands::model()->findAll();
+        foreach ($brands as $brand) {
+            $model = new Tags();
+            $model->name = $brand->name;
+            $model->type = Tags::TYPE_BRAND;
+            if ($model->validate()) {
+                echo $brand->name.PHP_EOL;
+                $model->save();
+                $tag = $model->id;
+                $model = new BrandsTags();
+                $model->brand = $brand->id;
+                $model->tag = $tag;
+                if ($model->validate()) {
+                    $model->save();
+                }
+            }
+        }
+        unset($brand, $brands);
+        
+        $products = Goods::model()->with(["brand_data"])->findAll();
+        
+        foreach ($products as $product) {
+            $name = $product->brand_data->name." ".$product->name;
+            $model = new Tags();
+            $model->name = $name;
+            $model->type = Tags::TYPE_PRODUCT;
+            if ($model->validate()) {
+                echo $name.PHP_EOL;
+                $model->save();
+                $tag = $model->id;
+                $model = new GoodsTags();
+                $model->goods = $product->id;
+                $model->tag = $tag;
+                if ($model->validate()) {
+                    $model->save();
+                }
+                foreach ($product->synonims as $synonim) {
+                    $name = $product->brand_data->name." ".$synonim->name;
+                    echo $name.PHP_EOL;
+                    $model = new Tags();
+                    $model->name = $name;
+                    $model->type = Tags::TYPE_PRODUCT;
+                    if ($model->validate()) {
+                        $model->save();
+                        $tag = $model->id;
+                        $model = new GoodsTags();
+                        $model->goods = $product->id;
+                        $model->tag = $tag;
+                        if ($model->validate()) {
+                            $model->save();
+                        }
+                    }
+                }
+            }
+        }
+    }
 
 }

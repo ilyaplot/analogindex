@@ -39,6 +39,7 @@ return array(
             ),
         ),
         'db'=>  require dirname(__FILE__).'/mysql.php',
+        'teta'=>  require dirname(__FILE__).'/teta.php',
         'reviews'=>array(
             'connectionString' => 'mysql:host=localhost;dbname=reviews',
             'emulatePrepare' => true,

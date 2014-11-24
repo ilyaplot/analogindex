@@ -117,6 +117,19 @@
             <h1><?php echo $review->title ?></h1>
             <div class="review-content"><?php echo $review->content ?></div>
             <hr />
+            Тэги:
+            <ul class="tags">
+                <?php foreach ($review->tags as $tag):?>
+                <li>
+                    <a href="<?php echo Yii::app()->createUrl("tag/reviews", [
+                        'language'=>  Language::getCurrentZone(),
+                        'type'=>$tag->tag_data->type,
+                        'tag'=>$tag->tag_data->link,
+                    ])?>"><?=$tag->tag_data->name?></a>
+                </li>
+                <?php endforeach;?>
+            </ul>
+            <hr />
             <br />
             <?php foreach ($review->comments as $comment): ?>
                 <div><?php echo $comment->text ?></div>
