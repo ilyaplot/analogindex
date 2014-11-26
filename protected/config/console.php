@@ -21,6 +21,9 @@ return array(
         'yml_parse'=>array(
             'class'=>'application.modules.yml.commands.ParseCommand',
         ),
+        'news_import'=>array(
+            'class'=>'application.modules.news.commands.ImportCommand',
+        ),
     ),
     'preload'=>array('log'),
     'components'=>array(
@@ -60,6 +63,17 @@ return array(
             'Port'=>465,
             'CharSet'=>"utf-8",
             'SMTPAuth'=>true, 
+        ),
+        'search' => array(
+            'class' => 'SphinxSearch',
+            'server' => '127.0.0.1',
+            'port' => 9312,
+            'maxQueryTime' => 3000,
+            'enableProfiling' => 0,
+            'enableResultTrace' => 0,
+            'fieldWeights' => array(
+                'name' => 10000,
+            ),
         ),
         'urlManager' => require dirname(__FILE__) . '/url.php',
     ),

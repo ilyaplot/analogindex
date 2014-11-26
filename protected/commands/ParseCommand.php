@@ -508,10 +508,175 @@ class ParseCommand extends CConsoleCommand
         echo PHP_EOL;
     }
     
+    public function actionNewsTags()
+    {
+        $news = News::model()->findAll();
+        $criteria = new CDbCriteria();
+        $criteria->condition = "disabled = 0";
+        $tags = Tags::model()->findAll($criteria);
+        foreach ($news as $item) {
+            foreach ($tags as $tag) {
+                if ($this->hasTag($item->title." ".$item->content, $tag->name)) {
+                    $model = new NewsTags();
+                    $model->tag = $tag->id;
+                    $model->news = $item->id;
+                    if ($model->validate()) {
+                        $model->save();
+                        echo $tag->type."_".$tag->link.PHP_EOL;
+                    }
+                }
+            }
+        }
+        echo PHP_EOL;
+    }
+    
     protected function hasTag($content, $tag) 
     {
         $pattern = preg_quote($tag, '/');
         $exp = "/[^\w]{1}{$pattern}[^\w]{1}/isu";
         return preg_match($exp, $content);
     }
+    
+    
+    public function actionReviewLinks()
+    {
+        $reviews = Reviews::model()->with(array("goods_data"))->findAll();
+
+        $goods = Goods::model()->with(array(
+                "brand_data", 
+                "type_data", 
+                "synonims"
+            ))->findAll(array(
+            "order"=>"LENGTH(t.name) desc"
+        ));
+        
+        $brands = Brands::model()->findAll(array("condition"=>"t.id not in (167)"));
+        /**
+         * Перебираем отзывы
+         */
+        foreach ($reviews as $review) {
+            // Берем оригинал для обработки
+            $review->content = $review->original;
+
+            $product = $review->goods_data;
+                
+            
+
+            $characteristics = $product->getCharacteristicsNew(array("in" => $product->generalCharacteristics, "createLinks" => true));
+
+            /**
+             * Перебираем характеристики
+             */
+            foreach ($characteristics as $characteristic) {
+                // Слово для поиска
+                $keyword = $characteristic->getValue(false);
+                // Ссылка для замены
+                $value = $characteristic->getValue();
+                
+                if ($keyword == $value)
+                    continue;
+                
+                // Мелкие строки не берем
+                if (mb_strlen($keyword) < 3)
+                    continue;
+
+                // Экранируем
+                $pattern = preg_quote($keyword, "~");
+
+                // Если нет значения для подстановки в ссылку, продолжаем перебор
+                if (!$characteristic->linkValue)
+                    continue;
+                
+                do {
+                    $replaced = $this->replaceRecursive($review->content, $pattern, $value, $review->id);
+                    if ($replaced !== false) {
+                        $review->content = $replaced;
+                    }
+                } while($replaced !== false);
+                
+            }
+
+            
+            /**
+             * Ссылки на товары
+             */
+            foreach ($goods as $item) {
+                $pattern = preg_quote("{$item->brand_data->name} {$item->name}", "~");
+
+
+                $value = CHtml::link("{$item->brand_data->name} {$item->name}", "http://".Yii::app()->createUrl("site/goods", array(
+                    'link' => $item->link,
+                    'brand' => $item->brand_data->link,
+                    'type' => $item->type_data->link,
+                    'language' => Language::getZoneForLang(($review->lang) ? $review->lang : 'ru'),
+                )));
+                
+                do {
+                    $replaced = $this->replaceRecursive($review->content, $pattern, $value, $review->id);
+                    if ($replaced !== false) {
+                        $review->content = $replaced;
+                    }
+                } while($replaced !== false);
+
+                /**
+                 * Перебираем синонимы товара
+                 */
+                foreach ($product->synonims as $synonim) {
+                    
+                    $pattern = preg_quote("{$product->brand_data->name} {$synonim->name}", "~");
+                    
+                    
+                    $value = CHtml::link("{$product->brand_data->name} {$product->name}", "http://".Yii::app()->createUrl("site/goods", array(
+                        'link' => $product->link,
+                        'brand' => $product->brand_data->link,
+                        'type' => $product->type_data->link,
+                        'language' => Language::getZoneForLang(($review->lang) ? $review->lang : 'ru'),
+                    )));
+                        
+                    do {
+                        $replaced = $this->replaceRecursive($review->content, $pattern, $value, $review->id);
+                        if ($replaced !== false) {
+                            $review->content = $replaced;
+                        }
+                    } while($replaced !== false);
+                   
+                }
+            }
+
+            /**
+             * Расставляем ссылки на бренды
+             */
+            foreach ($brands as $brand) {
+                $pattern = preg_quote($brand->name, "~");
+                $value = CHtml::link($brand->name, "http://".Yii::app()->createUrl("site/brand", array(
+                    "language" => Language::getZoneForLang(($review->lang) ? $review->lang : 'ru'),
+                    "type" => $product->type_data->link,
+                    "link" => $brand->link,
+                )));
+                do {
+                    $replaced = $this->replaceRecursive($review->content, $pattern, $value, $review->id);
+                    if ($replaced !== false) {
+                        $review->content = $replaced;
+                    }
+                } while($replaced !== false);
+            }
+            $review->save();
+        }
+    }
+    
+    public function replaceRecursive($content, $pattern, $value, $id)
+    {
+        $exp = "~(<[^aA][^>]*?>[^<\"]*?[^\w\d\-:])({$pattern})([^\w\d\-][^>\"]*?)~iu";
+        //"~(.{0,10}[^>\"/\-\w\d\._\[\]#]{1})({$pattern})([^<\"/\-\w\d_\[\]#]{1}.{0,10})~iu"
+        if (preg_match_all($exp, $content, $matches, PREG_SET_ORDER)) {
+            $match = $matches[0];
+
+            $content = str_replace($match[0], $match[1].$value.$match[3], $content);
+            echo $id." : ". $pattern." : ".$match[0]." : ".$match[1].$value.$match[3].PHP_EOL;
+            return $content;
+            
+        }
+        return false;
+    }
+    
 }
