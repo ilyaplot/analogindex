@@ -130,12 +130,19 @@
                         <section class="infoGoodItem_content">
                             <h3 class="infoGoodItem-infoTitle"><?php echo Yii::t('goods', 'Новости') ?></h3>
                             <ul id="GoodItem-news">
-                                <!--
+                                <?php foreach ($news as $nitem):?>
                                 <li>
-                                    <div class="newsGood-name"><span class="count">1.</span>Обзор планшета iPad mini</div>
-                                    <div class="newsGoods-link"><a href="#">http://www.mobile-review.com/ipad-mini.html</a></div>
+                                    <div class="newsGood-name"><span class="count" style="font-style: italic;"><?php echo Yii::app()->dateFormatter->format("dd.MM.yyyy", $nitem->created)?></span><?php echo $nitem->title?></div>
+                                    <div class="newsGoods-link"><a href="<?php echo Yii::app()->createAbsoluteUrl("news/index", ['link'=>$nitem->link, 'id'=>$nitem->id, 'language'=>  Language::getCurrentZone()]);?>">
+                                            <?php echo Yii::app()->createAbsoluteUrl("news/index", ['link'=>$nitem->link, 'id'=>$nitem->id, 'language'=>  Language::getCurrentZone()]);?>
+                                        </a></div>
                                 </li>
-                                -->
+                                <?php endforeach;?>
+                                <?php if ($news_count): ?>
+                                <a href="<?php echo Yii::app()->createUrl("news/goodslist", ['brand'=>$brand->link, 'product'=>$product->link, 'language'=>  Language::getCurrentZone()]);?>">
+                                    Все новости (<?php echo $news_count?>)...
+                                </a>
+                                <?php endif; ?>
                             </ul>
                         </section>
                     </div>
@@ -200,7 +207,7 @@
                         <?php foreach ($product->comments as $comment): ?>
                             <div><?php echo $comment->text ?></div>
                         <?php endforeach; ?>
-                            <iframe width="500" height="290" scrolling="no" src="http://www.google.com/trends/fetchComponent?hl=ru&q=<?php echo urlencode($brand->name." ".$product->name)?>&cmpt=q&content=1&cid=TIMESERIES_GRAPH_0&export=5&w=500&h=330&date=today+12-m"></iframe>
+                            <iframe id="trends" width="500" height="290" scrolling="no" src="http://www.google.com/trends/fetchComponent?hl=ru&q=<?php echo urlencode($brand->name." ".$product->name)?>&cmpt=q&content=1&cid=TIMESERIES_GRAPH_0&export=5&w=500&h=330&date=today+12-m"></iframe>
                         <?php if (Yii::app()->user->checkAccess(Users::ROLE_USER)): ?>
                             <section class="infoGoodItem_content">
                                 <div class="infoGoodItem_title-2 clr">
@@ -384,3 +391,9 @@
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+    $("document").ready(function(){
+        //alert($(this).html());
+    });
+</script>

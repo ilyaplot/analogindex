@@ -36,7 +36,7 @@
                     <a href="<?php echo Yii::app()->createUrl("site/goods", array(
                         'link'=>$goods->link, 
                         'brand'=>$goods->brand_data->link,
-                        'type'=>$type->link, 
+                        'type'=>$goods->type_data->link, 
                         'language'=>Language::getCurrentZone(),
                     ));?>">
                         <?php if (isset($goods->primary_image->image_data->size4_data->id)):?>

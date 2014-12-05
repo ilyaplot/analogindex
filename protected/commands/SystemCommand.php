@@ -59,6 +59,7 @@ class SystemCommand extends ConsoleCommand
                     $reviewModel->link = $urlManager->translitUrl($review['title']);
                     $reviewModel->author = 0;
                     $reviewModel->content = $review['content'];
+                    $reviewModel->original = $review['content'];
                     $reviewModel->disabled = 0;
                     $reviewModel->save();
                     if ($review['rating']) {
@@ -243,20 +244,44 @@ class SystemCommand extends ConsoleCommand
         $products = Goods::model()->with(["brand_data"])->findAll();
         
         foreach ($products as $product) {
+            
+            if (!preg_match("/^\d+$/isu", $product->name) && mb_strlen($product->name) > 2) {
+                $model = new Tags();
+                $model->name = $product->name;
+                $model->type = Tags::TYPE_PRODUCT;
+                if ($model->validate()) {
+                    $model->save();
+                    $tag = $model->id;
+
+                    $model = new GoodsTags();
+                    $model->goods = $product->id;
+                    $model->tag = $tag;
+                    if ($model->validate()) {
+                        $model->save();
+                    }
+                }
+            }
+            
+            
             $name = $product->brand_data->name." ".$product->name;
             $model = new Tags();
             $model->name = $name;
             $model->type = Tags::TYPE_PRODUCT;
+            
+            
             if ($model->validate()) {
                 echo $name.PHP_EOL;
                 $model->save();
                 $tag = $model->id;
+                
                 $model = new GoodsTags();
                 $model->goods = $product->id;
                 $model->tag = $tag;
                 if ($model->validate()) {
                     $model->save();
                 }
+                
+                
                 foreach ($product->synonims as $synonim) {
                     $name = $product->brand_data->name." ".$synonim->name;
                     echo $name.PHP_EOL;
@@ -276,6 +301,63 @@ class SystemCommand extends ConsoleCommand
                 }
             }
         }
+        
+        unset($product, $products);
+        
+        $osItems = Os::model()->findAll(); 
+        foreach ($osItems as $os) {
+            $model = new Tags();
+            $model->name = $os->name;
+            $model->type = Tags::TYPE_OS;
+            if ($model->validate()) {
+                $model->save();
+                $tag = $model->id;
+                $model = new OsTags();
+                $model->os = $os->id;
+                $model->tag = $tag;
+                if ($model->validate()) {
+                    $model->save();
+                }
+            }
+        }
     }
 
+    public function actionImportYoutube()
+    {
+        /**
+        Yii::app()->language = 'ru';
+        $goods = Goods::model()->findall();
+        foreach ($goods as $product) {
+            $videos = $product->getVideos(false, 'ru');
+            foreach ($videos as $video) {
+                $model = new Videos();
+                $model->goods = $product->id;
+                $model->lang = 'ru';
+                $model->type = Videos::TYPE_YOUTUBE;
+                $model->link = $video;
+                if ($model->validate()) {
+                    $model->save();
+                    echo ".";
+                }
+            }
+        }
+        **/
+        Yii::app()->language = 'en';
+        $goods = Goods::model()->findall();
+        foreach ($goods as $product) {
+            $videos = $product->getVideos(false, 'en');
+            foreach ($videos as $video) {
+                $model = new Videos();
+                $model->goods = $product->id;
+                $model->lang = 'en';
+                $model->type = Videos::TYPE_YOUTUBE;
+                $model->link = $video;
+                if ($model->validate()) {
+                    $model->save();
+                    echo ".";
+                }
+            }
+        }
+        echo PHP_EOL;
+    }
 }

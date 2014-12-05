@@ -15,4 +15,5 @@ return array(
     'Регистрация'=>'Sign up',
     'Вы еще не подтвердили свой Email. <a href=\"{n}\">Отправить письмо повторно.</a>'=>"You have not verified your Email. <a href=\"{n}\"> Resend. </a>",
     'Ваша оценка'=>'Your vote is',
+    'Видео обзор'=>'Video review',
  );

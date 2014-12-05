@@ -1,18 +1,17 @@
 <?php
+
 /**
  * 
  */
 class Books
 {
-    
     protected $servers = array(
         'kappa3.academic.ru'
     );
     public static $connection = null;
     public static $itemsCount = null;
-
     protected $maxLimit = 20;
-    
+
     public function __construct()
     {
         
@@ -43,7 +42,6 @@ class Books
         } catch (Exception $ex) {
             throw $ex;
         }
-        
     }
 
     /**
@@ -91,28 +89,31 @@ class Books
     public function getJsonItems($limit = 3)
     {
         $items = $this->getItems($limit);
-        $items = array_map(function ($value){
-            $value['url'] = "http://books.academic.ru/book.nsf/{$value['id']}/".urlencode($value['name']);
+        $items = array_map(function ($value) {
+            $value['url'] = "http://books.academic.ru/book.nsf/{$value['id']}/" . urlencode($value['name']);
             return $value;
         }, $items);
         if (is_array($items) && !empty($items)) {
-            return json_encode(array("items"=>$items));
+            return json_encode(array("items" => $items));
         }
     }
+
 }
 
 class BooksServer
 {
+
     protected $model;
+
     const ANSWER_JSON = 1;
     const ANSWER_HTML = 2;
-    
+
     public function __construct()
     {
         $this->model = new Books;
     }
-    
-    public function run($limit, $type=self::ANSWER_JSON)
+
+    public function run($limit, $type = self::ANSWER_JSON)
     {
         try {
             if ($json = $this->model->getJsonItems($limit, $type)) {
@@ -122,13 +123,14 @@ class BooksServer
         } catch (Exception $ex) {
             http_response_code(500);
         }
-        
+
         http_response_code(404);
     }
+
 }
 
 $server = new BooksServer();
-$type = (isset($_POST['type']) && in_array($_POST['type'], array(1,2))) ? $_POST['type'] : BooksServer::ANSWER_JSON;
+$type = (isset($_POST['type']) && in_array($_POST['type'], array(1, 2))) ? $_POST['type'] : BooksServer::ANSWER_JSON;
 $limit = isset($_POST['limit']) ? $_POST['limit'] : 3;
 echo $server->run($limit, $type);
 exit();

@@ -95,10 +95,24 @@ class SiteController extends Controller
             $ratingDisabled = 0;
         }
 
+        $newsCriteria = new CDbCriteria();
+        $newsCriteria->order = "product.goods, t.created desc";
+        $newsCriteria->condition = "t.lang = :lang and product.goods = :goods";
+        $newsCriteria->params = ['lang'=>Yii::app()->language, 'goods'=>$product->id];
+        $newsCriteria->limit = 5;
+
+        $news = News::model()->with([
+            'product'
+        ])->findAll($newsCriteria);
+        
+        $news_count = GoodsNews::model()->countByAttributes(['goods'=>$product->id, 'disabled'=>0]);
+        
         $this->render("goods", array(
             "type" => $type,
             "brand" => $brand,
             "product" => $product,
+            "news" => $news,
+            "news_count" => $news_count,
             "ratingDisabled" => $ratingDisabled,
         ));
     }
@@ -151,7 +165,7 @@ class SiteController extends Controller
         }
         $goodsCount = Goods::model()->cache(60 * 60 * 48)->count($criteria);
         $criteria->limit = $view['limit'];
-        $criteria->order = "t.name asc";
+        $criteria->order = "t.updated desc";
         $pages = new CPagination($goodsCount);
         $pages->setPageSize($view['limit']);
         $pages->applyLimit($criteria);
@@ -533,7 +547,7 @@ class SiteController extends Controller
 
         $searchCriteria->paginator = $pages;
        
-        $searchCriteria->from = 'topics_index';
+        $searchCriteria->from = 'heplix_reviews_index';
         try {
             $query = $search->escape($query);
             $searchCriteria->query = "{$query}";
@@ -544,18 +558,21 @@ class SiteController extends Controller
             
         }
         $items = [];
+        
         if (!empty($resIterator) && $resIterator->getTotal()) {
+
             $pages->setItemCount($resIterator->getTotalFound());
             $criteria = new CDbCriteria();
-            $criteria->select = "topic_id, topic_title";
-            $criteria->addInCondition("topic_id", $resIterator->getIdList());
-            $criteria->order = "FIELD(topic_id, ".implode($resIterator->getIdList()).")";
-            $items = Topics::model()->findAll($criteria);
+            $criteria->select = "id, mobile, title";
+            $criteria->addInCondition("id", $resIterator->getIdList());
+            $criteria->order = "FIELD(id, ".implode($resIterator->getIdList()).")";
+            $items = HelpixReviews::model()->findAll($criteria);
         }
-
+        echo "<table>";
         foreach ($items as $item)
         {
-            echo $item->topic_id.": ".$item->topic_title."<br />".PHP_EOL;
+            echo "<tr><td>".$item->id."</td><td>".$item->mobile." </td><td> {$item->title}</td></tr>".PHP_EOL;
         }
+        echo "</table>";
     }
 }

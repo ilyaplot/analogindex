@@ -8,5 +8,5 @@ return array(
     'tablePrefix' => 'ai_',
     'charset' => 'utf8',
     //'class' => 'CDbConnection',
-    'schemaCachingDuration' => 60 * 60 * 48,
+    //'schemaCachingDuration' => 60 * 60 * 48,
 );

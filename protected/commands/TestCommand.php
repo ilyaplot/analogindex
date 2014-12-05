@@ -275,4 +275,109 @@ class TestCommand extends CConsoleCommand
         echo $count.PHP_EOL;
         
     }
+
+    
+    public function actionHelpixReviews()
+    {
+        $products = Goods::model()->with(["brand_data"])->findAll();
+        /**
+         * "goods"=>Yii::t("model", "Товар"),
+            "link"=>Yii::t("model", "Ссылка"),
+            "lang"=>Yii::t("model", "Код языка"),
+            "author"=>Yii::t("model", "Автор"),
+            "title"=>Yii::t("model", "Заголовок"),
+            "content"=>Yii::t("model", "Текст"),
+            "priority"=>Yii::t("model", "Порядок сортировки"),
+            "source"=>Yii::t("model", "Ссылка на оригинал"),
+            "disabled"=>Yii::t("model", "Не показывать"),
+         */
+        foreach ($products as $product) {
+            $urlManager = new UrlManager();
+            $name = $product->brand_data->name." ".$product->name;
+            $criteria = new CDbCriteria();
+            $criteria->condition = 'mobile like :name';
+            $criteria->params = ['name'=>$name];
+            if ($helpixReviews = HelpixReviews::model()->findAll($criteria)) {
+                foreach ($helpixReviews as $review) {
+                    $model = new Reviews();
+                    $model->goods = $product->id;
+                    $model->link = $urlManager->translitUrl(htmlspecialchars_decode($review->title));
+                    $model->lang = 'ru';
+                    $model->title = htmlspecialchars_decode($review->title);
+                    $model->content = $review->body;
+                    $model->original = $review->body;
+                    $model->source = $review->url;
+                    $model->created = date("Y-m-d ".rand(10,20).":".rand(10,59).":s", strtotime(str_replace(".", "-", $review->date)));
+                    
+                    if ($model->validate()) {
+                        $model->save();
+                        echo $review->mobile." ".$model->title.PHP_EOL;
+                    }
+                }
+            }
+        }
+    }
+    
+    public function actionServer()
+    {
+        $gmc= new GearmanClient();
+        $gmc->addServer();
+        
+        $gmc->setCompleteCallback([$this, "news_completed"]);
+        $gmc->setFailCallback([$this, "news_fail"]);
+        
+        $products = Goods::model()->findAll();
+        foreach ($products as $product) {
+            $task= $gmc->addTask("news", serialize($product));
+        }
+        
+        if (! $gmc->runTasks())
+        {
+            echo "ERROR " . $gmc->error() . "\n";
+            exit;
+        }
+    }
+    
+    public function actionClient()
+    {
+        # Создание обработчика.
+        $gmworker= new GearmanWorker();
+
+        # Указание сервера по умолчанию  (localhost).
+        $gmworker->addServer();
+        
+        $gmworker->addFunction("news", [$this,"news_function"]);
+        
+
+        print "Waiting for job...\n";
+        
+        while($gmworker->work())
+        {
+          if ($gmworker->returnCode() != GEARMAN_SUCCESS)
+          {
+            echo "return_code: " . $gmworker->returnCode() . "\n";
+            break;
+          }
+        }
+    }
+    
+    
+    public function news_completed($task)
+    {
+        echo "COMPLETE: " . $task->jobHandle() .PHP_EOL;
+    }
+    
+    public function news_fail($task)
+    {
+        echo "FAILED: " . $task->jobHandle() . "\n";
+    }
+    
+    public function news_function($job)
+    {
+        echo "Received job: " . $job->handle() . "\n";
+
+        $product = unserialize($job->workload());
+        echo $product->brand_data->name." ".$product->name.PHP_EOL;
+        return true;
+    }
 }

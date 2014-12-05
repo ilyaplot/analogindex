@@ -45,7 +45,9 @@ class Reviews extends CActiveRecord
     public function rules()
     {
         return array(
-            array("content", "filter", 'filter'=>array($obj=new CHtmlPurifier(),'purify'))
+            array("content", "filter", 'filter'=>array($obj=new CHtmlPurifier(),'purify')),
+            array("source", "unique"),
+            ['source', 'length', 'min'=>10, 'max'=>500],
         );
     }
     

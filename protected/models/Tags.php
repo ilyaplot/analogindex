@@ -12,6 +12,8 @@ class Tags extends CActiveRecord
 
     const TYPE_BRAND = 'brand';
     const TYPE_PRODUCT = 'product';
+    const TYPE_OS = 'os';
+    
     const TYPE_WORD = 'word';
 
     public static function model($className = __CLASS__)
@@ -52,6 +54,7 @@ class Tags extends CActiveRecord
     {
         return [
             'reviews' => [self::HAS_MANY, 'ReviewsTags', 'tag'],
+            'goods' => [self::HAS_ONE, 'GoodsTags', 'tag'],
         ];
     }
 }

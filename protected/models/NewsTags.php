@@ -8,7 +8,6 @@ class NewsTags extends CActiveRecord
         return parent::model($className);
     }
 
-
     public function tableName()
     {
         return "{{news_tags}}";
@@ -26,7 +25,14 @@ class NewsTags extends CActiveRecord
             ]
         ];
     }
-
+    
+    public function relations()
+    {
+        return [
+            'news_data' => [self::BELONGS_TO, 'News', 'news'],
+            'tag_data' => [self::BELONGS_TO, 'Tags', 'tag', 'condition'=>'tag_data.disabled = 0'],
+        ];
+    }
 }
 
 

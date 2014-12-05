@@ -31,13 +31,28 @@ class Videos extends CActiveRecord
         return array(
             "rating" => array(self::HAS_ONE, "RatingsVideos", "video",
                 "select" => "AVG(rating.value) as value",
-            )
+            ),
+            'goods_data' => [self::BELONGS_TO, "Goods", "goods"],
         );
     }
 
     public function attributeLabels()
     {
         return array();
+    }
+    
+    public function rules()
+    {
+        return [
+            ['link', 'unique', 'allowEmpty'=>false, 
+                'attributeName'=>'link', 
+                'className'=>'Videos', 
+                'criteria'=>[
+                    'condition'=>'goods = :goods and lang = :lang', 
+                    'params'=>['goods'=>  $this->goods, 'lang'=>  $this->lang]
+                ],
+            ]
+        ];
     }
 
     public function getTemplate($type = null, $link = null)
@@ -50,8 +65,11 @@ class Videos extends CActiveRecord
         return sprintf($this->_templates[$type], $link);
     }
 
-    public function getYoutube($limit, $query, $brand, $name)
+    public function getYoutube($limit, $query, $brand, $name, $language = '')
     {
+        if (empty($language)) {
+            $language = Yii::app()->language;
+        }
         $videos = array();
         require_once Yii::app()->basePath . '/extensions/google-api-php-client/src/Google_Client.php';
         require_once Yii::app()->basePath . '/extensions/google-api-php-client/src/contrib/Google_YouTubeService.php';
@@ -62,8 +80,9 @@ class Videos extends CActiveRecord
             $searchResponse = $youtube->search->listSearch('id', array(
                 'q' => sprintf($query, $brand, $name),
                 'maxResults' => $limit,
-                'regionCode' => (Yii::app()->language == 'ru') ? 'ru' : 'us',
+                'regionCode' => ($language == 'ru') ? 'ru' : 'us',
             ));
+            echo sprintf($query, $brand, $name).PHP_EOL;
         } catch (Exception $ex) {
             return array();
         }

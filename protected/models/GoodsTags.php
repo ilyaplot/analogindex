@@ -26,5 +26,12 @@ class GoodsTags extends CActiveRecord
             ]
         ];
     }
+    
+    public function relations()
+    {
+        return [
+            'goods_data'=>[self::BELONGS_TO, 'Goods', 'goods'],
+        ];
+    }
 }
 

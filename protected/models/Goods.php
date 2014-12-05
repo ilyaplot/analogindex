@@ -8,7 +8,9 @@ class Goods extends CActiveRecord
 
     public $generalCharacteristics = array(5, 6, 7, 8, 9, 11, 13, 14, 18, 22);
     public $appendVideos = 3;
-
+    public $videos = [];
+    
+    
     public static function model($className = __CLASS__)
     {
         return parent::model($className);
@@ -35,10 +37,10 @@ class Goods extends CActiveRecord
                 "order" => "reviews.priority desc",
                 "on" => "reviews.lang = '" . Yii::app()->language . "'",
             ),
-            "videos" => array(self::HAS_MANY, "Videos", "goods",
-                "order" => "priority desc",
-                "on" => "lang = '" . Yii::app()->language . "'",
-            ),
+            //"videos" => array(self::HAS_MANY, "Videos", "goods",
+            //    "order" => "priority desc",
+            //    "on" => "videos.lang = '" . Yii::app()->language . "'",
+            //),
             "synonims" => array(self::HAS_MANY, "GoodsSynonims", "goods",
                 "select" => "synonims.id, synonims.name, synonims.visibled",
             ),
@@ -121,18 +123,35 @@ class Goods extends CActiveRecord
         return isset($image->image_data) ? $image->image_data : null;
     }
 
-    public function getVideos()
+    public function getVideos($render = true, $lang = '')
     {
+        if (empty($lang)) {
+            $lang = Yii::app()->language;
+        }
+        //if (empty($this->videos))
+        //{
+            $criteria = new CDbCriteria();
+            $criteria->order = "priority desc";
+            $criteria->condition = "t.goods = :id and t.lang = :lang";
+            $criteria->params = ['id'=>  $this->id, 'lang'=>$lang];
+
+            $this->videos = Videos::model()->findAll($criteria);
+        //}
+        
+        /**
+         * @todo язык видео не учитывается
+         */
         $result = array();
         foreach ($this->videos as $video) {
-            $result[] = $video->getTemplate(Videos::TYPE_YOUTUBE, $video->link) . PHP_EOL;
+            $result[] = ($render) ? $video->getTemplate(Videos::TYPE_YOUTUBE, $video->link) : $video->link;
         }
+
         if (count($result) < $this->appendVideos) {
-            $videoModel = new Videos();
-            $appendVideos = $videoModel->getYoutube(
-                    $this->appendVideos - count($result), $this->type_data->name->video_search_string, $this->brand_data->name, $this->name);
+            $appendVideos = Videos::model()->getYoutube(
+                    $this->appendVideos - count($result), $this->type_data->name->video_search_string, $this->brand_data->name, $this->name, $lang);
+            
             foreach ($appendVideos as $video) {
-                $result[] = $videoModel->getTemplate(Videos::TYPE_YOUTUBE, $video) . PHP_EOL;
+                $result[] = ($render) ? Videos::model()->getTemplate(Videos::TYPE_YOUTUBE, $video) : $video;
             }
         }
         return $result;
@@ -194,6 +213,70 @@ class Goods extends CActiveRecord
         }
         if (!$noCache)
             Yii::app()->cache->set("goods.characteristics" . serialize($params) . $ids, $result, 60 * 60 * 12);
+        return $result;
+    }
+    
+    
+    public function getCharacteristicsCompare()
+    {
+        $query = "select 
+                c.id as id,
+                gc.value as value,
+                c.formatter as formatter
+            from {{goods_characteristics}} gc 
+            inner join {{characteristics}} c on gc.characteristic = c.id 
+            where 
+                gc.lang = :lang 
+                and gc.goods = :goods
+            order by c.id";
+        $params = array("lang" => Yii::app()->language, "goods" => $this->getPrimaryKey());
+
+        $result = [];
+
+        if (!$result = Yii::app()->cache->get("goods.characteristics.compare" . serialize($params))) {
+            $connection = $this->getDbConnection();
+            $items = $connection->createCommand($query)->queryAll(true, $params);
+            
+            foreach ($items as $item) {
+                $formatter = $item['formatter'];
+                $result[$item['id']] = Yii::app()->format->$formatter($item['value']);
+            }
+        }
+
+        Yii::app()->cache->set("goods.characteristics.compare" . serialize($params), $result, 60 * 60 * 12);
+        return $result;
+    }
+    
+    
+    public function getCharacteristicsList()
+    {
+        $query = "select 
+                c.id as id,
+                ccn.name as catalog_name, 
+                cn.name as characteristic_name,
+                cn.description as characteristic_description
+            from {{characteristics}} c 
+            inner join {{characteristics_names}} cn on c.id = cn.characteristic 
+            inner join {{characteristics_catalogs}} cc on c.catalog = cc.id 
+            inner join {{characteristics_catalogs_names}} ccn on ccn.catalog = cc.id 
+            where 
+                ccn.lang=:lang
+                and cn.lang = :lang
+            order by cc.priority desc, c.priority desc";
+        $params = array("lang" => Yii::app()->language);
+
+        $result = array();
+
+        if (!$result = Yii::app()->cache->get("goods.characteristics.list_" . serialize($params) )) {
+            $connection = $this->getDbConnection();
+            $items = $connection->createCommand($query)->queryAll(true, $params);
+            if (!$items)
+                $result = array();
+            foreach ($items as $item) {
+                $result[$item['catalog_name']][$item['id']] = $item;
+            }
+        }
+        Yii::app()->cache->set("goods.characteristics.list_" . serialize($params), $result, 60 * 60 * 12);
         return $result;
     }
     

@@ -174,7 +174,7 @@ class Formatter extends CFormatter
         $colors = Colors::model()->cache(60*60*48)->findAll($criteria);
         $result = [];
         foreach ($colors as $color) {
-            $result[]= "<span class=\"color-label\" style=\"background-color: {$color->code};\">{$color->$language}</span> ";
+            $result[]= "<nobr><span class=\"color-label\" style=\"border: 1px solid #555; width: 15px; height: 15px; display: inline-block; background-color: {$color->code};\">&nbsp;</span> {$color->$language}</nobr>";
         }
         $result = implode(", ", $result);
         return $result;

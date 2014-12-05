@@ -3,6 +3,11 @@
 class ParseCommand extends CConsoleCommand
 {
 
+    protected static $tags;
+    protected static $goods;
+    protected static $brands;
+    
+    
     public function actionGsmArena()
     {
         $task = SourcesGsmarena::model()->with("file_data")->findByAttributes(array("completed" => 0));
@@ -489,10 +494,12 @@ class ParseCommand extends CConsoleCommand
     public function actionReviewsTags()
     {
         $reviews = Reviews::model()->findAll();
+        shuffle($reviews);
         $criteria = new CDbCriteria();
         $criteria->condition = "disabled = 0";
         $tags = Tags::model()->findAll($criteria);
         foreach ($reviews as $review) {
+            echo ".";
             foreach ($tags as $tag) {
                 if ($this->hasTag($review->title." ".$review->content, $tag->name)) {
                     $model = new ReviewsTags();
@@ -508,30 +515,171 @@ class ParseCommand extends CConsoleCommand
         echo PHP_EOL;
     }
     
-    public function actionNewsTags()
+    public function actionNewsTagsServer()
     {
-        $news = News::model()->findAll();
+        $gmc= new GearmanClient();
+        $gmc->addServer();
+        $gmc->setCompleteCallback([$this, "news_completed"]);
+        $criteria = new CDbCriteria();
+        $criteria->order = 't.id desc';
+        $news = News::model()->findAll($criteria);
+        
+        foreach ($news as $item) {
+            //$task= $gmc->doBackground("news_tag", serialize($item));
+            $task= $gmc->doBackground("news_filter", serialize($item));
+        }
+        
+        if (! $gmc->runTasks())
+        {
+            echo "ERROR " . $gmc->error() . "\n";
+            exit;
+        }
+        
+        echo PHP_EOL;
+    }
+    
+    public function actionNewsTagsClient($function)
+    {
         $criteria = new CDbCriteria();
         $criteria->condition = "disabled = 0";
-        $tags = Tags::model()->findAll($criteria);
-        foreach ($news as $item) {
-            foreach ($tags as $tag) {
-                if ($this->hasTag($item->title." ".$item->content, $tag->name)) {
-                    $model = new NewsTags();
-                    $model->tag = $tag->id;
-                    $model->news = $item->id;
-                    if ($model->validate()) {
-                        $model->save();
-                        echo $tag->type."_".$tag->link.PHP_EOL;
-                    }
+        self::$tags = Tags::model()->findAll($criteria);
+        self::$goods = Goods::model()->with(array(
+                "brand_data", 
+                "type_data", 
+                "synonims"
+            ))->findAll(array(
+            "order"=>"LENGTH(t.name) desc"
+        ));
+        self::$brands = Brands::model()->findAll(array("condition"=>"t.id not in (167)"));
+        
+        # Создание обработчика.
+        $gmworker= new GearmanWorker();
+
+        # Указание сервера по умолчанию  (localhost).
+        $gmworker->addServer();
+        
+        $gmworker->addFunction($function, [$this,$function]);
+
+        print "Waiting for job...\n";
+        
+        while($gmworker->work())
+        {
+          if ($gmworker->returnCode() != GEARMAN_SUCCESS)
+          {
+            echo "return_code: " . $gmworker->returnCode() . "\n";
+            break;
+          }
+        }
+        
+    }
+    
+    public function news_completed($task)
+    {
+        echo "COMPLETE: " . $task->jobHandle() .PHP_EOL;
+    }
+    
+    public function news_tag($job)
+    {
+        echo "news_tag".PHP_EOL;
+        $item = unserialize($job->workload());
+        foreach (self::$tags as $tag) {
+            if ($this->hasTag($item->title." ".$item->content, $tag->name)) {
+                $model = new NewsTags();
+                $model->tag = $tag->id;
+                $model->news = $item->id;
+                if ($model->validate()) {
+                    $model->save();
+                    echo $tag->type."_".$tag->link.PHP_EOL;
+                } else {
+                     var_dump($model->getErrors());
+                }
+                
+            }
+        }
+        $item = News::model()->findByPk($item->id);
+        $item->updated_tags = new CDbExpression("NOW()");
+        $item->save();
+    }
+    
+    public function news_filter($job)
+    {
+        
+        $news = unserialize($job->workload());
+        $content = $news->filteredContent();
+        
+        
+        foreach (self::$goods as $product) {
+            $pattern = preg_quote("{$product->brand_data->name} {$product->name}", "~");
+
+
+            $value = CHtml::link("{$product->brand_data->name} {$product->name}", "http://".Yii::app()->createUrl("site/goods", array(
+                'link' => $product->link,
+                'brand' => $product->brand_data->link,
+                'type' => $product->type_data->link,
+                'language' => Language::getZoneForLang(($news->lang) ? $news->lang : 'ru'),
+            )));
+
+            do {
+                $replaced = $this->replaceRecursive($content, $pattern, $value);
+                if ($replaced !== false) {
+                    $content = $replaced;
+                }
+            } while($replaced !== false);
+
+            /**
+             * Перебираем синонимы товара
+             */
+            if (is_array($product->synonims)) {
+                foreach ($product->synonims as $synonim) {
+
+                    $pattern = preg_quote("{$product->brand_data->name} {$synonim->name}", "~");
+
+
+                    $value = CHtml::link("{$product->brand_data->name} {$product->name}", "http://".Yii::app()->createUrl("site/goods", array(
+                        'link' => $product->link,
+                        'brand' => $product->brand_data->link,
+                        'type' => $product->type_data->link,
+                        'language' => Language::getZoneForLang(($news->lang) ? $news->lang : 'ru'),
+                    )));
+
+                    do {
+                        $replaced = $this->replaceRecursive($content, $pattern, $value);
+                        if ($replaced !== false) {
+                            $content = $replaced;
+                        }
+                    } while($replaced !== false);
+
                 }
             }
         }
-        echo PHP_EOL;
+
+        /**
+         * Расставляем ссылки на бренды
+         */
+        foreach (self::$brands as $brand) {
+            $pattern = preg_quote($brand->name, "~");
+            $value = CHtml::link($brand->name, "http://".Yii::app()->createUrl("site/brand", array(
+                "language" => Language::getZoneForLang(($news->lang) ? $news->lang : 'ru'),
+                "link" => $brand->link,
+            )));
+            do {
+                $replaced = $this->replaceRecursive($content, $pattern, $value);
+                if ($replaced !== false) {
+                    $content = $replaced;
+                }
+            } while($replaced !== false);
+        }
+        if (!empty($content)) {
+            echo "news_filter: {$news->id}".PHP_EOL;
+            $news = News::model()->findByPk($news->id);
+            $news->content_filtered = $content;
+            $news->save();
+        }
     }
     
     protected function hasTag($content, $tag) 
     {
+        $content = strip_tags($content);
         $pattern = preg_quote($tag, '/');
         $exp = "/[^\w]{1}{$pattern}[^\w]{1}/isu";
         return preg_match($exp, $content);
@@ -559,14 +707,12 @@ class ParseCommand extends CConsoleCommand
             $review->content = $review->original;
 
             $product = $review->goods_data;
-                
-            
-
+            /**
             $characteristics = $product->getCharacteristicsNew(array("in" => $product->generalCharacteristics, "createLinks" => true));
 
-            /**
-             * Перебираем характеристики
-             */
+            
+            // Перебираем характеристики
+             
             foreach ($characteristics as $characteristic) {
                 // Слово для поиска
                 $keyword = $characteristic->getValue(false);
@@ -595,7 +741,7 @@ class ParseCommand extends CConsoleCommand
                 } while($replaced !== false);
                 
             }
-
+            **/
             
             /**
              * Ссылки на товары
@@ -621,25 +767,27 @@ class ParseCommand extends CConsoleCommand
                 /**
                  * Перебираем синонимы товара
                  */
-                foreach ($product->synonims as $synonim) {
-                    
-                    $pattern = preg_quote("{$product->brand_data->name} {$synonim->name}", "~");
-                    
-                    
-                    $value = CHtml::link("{$product->brand_data->name} {$product->name}", "http://".Yii::app()->createUrl("site/goods", array(
-                        'link' => $product->link,
-                        'brand' => $product->brand_data->link,
-                        'type' => $product->type_data->link,
-                        'language' => Language::getZoneForLang(($review->lang) ? $review->lang : 'ru'),
-                    )));
-                        
-                    do {
-                        $replaced = $this->replaceRecursive($review->content, $pattern, $value, $review->id);
-                        if ($replaced !== false) {
-                            $review->content = $replaced;
-                        }
-                    } while($replaced !== false);
-                   
+                if (is_array($product->synonims)) {
+                    foreach ($product->synonims as $synonim) {
+
+                        $pattern = preg_quote("{$product->brand_data->name} {$synonim->name}", "~");
+
+
+                        $value = CHtml::link("{$product->brand_data->name} {$product->name}", "http://".Yii::app()->createUrl("site/goods", array(
+                            'link' => $product->link,
+                            'brand' => $product->brand_data->link,
+                            'type' => $product->type_data->link,
+                            'language' => Language::getZoneForLang(($review->lang) ? $review->lang : 'ru'),
+                        )));
+
+                        do {
+                            $replaced = $this->replaceRecursive($review->content, $pattern, $value, $review->id);
+                            if ($replaced !== false) {
+                                $review->content = $replaced;
+                            }
+                        } while($replaced !== false);
+
+                    }
                 }
             }
 
@@ -664,7 +812,7 @@ class ParseCommand extends CConsoleCommand
         }
     }
     
-    public function replaceRecursive($content, $pattern, $value, $id)
+    public function replaceRecursive($content, $pattern, $value, $id=null)
     {
         $exp = "~(<[^aA][^>]*?>[^<\"]*?[^\w\d\-:])({$pattern})([^\w\d\-][^>\"]*?)~iu";
         //"~(.{0,10}[^>\"/\-\w\d\._\[\]#]{1})({$pattern})([^<\"/\-\w\d_\[\]#]{1}.{0,10})~iu"
