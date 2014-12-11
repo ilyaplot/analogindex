@@ -54,6 +54,7 @@ class News extends CActiveRecord
         
         
         $html = phpQuery::newDocumentHtml($this->content);
+        $html->find("script")->remove();
         $source_domain = preg_replace("/(http:\/\/[^\/]+\/).*/isu", "$1", $this->source_url);
         //$source_domain = preg_replace("/<p>\w+: <a href=\".*\">\w+<\/a>\..*&gt;(.*)<\/p>/isu", "$1", $source_domain);
         $blacklist = [
@@ -68,8 +69,13 @@ class News extends CActiveRecord
         
         foreach ($html->find("a") as $a) {
             foreach ($blacklist as $rule) {
-                if (preg_match($rule, pq($a)->attr("href")))
-                    pq($a)->replaceWith(pq($a)->html());
+                if (preg_match($rule, pq($a)->attr("href"))) {
+                    try {
+                        pq($a)->replaceWith(pq($a)->html());
+                    } catch (Exception $e) {
+                        
+                    }
+                }
             }
         }
         //3dnews.ru/news/634430" target="_blank"&gt;
@@ -79,5 +85,42 @@ class News extends CActiveRecord
         //$this->content_filtered = (string) $html;
         //$this->save();
         return $html;
+    }
+    
+    public function getWords($str, $length = 50)
+    {
+        $words = explode(" ", trim(strip_tags($str)));
+        return implode (" ", array_slice($words, 0, $length));
+    }
+    
+    public function getDescription()
+    {
+        if (!empty($this->preview)) {
+            return $this->preview;
+        }
+        
+        $words = explode(" ", trim(strip_tags($this->filteredContent())));
+        $description = $words[0];
+        $key = 0;
+        do {
+            if (isset($words[$key]))
+                $key++;
+            else 
+                break;
+            if (!isset($words[$key]) || mb_strlen($description.$words[$key], 'UTF-8') > 250)
+                break;
+            $description.=" ".$words[$key];
+        } while (mb_strlen($description, 'UTF-8') < 245);
+        $description = htmlspecialchars($description);
+        $description = mb_substr($description, 0, 250, 'UTF-8');
+        $this->preview = $description;
+        $this->save();
+        return $description;
+    }
+    
+    public function afterSave()
+    {
+        $this->preview = $this->getDescription();
+        return parent::beforeSave();
     }
 }

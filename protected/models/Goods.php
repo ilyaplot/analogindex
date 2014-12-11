@@ -10,7 +10,9 @@ class Goods extends CActiveRecord
     public $appendVideos = 3;
     public $videos = [];
     
-    
+    public $revs = [];
+
+
     public static function model($className = __CLASS__)
     {
         return parent::model($className);
@@ -149,8 +151,18 @@ class Goods extends CActiveRecord
         if (count($result) < $this->appendVideos) {
             $appendVideos = Videos::model()->getYoutube(
                     $this->appendVideos - count($result), $this->type_data->name->video_search_string, $this->brand_data->name, $this->name, $lang);
-            
+
             foreach ($appendVideos as $video) {
+                $model = new Videos();
+                $model->goods = $this->id;
+                $model->lang = Yii::app()->language;
+                $model->type = 1;
+                $model->link = $video;
+                $model->priority = 100;
+                $model->disabled = 0;
+                if ($model->validate()) {
+                    $model->save();
+                }
                 $result[] = ($render) ? Videos::model()->getTemplate(Videos::TYPE_YOUTUBE, $video) : $video;
             }
         }
@@ -233,17 +245,29 @@ class Goods extends CActiveRecord
 
         $result = [];
 
-        if (!$result = Yii::app()->cache->get("goods.characteristics.compare" . serialize($params))) {
+        if (!$result = Yii::app()->cache->get("goods.characteristics.compare.with.url" . serialize($params))) {
             $connection = $this->getDbConnection();
             $items = $connection->createCommand($query)->queryAll(true, $params);
             
-            foreach ($items as $item) {
+            foreach ($items as &$item) {
+                $item['raw'] = $item['value'];
                 $formatter = $item['formatter'];
-                $result[$item['id']] = Yii::app()->format->$formatter($item['value']);
+                $item['value'] = Yii::app()->format->$formatter($item['value']);
+            }
+            
+            //$characteristicsLinks = new CharacteristicsLinks($items);
+            //$items = $characteristicsLinks->getCharacteristics($this->type_data->link);
+
+            foreach ($items as $item) {
+                $result[$item['id']] = $item;
             }
         }
 
-        Yii::app()->cache->set("goods.characteristics.compare" . serialize($params), $result, 60 * 60 * 12);
+        //Yii::app()->cache->set("goods.characteristics.compare" . serialize($params), $result, 60 * 60 * 12);
+        
+
+                
+        
         return $result;
     }
     

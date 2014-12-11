@@ -2,7 +2,7 @@
 return array(
     'Производитель' => 'Manufacturer',
     'Характеристики' => 'Characteristics',
-    'Новости' => 'News and reviews',
+    'Новости' => 'News',
     'Обновления и прошивки' => 'Updates and ROM\'s',
     'Отзывы' => 'Comments',
     'Рейтинги' => 'Ratings',
@@ -15,4 +15,12 @@ return array(
     'Да'=>'Yes',
     'Нет'=>'No',
     'мАч'=>'mAh',
+    'Читать все новости'=>'Read all news',
+    'Читать все отзывы'=>'Read all reviews',
+    'Отзывы о'=>'Reviews for',
+    'Новости по теме'=>'Related news',
+    'Читать полностью'=>'Read more',
+    'Технические характеристики'=>'Technical specifications',
+    'Упомянутые аппараты'=>'Related devices',
+
 );

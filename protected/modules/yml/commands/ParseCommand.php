@@ -13,7 +13,7 @@ class ParseCommand extends CConsoleCommand
     public function actionIndex()
     {
         $criteria = new CDbCriteria();
-        $criteria->condition = "status = 1";
+        //$criteria->condition = "status = 1";
         
         $sources = YmlSources::model()->findAll($criteria);
         foreach ($sources as &$source) {
@@ -42,8 +42,8 @@ class ParseCommand extends CConsoleCommand
                         "catalog_id"=>$items['categoryId']->data,
                         "enabled"=>true
                     ]) && !empty($elem->attrs['id'])) {
-                        $model = (YmlItems::model()->countByAttributes(["source"=>$this->sourceId, "offer_id"=>$elem->attrs['id']])) 
-                            ? YmlItems::model()->findByAttributes(["source"=>$this->sourceId, "offer_id"=>$elem->attrs['id']]) :
+                        $model = (YmlItems::model()->countByAttributes(["source"=>$this->sourceId, "offer_id"=>$elem->attrs['id'], 'price'=>!empty($items['price']->data) ? (float) $items['price']->data : 0])) 
+                            ? YmlItems::model()->findByAttributes(["source"=>$this->sourceId, "offer_id"=>$elem->attrs['id'], 'price'=>!empty($items['price']->data) ? (float) $items['price']->data : 0]) :
                             new YmlItems();
                         $model->source = $this->sourceId;
                         $model->offer_id = $elem->attrs['id'];
@@ -59,7 +59,7 @@ class ParseCommand extends CConsoleCommand
                         $model->prefix = !empty($items['typePrefix']->data) ? $items['typePrefix']->data : '';
                         $model->vendor = !empty($items['vendor']->data) ? $items['vendor']->data : ''; 
                         $model->model = !empty($items['model']->data) ? $items['model']->data : ''; 
-                        
+                        $model->created = new CDbExpression("NOW()");
                         
                         if (empty($model->name) && !empty($items['vendor']->data) && !empty($items['model']->data)) {
                             $model->name = $items['vendor']->data." ".$items['model']->data;

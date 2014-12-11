@@ -14,11 +14,17 @@ return array(
         'http://analogindex.<language:\w+>/news/<link:[\d\w\-_]+>_<id:\d+>' =>
             array('news/index', 'urlSuffix' => '.html'),
         
+        'http://analogindex.<language:\w+>/news/product/<brand:[\w\-]+>_<product:[\w\-]+>/page_<page:\d+>' =>
+            array('news/goodslist', 'urlSuffix' => '.html'),
+        
         'http://analogindex.<language:\w+>/news/product/<brand:[\w\-]+>_<product:[\w\-]+>' =>
             array('news/goodslist', 'urlSuffix' => '.html'),
         
         'http://analogindex.<language:\w+>/news/brand/<brand:[\d\w\-_]*>' =>
             array('news/brandlist', 'urlSuffix' => '.html'),
+        
+        'http://analogindex.<language:\w+>/reviews/product/<brand:[\w\-]+>_<product:[\w\-]+>' =>
+            array('reviews/list', 'urlSuffix' => '.html'),
         
         'http://analogindex.<language:\w+>/tag/<type:[\w\-]+>_<tag:[\w\-]+>/reviews' => 'tag/reviews',
         'http://analogindex.<language:\w+>/tag/<type:[\w\-]+>_<tag:[\w\-]+>/news' => 'tag/news',
@@ -39,8 +45,10 @@ return array(
             'urlSuffix' => '.html',
             'class' => 'application.components.TypeRule',
         ),
+        
         'http://analogindex.<language:\w+>/review/<goods:[\d\w\-_]*>/<link:[\d\w\-_]+>_<id:\d+>' =>
-        array('site/review', 'urlSuffix' => '.html'),
+        array('reviews/index', 'urlSuffix' => '.html'),
+        
         'http://analogindex.<language:\w+>/_image/id<id:\d+>/<name:.*>' =>
         array('files/image', 'urlSuffix' => ''),
         'http://analogindex.<language:\w+>/brand/<link:[\d\w\-_]*>/<type:[\d\w\-_]*>/page<page:\d+>' =>

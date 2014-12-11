@@ -66,18 +66,23 @@ class SiteController extends Controller
                     //    "on" => "synonims.visibled = 1"
                     //),
                     "primary_image",
-                    "reviews" => array(
-                        "select" => "reviews.link, reviews.id, reviews.preview, reviews.title, reviews.created",
-                        "group" => "reviews.id",
-                    )
                 ))->find($criteria);
 
         if (!$product) {
             Yii::app()->request->redirect("/", true, 302);
             exit();
         }
+        $reviewsCriteria = new CDbCriteria();
+        $reviewsCriteria->condition = "t.goods = :goods and t.lang=:lang";
+        $reviewsCriteria->params = ['goods'=>$product->id, 'lang'=>Yii::app()->language];
+        $reviewsCount = Reviews::model()->cache(60*60*24)->count($reviewsCriteria);
+        $reviewsCriteria->select = "t.link, t.id, t.preview, t.title, t.created";
+        $reviewsCriteria->order = 't.created desc';
+        $reviewsCriteria->limit = 5;
+        $reviews = Reviews::model()->cache(60*60*24)->findAll($reviewsCriteria);
 
-
+        
+        
         $this->setPageTitle($product->type_data->name->item_name . " " . $brand->name . " " . $product->name);
         $this->addKeywords(array($product->type_data->name->item_name, $brand->name, $product->name));
 
@@ -105,12 +110,17 @@ class SiteController extends Controller
             'product'
         ])->findAll($newsCriteria);
         
-        $news_count = GoodsNews::model()->countByAttributes(['goods'=>$product->id, 'disabled'=>0]);
+        $countCriteria = new CDbCriteria();
+        $countCriteria->condition = "t.goods = :goods and t.disabled = 0 and news_data.lang = :lang";
+        $countCriteria->params = ['goods'=>$product->id, 'lang'=>Yii::app()->language];
+        $news_count = GoodsNews::model()->cache(60*60)->with(['news_data'=>['joinType'=>'inner join']])->count($countCriteria);
         
         $this->render("goods", array(
             "type" => $type,
             "brand" => $brand,
             "product" => $product,
+            "reviews" => $reviews,
+            "reviews_count" => $reviewsCount,
             "news" => $news,
             "news_count" => $news_count,
             "ratingDisabled" => $ratingDisabled,
@@ -180,54 +190,6 @@ class SiteController extends Controller
             "pages" => $pages,
             "view" => $view,
             "type_selected" => isset($type->link) ? $type : null,
-        ));
-    }
-
-    public function actionReview($goods, $link, $id)
-    {
-        if (!Reviews::model()->countByAttributes(array(
-                    "link" => $link,
-                    "id" => $id,
-                )))
-            throw new CHttpException(404, Yii::t("errors", "Страница не найдена"));
-
-        $review = Reviews::model()->cache(60 * 60)->findByPk($id);
-        $criteria = new CDbCriteria();
-        $criteria->compare("t.id", $review->goods);
-        $criteria->group = "t.id, rating.value";
-        $criteria->order = "rating.value desc";
-
-        $product = Goods::model()->cache(60 * 60)->with(array(
-                    "brand_data",
-                    "type_data",
-                    "primary_image",
-                    "rating"
-                ))->find($criteria);
-
-        $ratingDisabled = 1;
-        if (!Yii::app()->user->isGuest &&
-                !Yii::app()->user->getState("readonly") &&
-                !RatingsGoods::model()->countByAttributes(array("goods" => $product->id, "user" => Yii::app()->user->id))) {
-            $ratingDisabled = 0;
-        }
-
-        $this->pageDescription = $review->getDescription();
-        $keywords = array();
-        if (!empty($product->synonims)) {
-            foreach ($product->synonims as $synonim) {
-                $keywords[] = $synonim->name;
-            }
-        }
-        $keywords = array_merge($keywords, array(
-            $product->name,
-            $product->brand_data->name,
-            $product->type_data->name->name,
-        ));
-        $this->pageKeywords = implode(", ", $keywords);
-        $this->render("review", array(
-            "review" => $review,
-            "product" => $product,
-            "ratingDisabled" => $ratingDisabled,
         ));
     }
 

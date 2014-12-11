@@ -21,4 +21,7 @@ return array(
     'Следующая' => 'Next',
     'Предыдущая' => 'Previous',
     'Все типы товаров' => 'All products types',
+    'Читать полностью'=>'Read more',
+    'Эта новость'=>'This page',
+    'Источник'=>'Source',
 );

@@ -10,7 +10,7 @@ class DownloadCommand extends CConsoleCommand
     public function actionIndex()
     {
         $criteria = new CDbCriteria();
-        $criteria->condition = "status = 0";
+        //$criteria->condition = "status = 0";
         $sources = YmlSources::model()->findAll($criteria);
         foreach ($sources as &$source) {
             $listUrl = $source->url;

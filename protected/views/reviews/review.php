@@ -1,24 +1,24 @@
 <ul class="breadcrumbs breadcrumb">
     <li itemscope itemtype="http://data-vocabulary.org/Breadcrumb" itemref="breadcrumb-1">
-        <a href="http://analogindex.<?php echo Language::getCurrentZone() ?>/"><?php echo Yii::t('main', 'Главная') ?></a>
+        <span itemprop="title"><a itemprop="url" href="http://analogindex.<?php echo Language::getCurrentZone() ?>/"><?php echo Yii::t('main', 'Главная') ?></a></span>
         <span class="divider">/</span>
     </li>
     <li itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-1" itemref="breadcrumb-2">
-        <a href="<?php echo Yii::app()->createUrl("site/type", array("type" => $product->type_data->link)) ?>"><?php echo $product->type_data->name->name ?></a>
+        <span itemprop="title"><a itemprop="url" href="<?php echo Yii::app()->createUrl("site/type", array("type" => $product->type_data->link)) ?>"><?php echo $product->type_data->name->name ?></a></span>
         <span class="divider">/</span>
     </li>
     <li itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-2" itemref="breadcrumb-3">
-        <a href="<?php
+        <span itemprop="title"><a itemprop="url" href="<?php
         echo Yii::app()->createUrl("site/brand", array(
             "link" => $product->brand_data->link,
             "language" => Language::getCurrentZone(),
             "type" => $product->type_data->link,
         ));
-        ?>"><?php echo $product->brand_data->name ?></a>
+        ?>"><?php echo $product->brand_data->name ?></a></span>
         <span class="divider">/</span>
     </li>
     <li itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-3" itemref="breadcrumb-4">
-        <a href="<?php
+        <span itemprop="title"><a itemprop="url" href="<?php
         echo Yii::app()->createUrl("site/goods", array(
             'link' => $product->link,
             'brand' => $product->brand_data->link,
@@ -27,15 +27,15 @@
         ));
         ?>">
                <?php echo $product->brand_data->name ?> <?php echo $product->name ?>
-        </a>
+        </a></span>
         <span class="divider">/</span>
     </li>
     <li itemprop="child" class="active" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-4">
-        <?php echo Yii::t("main", "Обзор") ?>: <?php echo $review->title ?>
+        <span itemprop="title"><?php echo Yii::t("main", "Обзор") ?>: <?php echo $review->title ?></span>
     </li>
 </ul>
 <div class="wp_col_fix clr">
-    <div class="col-infoReview">
+    <div class="col-infoReview" itemprop="review" itemscope itemtype="http://schema.org/Review">
         <div class="manufacture-categories clr">
             <div class="mnf_logo">
                 <a href="<?php
@@ -65,7 +65,7 @@
                         'type' => $product->type_data->link,
                         'language' => Language::getCurrentZone()
                     ))
-                    ?>"><span><?php echo $product->brand_data->name . " " . $product->name ?></span></a>
+                    ?>"><span itemprop="itemReviewed"><?php echo $product->brand_data->name . " " . $product->name ?></span></a>
                 </div>
                 <div class="item<?php echo (!$ratingDisabled) ? 0 : 3 ?>" id="ratingResult">
 
@@ -92,9 +92,9 @@
                                                 })
                                             }'
                         ));
-                        ?> <?php echo isset($product->rating->value) ? "(" . round($product->rating->value, 1) . ")" : ''; ?>
+                        ?> <?php echo isset($product->rating->value) ? "(<span itemprop='reviewRating'>" . round($product->rating->value, 1) . "</span>)" : ''; ?>
                     <?php else: ?>
-                        <?php echo isset($product->rating->value) ? round($product->rating->value, 1) : ''; ?>
+                    <span itemprop='reviewRating'><?php echo isset($product->rating->value) ? round($product->rating->value, 1) : ''; ?></span>
                     <?php endif; ?>
                 </div>
                 <br />
@@ -114,14 +114,55 @@
             </div>
         </div>
         <div class="review">
-            <h1><?php echo $review->title ?></h1>
-            <div class="review-content"><?php echo $review->content ?></div>
-            <hr />
-            Тэги:
-            <ul class="tags">
+            <h1 itemprop="name"><?php echo $review->title ?></h1>
+            
+            <?php if(!empty($review->tags)):?>
+                <?php $tags = [];?>
                 <?php foreach ($review->tags as $tag):?>
+                <?php if(!empty($tag->tag_data)):?>
+                <?php 
+                    $tags[$tag->tag_data->name] = $tag->tag_data->name;
+                    $this->addKeyword($tag->tag_data->name);
+                ?>
+                <?php endif;?>
+                <?php endforeach;?>
+                <?php $tags = implode(", ", $tags);?>
+            <?php endif;?>
+            <?php if(!empty($tags)):?>
+            <div>
+                <?php $export->products($tags, Yii::app()->language); ?>
+            </div>
+            <hr />
+            <?php endif;?>
+            
+            <div class="review-content" itemprop="reviewBody"><?php echo $review->content ?></div>
+            <?php if(!empty($tags)):?>
+            <hr />
+            <div>
+                <?php $export->trends($tags, Yii::app()->language, 20); ?>
+            </div>
+            <div>
+                <?php $export->videos($tags, Yii::app()->language); ?>
+            </div>
+
+            <div>
+                <?php $export->compare($tags, Yii::app()->language, 20); ?>
+            </div>
+            
+            <div>
+                <?php $export->news($tags, Yii::app()->language, 10); ?>
+            </div>
+            
+            <div>
+                <?php $export->reviews($tags, Yii::app()->language, 10); ?>
+            </div>
+            <?php endif; ?>
+            <ul class="tags">
+                <?php $tags = [];?>
+                <?php foreach ($review->tags as $tag):?>
+                <?php $tags[$tag->tag_data->name] = $tag->tag_data->name ;?>
                 <li>
-                    <a href="<?php echo Yii::app()->createUrl("tag/reviews", [
+                    <a rel="tag" href="<?php echo Yii::app()->createUrl("tag/reviews", [
                         'language'=>  Language::getCurrentZone(),
                         'type'=>$tag->tag_data->type,
                         'tag'=>$tag->tag_data->link,
@@ -129,6 +170,9 @@
                 </li>
                 <?php endforeach;?>
             </ul>
+            <?php if(!empty($tags)):?>
+            <span itemprop="keywords" style="display: none;"><?php echo implode(", ", $tags)?></span>
+            <?php endif;?>
             <hr />
             <br />
             <?php foreach ($review->comments as $comment): ?>

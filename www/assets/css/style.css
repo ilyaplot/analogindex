@@ -786,8 +786,9 @@ section.infoGoodItem_content {
     padding: 0;
     list-style-type: none;
 }
-#GoodItem-news li {
+#GoodItem-news div {
     margin: 0 0 20px;
+    font: normal 12px 'Segoe UI', Verdana, sans-serif;
 }
 #GoodItem-news li:last-child { margin: 0;}
 .newsGoods-link a { 
@@ -1728,4 +1729,40 @@ a.lang-select {
 .review > h1 {
     font-size: 24px;
     margin: 12px;
+}
+
+
+.news, .review {
+    font-size: 14px;
+}
+
+.news .news-content {
+    padding: 5px;
+}
+
+ul.tags {
+    
+}
+
+ul.tags > li {
+    cursor: pointer;
+    background-color: #e0eaf1;
+    border-bottom: 1px solid #b3cee1;
+    border-right: 1px solid #b3cee1;
+    padding: 3px 4px 3px 4px;
+    margin: 2px 2px 2px 0;
+    text-decoration: none;
+    font-size: 90%;
+    line-height: 1.4;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+ul.tags > li > a {
+    color: #3e6d8e;
+    text-decoration: none;
+}
+
+ul.tags > li > a:visited {
+    color: #4a6b82;
 }

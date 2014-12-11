@@ -44,5 +44,12 @@ class GoodsNews extends CActiveRecord
             $connection->createCommand($query)->execute();
         }
     }
+    
+    public function relations()
+    {
+        return [
+            'news_data'=>[self::BELONGS_TO, 'News', 'news'],
+        ];
+    }
 
 }

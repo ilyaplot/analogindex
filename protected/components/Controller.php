@@ -35,7 +35,7 @@ class Controller extends CController
         
         $this->keywordsArray = array_merge($this->keywordsArray, $keywords);
         $this->keywordsArray = array_unique($this->keywordsArray);
-        $this->pageKeywords = mb_substr(implode(", ", $this->keywordsArray), 0 ,250);
+        $this->pageKeywords = mb_substr(implode(", ", $this->keywordsArray), 0 ,250, 'UTF-8');
     }
     
     public function addKeyword($keyword)
@@ -45,7 +45,8 @@ class Controller extends CController
         
         $this->keywordsArray[] = trim(strip_tags($keyword));
         $this->keywordsArray = array_unique($this->keywordsArray);
-        $this->pageKeywords = mb_substr(implode(", ", $this->keywordsArray), 0 ,250);
+        $this->pageKeywords = implode(", ", $this->keywordsArray);
+        $this->pageKeywords = mb_substr(preg_replace("/[^\w \.,!\?]/isu", '', $this->pageKeywords), 0 ,250, 'UTF-8');
     }
 
     
@@ -56,6 +57,6 @@ class Controller extends CController
         
         $this->descriptionArray[] = trim(strip_tags($decription));
         $this->descriptionArray = array_unique($this->descriptionArray);
-        $this->pageDescription = mb_substr(implode(" ", $this->descriptionArray), 0 ,250);
+        $this->pageDescription = preg_replace("/[^\w \.,!\?]/isu", '', mb_substr(implode(" ", $this->descriptionArray), 0 ,250, 'UTF-8'));
     }
 }

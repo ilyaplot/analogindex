@@ -2,7 +2,55 @@
 
 class DownloadCommand extends CConsoleCommand
 {
-
+    
+    public function actionPhonearena()
+    {
+        $referer = '';
+        $list = PhonearenaUrls::model()->getDownloadList();
+        foreach ($list as $item) {
+            sleep(rand(2,3));
+            if (!preg_match("/.*\/fullspecs$/isu", $item->fullurl)) {
+                $item->fullurl .= "/fullspecs";
+            }
+            $ch = curl_init($item->fullurl);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
+            curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.153 Safari/537.36");
+            curl_setopt($ch, CURLOPT_AUTOREFERER, true);
+            curl_setopt($ch, CURLOPT_REFERER, $referer);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+            curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+            $content = curl_exec($ch);
+            $referer = $item->fullurl;
+            
+            if (curl_errno($ch)) {
+                echo "Curl error #".curl_errno($ch)." " . curl_error($ch)." " .$item->fullurl. PHP_EOL;
+                
+            } else {
+                $item->setContent($content);
+                echo $item->id." ".$item->fullurl.PHP_EOL;
+                if ($url = preg_replace("/(.*)\/fullspecs$/isu", "$1/photos", $item->fullurl)) {
+                    sleep(rand(1,2));
+                    curl_setopt($ch, CURLOPT_URL, $url);
+                    curl_setopt($ch, CURLOPT_REFERER, $referer);
+                    $content = curl_exec($ch);
+                    if (curl_errno($ch)) {
+                        echo "Curl error #".curl_errno($ch)." " . curl_error($ch)." " .$url. PHP_EOL;
+                    } else {
+                        $item->setPhotos($content);
+                        echo $item->id." ".$url.PHP_EOL;
+                    }
+                }
+            }
+            
+            
+            curl_close($ch);
+            
+        }
+    }
+    
     public function actionAntutu($type = 1)
     {
         $types = array(

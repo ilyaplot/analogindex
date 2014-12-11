@@ -441,6 +441,70 @@ class ParseCommand extends CConsoleCommand
         $this->actionSmartphoneua();
     }
 
+    public function actionPhonearena()
+    {
+        $list = PhonearenaUrls::model()->getParseList();
+        foreach ($list as $item) {
+            usleep(500000);
+            $html = phpQuery::newDocumentHtml($item->content);
+            pq($html)->find("div.s_breadcrumbs > ul > li.s_sep")->remove();
+            $breadcrumbs = pq($html)->find("div.s_breadcrumbs > ul > li");
+
+            $brand = '';
+            $name = '';
+            $type = 0;
+            $synonims = [];
+            /**
+             * Проходимся по крошкам и выделем оттуда бренд и аппарат
+             */
+            foreach ($breadcrumbs as $index=>$breadcrumb) {
+                $text = pq($breadcrumb)->text();
+                switch ($index) {
+                    case 1:
+                        $brand = preg_replace("/(.*)\s(?:phones|tablets)/isu", "$1", $text);
+                    break;
+                    case 2:
+                        $pattern = preg_quote($brand, '/');
+                        $name = preg_replace("/{$pattern}\s(.*)/isu", "$1", $text);
+                        
+                        if (preg_match("/.*\/.*/isu", $name)) {
+                            $synonims = explode(" / ", $name);
+                            $name = $synonims[0];
+                            unset($synonims[0]);
+                        }
+                    break;
+                }
+            }
+
+            $typePatterns = [
+                1=>'Smart phone',
+                2=>'Tablet',
+                5=>'Feature phone',
+                6=>'Basic phone',
+            ];
+
+            $specificatons = pq($html)->find("#phone_specificatons");
+
+            /**
+             * Определяем тип устройства
+             */
+            foreach ($typePatterns as $typeId=>$pattern) {
+                $exp = "/<strong class=\" s_lv_1 \">Device type:<\/strong><ul class=\" s_lv_1 \"><li>{$pattern}<\/li>/isu";
+                if (preg_match($exp, $specificatons->html())) {
+                    $type = $typeId;
+                    break;
+                    
+                }
+            }
+            //if (empty($brand) || empty($name) || !empty($synonims)) {
+                echo $item->fullurl." # ";
+                echo $brand." # ".$name." # ".$type.PHP_EOL;
+                //var_dump($synonims);
+            //}
+        }
+    }
+    
+    
     public function getFile($url, $filename)
     {
         if (empty($filename))
@@ -525,7 +589,7 @@ class ParseCommand extends CConsoleCommand
         $news = News::model()->findAll($criteria);
         
         foreach ($news as $item) {
-            //$task= $gmc->doBackground("news_tag", serialize($item));
+            $task= $gmc->doBackground("news_tag", serialize($item));
             $task= $gmc->doBackground("news_filter", serialize($item));
         }
         

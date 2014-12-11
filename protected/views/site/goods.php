@@ -1,3 +1,4 @@
+<!--<?php echo $product->id?>-->
 <script type="text/javascript">
     /**
      * Возвращает строку для подписи к фото на нужном языке
@@ -11,25 +12,25 @@
 <link href="/assets/css/lightbox.css" rel="stylesheet" />
 <ul class="breadcrumbs breadcrumb">
     <li itemscope itemtype="http://data-vocabulary.org/Breadcrumb" itemref="breadcrumb-1">
-        <a href="http://analogindex.<?php echo Language::getCurrentZone() ?>/"><?php echo Yii::t('main', 'Главная') ?></a>
+        <span itemprop="title"><a itemprop="url" href="http://analogindex.<?php echo Language::getCurrentZone() ?>/"><?php echo Yii::t('main', 'Главная') ?></a></span>
         <span class="divider">/</span>
     </li>
     <li itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-1" itemref="breadcrumb-2">
-        <a href="<?php echo Yii::app()->createUrl("site/type", array("type" => $type->link, "language" => Language::getCurrentZone())) ?>"><?php echo $type->name->name ?></a>
+        <span itemprop="title"><a itemprop="url" href="<?php echo Yii::app()->createAbsoluteUrl("site/type", array("type" => $type->link, "language" => Language::getCurrentZone())) ?>"><?php echo $type->name->name ?></a></span>
         <span class="divider">/</span>
     </li>
     <li itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-2" itemref="breadcrumb-3">
-        <a href="<?php
-        echo Yii::app()->createUrl("site/brand", array(
+        <span itemprop="title"><a itemprop="url" href="<?php
+        echo Yii::app()->createAbsoluteUrl("site/brand", array(
             "link" => $brand->link,
             "language" => Language::getCurrentZone(),
             "type" => $type->link,
         ));
-        ?>"><?php echo $brand->name ?></a>
+        ?>"><?php echo $brand->name ?></a></span>
         <span class="divider">/</span>
     </li>
     <li class="active" itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-3">
-        <?php echo $brand->name ?> <?php echo $product->name ?>
+        <span itemprop="title"><?php echo $brand->name ?> <?php echo $product->name ?></span>
     </li>
 </ul>
 <div class="wp_col_fix clr">
@@ -129,21 +130,29 @@
                     <div class="infoGoodItem-wp-news" id="item3">
                         <section class="infoGoodItem_content">
                             <h3 class="infoGoodItem-infoTitle"><?php echo Yii::t('goods', 'Новости') ?></h3>
-                            <ul id="GoodItem-news">
-                                <?php foreach ($news as $nitem):?>
-                                <li>
-                                    <div class="newsGood-name"><span class="count" style="font-style: italic;"><?php echo Yii::app()->dateFormatter->format("dd.MM.yyyy", $nitem->created)?></span><?php echo $nitem->title?></div>
-                                    <div class="newsGoods-link"><a href="<?php echo Yii::app()->createAbsoluteUrl("news/index", ['link'=>$nitem->link, 'id'=>$nitem->id, 'language'=>  Language::getCurrentZone()]);?>">
-                                            <?php echo Yii::app()->createAbsoluteUrl("news/index", ['link'=>$nitem->link, 'id'=>$nitem->id, 'language'=>  Language::getCurrentZone()]);?>
-                                        </a></div>
-                                </li>
-                                <?php endforeach;?>
+                            <div id="GoodItem-news">
+                                    <?php foreach ($news as $item):?>
+                                    <div class="view_bl" itemscope itemtype="http://schema.org/NewsArticle">
+                                        <div class="view_bl-head clr">
+                                            <div class="view_bl-head-l flRight">
+                                                <date class="view_bl-date"><?php echo Yii::app()->dateFormatter->formatDateTime($item->created, 'long');?></date>
+                                                <span itemprop="datePublished" style="display: none;"><?php echo $item->created?></span>
+                                            </div>
+                                        </div>
+                                        <div class="view_bl-textView">
+                                            <a href="<?php echo Yii::app()->createAbsoluteUrl("news/index", ['link'=>$item->link, 'id'=>$item->id, 'language'=>  Language::getCurrentZone()]);?>" itemprop="url">
+                                                <h2 itemprop="name"><?php echo  $item->title ?></h2>
+                                            </a>
+                                            <span itemprop="description"><?php echo $item->getDescription()?></span>...
+                                        </div>
+                                    </div>
+                                    <?php endforeach; ?>
                                 <?php if ($news_count): ?>
                                 <a href="<?php echo Yii::app()->createUrl("news/goodslist", ['brand'=>$brand->link, 'product'=>$product->link, 'language'=>  Language::getCurrentZone()]);?>">
-                                    Все новости (<?php echo $news_count?>)...
+                                    <?php echo Yii::t("goods","Читать все новости");?> (<?php echo $news_count?>)...
                                 </a>
                                 <?php endif; ?>
-                            </ul>
+                            </div>
                         </section>
                     </div>
                     <div class="infoGoodItem-wp-updates" id="item4">
@@ -172,42 +181,40 @@
                                     <?php echo $video; ?>
                                 <?php endforeach; ?>
                             </div>
-                            <?php foreach ($product->reviews as $review): ?>
+                            <?php foreach ($reviews as $review): ?>
                                 <div class="view_bl">
                                     <div class="view_bl-head clr">
                                         <div class="view_bl-head-r flLeft">
                                             <div class="view_bl-avatar"><img src="/assets/img/photo/avatar_view.png"></div>
                                             <div class="view_bl-h2">
                                                 <div class="view_bl-h2_name">Аноним</div>
-                                                <!--<div class="view_bl-h2_rating">
-                                                    <ul class="rating_like-s" title="Оценка - 5">
-                                                        <li><span class="icon-like"></span></li>
-                                                        <li><span class="icon-like"></span></li>
-                                                        <li><span class="icon-like"></span></li>
-                                                        <li><span class="icon-like"></span></li>
-                                                        <li><span class="icon-like"></span></li>
-                                                    </ul>
-                                                </div>-->
-                                            </div>
+                                                
+                                             </div>
                                             <div class="clear"></div>
                                         </div>
                                         <div class="view_bl-head-l flRight">
-                                            <date class="view_bl-date"><?php echo Yii::app()->dateFormatter->format('d MMMM yyyy в hh:mm', $review->created); ?></date>
+                                            <date class="view_bl-date"><?php echo Yii::app()->dateFormatter->formatDateTime($review->created, 'long');?></date>
                                         </div>
                                     </div>
                                     <div class="view_bl-textView">
-                                        <h2><?php echo $review->title ?></h2>
-                                        <?php echo $review->preview ?>...
+                                        <a href="<?php echo Yii::app()->createAbsoluteUrl("reviews/index", array("goods" => $brand->link . "-" . $product->link, "link" => $review->link, "id" => $review->id, "language" => Language::getCurrentZone())) ?>">
+                                            <h2><?php echo $review->title ?></h2>
+                                        </a>
+                                        <span><?php echo $review->preview ?>...</span>
                                     </div>
-                                    <div class="view_bl-replyLink"><a href="<?php echo Yii::app()->createUrl("site/review", array("goods" => $brand->link . "-" . $product->link, "link" => $review->link, "id" => $review->id, "language" => Language::getCurrentZone())) ?>" class="link-replyView">Читать полностью...</a></div>
                                 </div>
 
                             <?php endforeach; ?>
+                            <?php if ($reviews_count): ?>
+                                <a href="<?php echo Yii::app()->createUrl("reviews/list", ['brand'=>$brand->link, 'product'=>$product->link, 'language'=>  Language::getCurrentZone()]);?>">
+                                    <?php echo Yii::t("goods","Читать все отзывы");?> (<?php echo $reviews_count?>)...
+                                </a>
+                            <?php endif; ?>
                         </section>
                         <?php foreach ($product->comments as $comment): ?>
                             <div><?php echo $comment->text ?></div>
                         <?php endforeach; ?>
-                            <iframe id="trends" width="500" height="290" scrolling="no" src="http://www.google.com/trends/fetchComponent?hl=ru&q=<?php echo urlencode($brand->name." ".$product->name)?>&cmpt=q&content=1&cid=TIMESERIES_GRAPH_0&export=5&w=500&h=330&date=today+12-m"></iframe>
+                            <iframe id="trends" width="500" height="290" scrolling="no" src="http://www.google.com/trends/fetchComponent?hl=<?php echo Yii::app()->language?>&q=<?php echo urlencode($brand->name." ".$product->name)?>&cmpt=q&content=1&cid=TIMESERIES_GRAPH_0&export=5&w=500&h=330&date=today+12-m"></iframe>
                         <?php if (Yii::app()->user->checkAccess(Users::ROLE_USER)): ?>
                             <section class="infoGoodItem_content">
                                 <div class="infoGoodItem_title-2 clr">

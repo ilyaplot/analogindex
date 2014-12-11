@@ -6,7 +6,7 @@
 class Books
 {
     protected $servers = array(
-        'kappa3.academic.ru'
+        '85.17.154.100', // kappa3.academic.ru
     );
     public static $connection = null;
     public static $itemsCount = null;
@@ -78,8 +78,9 @@ class Books
 
             try {
                 self::$connection = new PDO("mysql:host={$server};port={$port};dbname={$dbname};charset=UTF8", $user, $pass);
-            } catch (Exception $ex) {
-                throw $ex;
+            } catch (PDOException $ex) {
+                print "Error!: " . $ex->getMessage() . "<br/>";
+                exit();
             }
         }
 

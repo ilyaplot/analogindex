@@ -33,14 +33,14 @@
             <?php foreach ($data as $goods): ?>
             <li>
                 <div class="informer-listGoods_photo">
-                    <a href="<?php echo Yii::app()->createUrl("site/goods", array(
+                    <a href="<?php echo Yii::app()->createAbsoluteUrl("site/goods", array(
                         'link'=>$goods->link, 
                         'brand'=>$goods->brand_data->link,
                         'type'=>$goods->type_data->link, 
                         'language'=>Language::getCurrentZone(),
                     ));?>">
                         <?php if (isset($goods->primary_image->image_data->size4_data->id)):?>
-                            <img src="<?php echo Yii::app()->createUrl("files/image", array(
+                            <img src="<?php echo Yii::app()->createAbsoluteUrl("files/image", array(
                                 'id'=>$goods->primary_image->image_data->size4_data->id,
                                 'name'=>$goods->primary_image->image_data->size4_data->name,
                                 'language'=>Language::getCurrentZone(),
@@ -51,7 +51,7 @@
                     </a>
                 </div>
                 <div class="informer-listGoods_desc">
-                    <a href="<?php echo Yii::app()->createUrl("site/goods", array(
+                    <a href="<?php echo Yii::app()->createAbsoluteUrl("site/goods", array(
                         'link'=>$goods->link, 
                         'brand'=>$goods->brand_data->link,
                         'type'=>$type->link,

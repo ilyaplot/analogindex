@@ -15,8 +15,8 @@ class CharacteristicsLinks
         $os = Os::model()->findAll();
         $os = CHtml::listData($os, "link", "name");
 
-        $processors = Processors::model()->findAll();
-        $processors = CHtml::listData($processors, "link", "name");
+        //$processors = Processors::model()->findAll();
+        //$processors = CHtml::listData($processors, "link", "name");
 
         
         $gpu = Gpu::model()->findAll();
@@ -24,7 +24,9 @@ class CharacteristicsLinks
         
         foreach ($this->characteristics as $catalog) {
             foreach ($catalog as $characteristic) {
-
+                if (empty($characteristic['id'])) {
+                    $characteristic = $catalog;
+                }
                 switch ($characteristic['id']) {
                     case 5 : // cpu cores
                         $cores = $characteristic['value'];
@@ -44,6 +46,7 @@ class CharacteristicsLinks
 
                         $attributes['cores'] = '3plus';
                         break;
+                        
                     case 6 : // cpu freq
                         $freq = round($characteristic['raw'] / 1000 / 1000 / 1000, 2);
 
@@ -67,6 +70,7 @@ class CharacteristicsLinks
 
 
                         break;
+                        /**
                     case 7 : // cpu model
                         foreach ($processors as $link => $processor) {
 
@@ -77,6 +81,8 @@ class CharacteristicsLinks
                             }
                         }
                         break;
+                         * 
+                         */
                     case 8 : // ram
                         $ram = round($characteristic['raw'] / 1024 / 1024, 2);
                         if (!$ram) {
@@ -158,14 +164,21 @@ class CharacteristicsLinks
     {
         $os = Os::model()->findAll();
         $os = CHtml::listData($os, "link", "name");
-        $processors = Processors::model()->findAll();
-        $processors = CHtml::listData($processors, "link", "name");
-
+        //$processors = Processors::model()->findAll();
+        //$processors = CHtml::listData($processors, "link", "name");
+        
         foreach ($this->characteristics as &$catalog) {
             foreach ($catalog as &$characteristic) {
-
+                
+                if (empty($characteristic['id'])) {
+                    $characteristic = &$catalog;
+                }
+                
                 switch ($characteristic['id']) {
                     case 5 : // cpu cores
+                        if (preg_match("/^<a href/isu", $characteristic['value'])) {
+                            break;
+                        }
                         if ($characteristic['value'] == 1) {
                             $characteristic['value'] = '<a href="' . Yii::app()->createUrl("site/type", array(
                                         "type" => $type,
@@ -195,9 +208,11 @@ class CharacteristicsLinks
                         }
                         break;
                     case 6 : // cpu freq
+                        if (preg_match("/^<a href/isu", $characteristic['value'])) {
+                            break;
+                        }
                         $freq = round($characteristic['raw'] / 1000 / 1000 / 1000, 2);
-
-
+                        
                         if ($freq <= 1) {
                             $characteristic['value'] = '<a href="' . Yii::app()->createUrl("site/type", array(
                                         "type" => $type,
@@ -223,6 +238,7 @@ class CharacteristicsLinks
                                     "cpufreq" => '2plus',
                                 )) . '">' . $characteristic['value'] . "</a>";
                         break;
+                        /**
                     case 7 : // cpu model
                         foreach ($processors as $link => $processor) {
 
@@ -236,7 +252,12 @@ class CharacteristicsLinks
                             }
                         }
                         break;
+                         * 
+                         */
                     case 8 : // ram
+                        if (preg_match("/^<a href/isu", $characteristic['value'])) {
+                            break;
+                        }
                         $ram = round($characteristic['raw'] / 1024 / 1024, 2);
 
 
@@ -283,6 +304,9 @@ class CharacteristicsLinks
                                 )) . '">' . $characteristic['value'] . "</a>";
                         break;
                     case 13 : // screensize
+                        if (preg_match("/^<a href/isu", $characteristic['value'])) {
+                            break;
+                        }
                         $screensize = $characteristic['value'];
                         if ($screensize == 0)
                             break;
@@ -320,6 +344,9 @@ class CharacteristicsLinks
                                 )) . '">' . $characteristic['value'] . "</a>";
                         break;
                     case 14 : // OS
+                        if (preg_match("/^<a href/isu", $characteristic['value'])) {
+                            break;
+                        }
                         foreach ($os as $link => $osItem) {
                             if (false !== strripos($characteristic['value'], $osItem)) {
                                 $characteristic['value'] = '<a href="' . Yii::app()->createUrl("site/type", array(

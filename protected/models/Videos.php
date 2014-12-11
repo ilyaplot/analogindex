@@ -82,7 +82,7 @@ class Videos extends CActiveRecord
                 'maxResults' => $limit,
                 'regionCode' => ($language == 'ru') ? 'ru' : 'us',
             ));
-            echo sprintf($query, $brand, $name).PHP_EOL;
+            
         } catch (Exception $ex) {
             return array();
         }

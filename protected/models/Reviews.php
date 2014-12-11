@@ -72,11 +72,11 @@ class Reviews extends CActiveRecord
                 $key++;
             else 
                 break;
-            if (!isset($words[$key]) || mb_strlen($description.$words[$key]) > 250)
+            if (!isset($words[$key]) || mb_strlen($description.$words[$key], 'UTF-8') > 250)
                 break;
             $description.=" ".$words[$key];
-        } while (mb_strlen($description) < 245);
+        } while (mb_strlen($description, 'UTF-8') < 245);
         $description = htmlspecialchars($description);
-        return mb_substr($description, 0, 250);
+        return mb_substr($description, 0, 250, 'UTF-8');
     }
 }
