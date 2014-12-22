@@ -48,7 +48,8 @@ class TopicTags extends CActiveRecord
     public function getNewsByTag($name)
     {
         $criteria = new CDbCriteria();
-        $criteria->addSearchCondition("topic_tag_text", $name);
+        $criteria->condition = "topic_tag_text like :name";
+        $criteria->params = ['name'=>$name];
         $criteria->select = "topic_id";
         
         $items = self::findAll($criteria);

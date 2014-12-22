@@ -258,7 +258,7 @@ class SiteController extends Controller
 
         $typeString = $type;
         if (!$type = GoodsTypes::model()->findByAttributes(array("link" => $typeString)))
-            throw new CHttpExceprion(404, "Страница не найдена");
+            throw new CHttpException(404, "Страница не найдена");
 
         $type = $type->id;
 

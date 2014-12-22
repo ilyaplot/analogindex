@@ -135,19 +135,25 @@ class Export
                     $exist = false;
                     foreach ($goodsNames as $index=>$goodsNamesGroup) {
                         $row = [];
+
                         foreach ($goodsNamesGroup as $productId=>$name) {
                             $row[$productId] = !empty($chCompare[$index][$productId][$id]) ? $chCompare[$index][$productId][$id] : null;
-                            
-                            if ($row[$productId] !== null) {
-                                $key = $chList[$catalog][$id]['characteristic_name'];
-                                if (empty($key)) {
-                                    $key = $chList[$catalog][$id]['catalog_name'];
+                            $key = $chList[$catalog][$id]['characteristic_name'];
+                            if (empty($key)) {
+                                $key = $chList[$catalog][$id]['catalog_name'];
+                            }
+
+                            $data[$index][$key] = $row;
+                        }
+                        foreach ($data[$index] as $characteristic=>$values) {
+                            $empty = true;
+                            foreach($values as $value) {
+                                if (is_array($value)) {
+                                    $empty = false;
                                 }
-                                $data[$index][$key] = $row;
-                            } else {
-                                if (empty($data[$index][$key][$productId])) {
-                                    $data[$index][$key][$productId] = null;
-                                }
+                            }
+                            if ($empty) {
+                                unset($data[$index][$characteristic]);
                             }
                         }
                     }

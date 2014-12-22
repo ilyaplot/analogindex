@@ -38,8 +38,12 @@ class TagController extends Controller
         $criteria->condition = "t.tag = :tag and news_data.lang = :lang";
         $criteria->params = ['tag'=>$tag->id, 'lang'=>Yii::app()->language];
         $criteria->group = 't.news';
-        
+        $criteria->order = "news_data.created desc";
+        $newsCount = NewsTags::model()->with(['news_data'])->count($criteria);
+        $pages = new CPagination($newsCount);
+        $pages->setPageSize(15);
+        $pages->applyLimit($criteria);
         $newsTags = NewsTags::model()->with(['news_data'])->findAll($criteria);
-        $this->render("news", ['newsTags'=>$newsTags, 'tag'=>$tag]);
+        $this->render("news", ['newsTags'=>$newsTags, 'tag'=>$tag, 'pages'=>$pages]);
     }
 }

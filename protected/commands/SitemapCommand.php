@@ -24,14 +24,18 @@ class SitemapCommand extends ConsoleCommand
     {
         $goods = Goods::model()->with(array("brand_data", "type_data"))->findAll();
         $reviews = Reviews::model()->with(array("goods_data"))->findAll();
+        $newsCriteria = new CDbCriteria();
+        $newsCriteria->select = "t.id, t.link, t.lang";
+        $newsCriteria->order = "t.created desc";
+        $news = News::model()->findAll();
         $links = array(
             "http://analogindex.ru/index.html",
             "http://analogindex.com/index.html",
         );
         foreach ($goods as $item) {
             echo ".";
-            $links[] = "http://analogindex.ru/" . $item->type_data->link . "/" . $item->brand_data->link . "/" . $item->link . ".html";
-            $links[] = "http://analogindex.com/" . $item->type_data->link . "/" . $item->brand_data->link . "/" . $item->link . ".html";
+            $links[] = "http://analogindex.ru/" . $item->type_data->link . "/" . $item->brand_data->link . "/" . urlencode($item->link) . ".html";
+            $links[] = "http://analogindex.com/" . $item->type_data->link . "/" . $item->brand_data->link . "/" . urlencode($item->link) . ".html";
         }
         foreach ($reviews as $review) {
             //http://analogindex.ru/review/nokia-asha-500/otli-nyj-telefon-v-vostorge-foto-_2027.html
@@ -42,6 +46,10 @@ class SitemapCommand extends ConsoleCommand
                 $links[] = "http://analogindex.com/review/" . $review->goods_data->brand_data->link .
                         "-" . $review->goods_data->link . "/" . $review->link . ".html";
             }
+            echo ".";
+        }
+        foreach ($news as $item) {
+            $links[] = "http://".Yii::app()->createUrl("news/index", ['link'=>$item->link, 'id'=>$item->id, 'language'=>  Language::getZoneForLang($item->lang)]);
             echo ".";
         }
         echo PHP_EOL;

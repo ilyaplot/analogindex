@@ -12,7 +12,9 @@ class Goods extends CActiveRecord
     
     public $revs = [];
 
-
+    public $is_modification = false;
+    public $modifications = [];
+    
     public static function model($className = __CLASS__)
     {
         return parent::model($className);
@@ -53,7 +55,6 @@ class Goods extends CActiveRecord
             "rating" => array(self::HAS_ONE, "RatingsGoods", "goods",
                 "select" => "AVG(rating.value) as value",
             ),
-            "modifications" => array(self::HAS_MANY, "GoodsModifications", "goods_parent"),
             "comments" => array(self::HAS_MANY, "CommentsGoods", "goods"),
         );
     }
@@ -88,8 +89,16 @@ class Goods extends CActiveRecord
             array('type, brand', 'numerical', 'integerOnly' => true),
             array('name, link', 'length', 'min' => 1, 'max' => 255),
             array('type', 'exist', 'allowEmpty' => false, 'attributeName' => 'id', 'className' => 'GoodsTypes'),
-            array('name', 'unique', 'allowEmpty' => false),
-            array('link', 'unique', 'allowEmpty' => false),
+            ['name', 'unique', 'allowEmpty'=>false, 
+                'attributeName'=>'name', 
+                'className'=>'Goods', 
+                'criteria'=>['condition'=>'brand = :brand', 'params'=>['brand'=>  $this->brand]]
+            ],
+            ['link', 'unique', 'allowEmpty'=>false, 
+                'attributeName'=>'link', 
+                'className'=>'Goods', 
+                'criteria'=>['condition'=>'brand = :brand', 'params'=>['brand'=>  $this->brand]]
+            ],
             array('brand', 'exist', 'allowEmpty' => false, 'attributeName' => 'id', 'className' => 'Brands'),
         );
     }

@@ -6,8 +6,11 @@ class ReviewsController extends Controller
         if (!Reviews::model()->countByAttributes(array(
                     "link" => $link,
                     "id" => $id,
-                )))
-            throw new CHttpException(404, Yii::t("errors", "Страница не найдена"));
+                ))) {
+            Yii::app()->request->redirect("/", true, 302);
+            exit();
+        }
+            
 
         $review = Reviews::model()->cache(60 * 60)->findByPk($id);
         $criteria = new CDbCriteria();
@@ -56,8 +59,10 @@ class ReviewsController extends Controller
     {
         $brand = Brands::model()->findByAttributes(array("link" => $brand));
         
-        if (!$brand)
-            throw new CHttpException(404, Yii::t("errors", "Страница не найдена"));
+        if (!$brand) {
+            Yii::app()->request->redirect("/", true, 302);
+            exit();
+        }
         
         $criteria = new CDbCriteria();
         $criteria->condition = "t.link = :link and t.brand = :brand";

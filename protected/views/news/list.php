@@ -107,7 +107,7 @@
             <h2 itemprop="name"><?php echo  $item->title ?></h2>
             <span itemprop="description"><?php echo $item->getDescription()?></span>...
         </div>
-        <div class="view_bl-replyLink"><?php echo Yii::t("main", 'Читать полностью')?> : <a itemprop="url" href="<?php echo Yii::app()->createUrl("news/index", ['link'=>$item->link, 'id'=>$item->id, 'language'=>  Language::getCurrentZone()]); ?>"><?php echo $item->title?></a></div>
+        <div class="view_bl-replyLink"><?php echo Yii::t("main", 'Читать полностью')?> : <a itemprop="url" href="<?php echo Yii::app()->createAbsoluteUrl("news/index", ['link'=>$item->link, 'id'=>$item->id, 'language'=>  Language::getCurrentZone()]); ?>"><?php echo $item->title?></a></div>
     </div>
     <?php endforeach; ?>
 </div>

@@ -126,9 +126,9 @@ class ImportCommand extends CConsoleCommand
     protected function itemsByIds($ids)
     {
         $criteria = new CDbCriteria();
-        $criteria->select = "t.topic_id, t.topic_title, t.topic_date_add, t.user_id";
+        $criteria->select = "t.topic_id, t.topic_title, t.topic_date_add, t.user_id, t.exported";
         $criteria->addInCondition("t.topic_id", (array) $ids);
-        $criteria->compare('t.exported', 0);
+        //$criteria->compare('t.exported', 0);
         $criteria->order = "t.topic_date_add desc";
 
         $items = Topics::model()->with("topic_content")->findAll($criteria);
@@ -149,13 +149,14 @@ class ImportCommand extends CConsoleCommand
                 'lang' => $item->lang,
                 'content' => $item->topic_content->topic_text,
             ];
+            if (!$item->exported) {
+                $connection = Yii::app()->teta;
+                $query = "update ls_topic set exported = 1 where topic_id = {$item->topic_id}";
+                usleep(1000);
+                $connection->createCommand($query)->execute();
+            }
         }
-        if (!empty($ids)) {
-            $connection = Yii::app()->teta;
-            $query = "update ls_topic set exported = 1 where topic_id in (".implode(", ", $ids).")";
-            $connection->createCommand($query)->execute();
-            
-        }
+        
         return $result;
     }
     
@@ -163,74 +164,66 @@ class ImportCommand extends CConsoleCommand
     {
         $urlManager = new UrlManager();
         $tags = Tags::model()->findAllByAttributes(['disabled'=>0]);
+        
+        $gmc= new GearmanClient();
+        $gmc->addServer();
+        
+        
         foreach ($tags as $tag) {
-            echo $tag->name.PHP_EOL;
+            
             $ids = TopicTags::model()->getNewsByTag($tag->name);
-            $news = $this->itemsByIds($ids);
-            foreach ($news as $url=>$item) {
-                
-                $model = new News();
-                $model->title = $item['title'];
-                $model->content = $item['content'];
-                $model->lang = $item['lang'];
-                $model->created = $item['date'];
-                $model->link = $urlManager->translitUrl($model->title);
-                $model->source_url = $url;
-                $id = '';
-                if ($model->validate()) {
-                    $model->save();
-                    echo $model->title.PHP_EOL;
-                }
-            }
-            GoodsNews::model()->filter();
-        }
-    }
-    
-    
-    public function actionTest()
-    {
-        $urlManager = new UrlManager();
-        $cr = new CDbCriteria();
-        $cr->condition = 't.id = 6917'; 
-        $products = Goods::model()->with(["brand_data"])->findAll($cr);
-        
-        foreach ($products as $product) {
-            $name = $product->brand_data->name." ".$product->name;
-            $news = $this->search($name);
-            foreach ($news as $url=>$item) {
-                
-                $model = new News();
-                $model->title = $item['title'];
-                $model->content = $item['content'];
-                $model->lang = $item['lang'];
-                $model->created = $item['date'];
-                $model->link = $urlManager->translitUrl($model->title);
-                $model->source_url = $url;
-                $id = '';
-                if ($model->validate()) {
-                    if ($model->save()) {
-                        $id = $model->id;
+            echo $tag->name." (".count($ids).")".PHP_EOL;
+            if (empty($ids))
+                continue;
+            // Разбиваем массив что бы не было больших in списков
+            $idsArray = array_chunk($ids, 20);
+            
+            foreach ($idsArray as $ids) {
+                $news = $this->itemsByIds($ids);
+                foreach ($news as $url=>$item) {
+                    echo ".";
+                    if ($news = News::model()->findByAttributes(['source_url'=>$url])) {
+                        $newsTags = new NewsTags();
+                        $newsTags->news = $news->id;
+                        $newsTags->tag = $tag->id;
+                        if ($newsTags->validate()) {
+                            $newsTags->save();
+                        }
+                        continue;
                     }
-                } else {
-                    $model = News::model()->findByAttributes(['source_url'=>$url]);
-                    
-                    if (!empty($model)) {
-                        $id = $model->id;
-                    }
-                }
-                
-                if (!empty($id)) {
-                    $model = new GoodsNews();
-                    $model->goods = $product->id;
-                    $model->news = $id;
+                    $model = new News();
+                    $model->title = $item['title'];
+                    $model->content = $item['content'];
+                    $model->lang = $item['lang'];
+                    $model->created = $item['date'];
+                    $model->link = $urlManager->translitUrl($model->title);
+                    $model->source_url = $url;
                     if ($model->validate()) {
-                        echo ".";
                         $model->save();
+                        
+                        $task= $gmc->addTaskHighBackground("news_tag", serialize($model));
+                        $task= $gmc->addTaskHighBackground("news_filter", serialize($model));
+                        
+                        $newsTags = new NewsTags();
+                        $newsTags->news = $news->id;
+                        $newsTags->tag = $tag->id;
+                        if ($newsTags->validate()) {
+                            $newsTags->save();
+                        }
+                        continue;
+                        echo $model->title.PHP_EOL;
                     }
                 }
+                echo PHP_EOL;
+                GoodsNews::model()->filter();
             }
         }
         
-        GoodsNews::model()->filter();
+        if (! $gmc->runTasks())
+        {
+            echo "ERROR " . $gmc->error() . "\n";
+            exit;
+        }
     }
+    
 }

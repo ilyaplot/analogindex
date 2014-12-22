@@ -27,6 +27,8 @@ return array(
             array('reviews/list', 'urlSuffix' => '.html'),
         
         'http://analogindex.<language:\w+>/tag/<type:[\w\-]+>_<tag:[\w\-]+>/reviews' => 'tag/reviews',
+        
+        'http://analogindex.<language:\w+>/tag/<type:[\w\-]+>_<tag:[\w\-]+>/news/page-<page:\d+>' => 'tag/news',
         'http://analogindex.<language:\w+>/tag/<type:[\w\-]+>_<tag:[\w\-]+>/news' => 'tag/news',
         'yml/manager/index'=>'yml/manager/index',
         'yml/manager/search'=>'yml/manager/search',

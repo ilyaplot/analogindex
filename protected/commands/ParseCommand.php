@@ -445,7 +445,7 @@ class ParseCommand extends CConsoleCommand
     {
         $list = PhonearenaUrls::model()->getParseList();
         foreach ($list as $item) {
-            usleep(500000);
+            //usleep(500000);
             $html = phpQuery::newDocumentHtml($item->content);
             pq($html)->find("div.s_breadcrumbs > ul > li.s_sep")->remove();
             $breadcrumbs = pq($html)->find("div.s_breadcrumbs > ul > li");
@@ -496,11 +496,123 @@ class ParseCommand extends CConsoleCommand
                     
                 }
             }
-            //if (empty($brand) || empty($name) || !empty($synonims)) {
-                echo $item->fullurl." # ";
-                echo $brand." # ".$name." # ".$type.PHP_EOL;
-                //var_dump($synonims);
-            //}
+            
+            /** hook **/
+            
+            /** end hook **/
+            if ($type != 1 && $type != 2)
+                $type = 1;
+            
+            if ($type == 1 || $type == 2) {
+                
+                $criteria = new CDbCriteria();
+                $criteria->condition = "(CONCAT(brand_data.name, ' ', t.name) LIKE :search "
+                        . "OR CONCAT(brand_data.name, ' ', synonims.name) LIKE :search) ";
+                $search = $brand . " " . $name;
+                $search = htmlspecialchars($search);
+                $search = str_replace("&nbsp;", " ", $search);
+                $search = "{$search}";
+                $criteria->params = array(
+                    "search" => $search,
+                );
+                $urlManager = new UrlManager();
+                echo $search . PHP_EOL;
+                $goods = Goods::model()->with("brand_data", "synonims")->find($criteria);
+
+                Yii::app()->language = 'ru';
+                if (!$goods) {
+                    if (!$brandModel = Brands::model()->findByAttributes(array("name" => $brand))) {
+
+                        $brandModel = new Brands();
+                        $brandModel->name = $brand;
+                        $brandModel->link = $urlManager->translitUrl($brand);
+                        if ($brandModel->validate()) {
+                            echo "Добавлен бренд {$brand}" . PHP_EOL;
+                            $brandModel->save();
+                        } else {
+                            echo "Не добавлен бренд {$brand}" . PHP_EOL;
+                            continue;
+                        }
+                    }
+                    $goods = new Goods();
+
+                    $goods->brand = $brandModel->id;
+                    $goods->name = $name;
+                    $goods->link = $urlManager->translitUrl($name);
+                    $goods->type = $type;
+                    echo $urlManager->translitUrl($name) . PHP_EOL;
+                    if ($goods->validate()) {
+                        echo "Добавлен товар {$brand} {$name}" . PHP_EOL;
+                        $goods->source_url = $item->fullurl;
+                        $goods->save();
+                    } else {
+                        echo "Не добавлен товар {$brand} {$name}" . PHP_EOL;
+                        var_dump($goods->getErrors());
+                        continue;
+                    }
+                } elseif (empty($goods->source_url) || $goods->type != $type) {
+                    $goods->type = $type;
+                    $goods->source_url = $item->fullurl;
+                    $goods->save();
+                }
+                
+                
+                /**
+                 * Изображения
+                 */
+                if (!empty($item->photos)) {
+                    if (preg_match_all("/'(?P<images>\/\/i\-cdn\.phonearena\.com\/images\/phones\/\d+\-xlarge\/[^.]+\.jpg)',/isu", $item->photos, $matches, PREG_PATTERN_ORDER)) {
+                        $matches['images'] = array_map(function($value){return "http:".$value;}, $matches['images']);
+                        
+                        foreach ((array) $matches['images'] as $image) {
+                            $goodsImage = GoodsImages::model()->with(array(
+                                "image_data" => array(
+                                    "joinType" => "INNER JOIN",
+                                    "condition" => "image_data.source  = :source",
+                                    "params" => array("source" => $image),
+                                )
+                            ))->count();
+                            if (!$goodsImage) {
+                                $ext = explode(".", $image);
+                                $ext = end($ext);
+                                $file = new Files();
+                                $file->name = "{$brand->name} {$goods->name}.{$ext}";
+                                $file->save();
+                                $filename = $file->getFilename();
+                                if (!$this->getFile($image, $filename)) {
+                                    echo "Не удалось скачать {$image}" . PHP_EOL;
+                                    $file->delete();
+                                    continue;
+                                }
+                                sleep(1);
+                                $file->size = $file->getFilesize();
+                                $file->mime_type = $file->getMimeType();
+                                if (!preg_match("~image.*~", $file->mime_type)) {
+                                    $file->delete();
+                                    echo "Тип изображения не соответствует image. {$file->mime_type}" . PHP_EOL;
+                                    continue;
+                                }
+                                echo "Добавлено изображение {$image} {$file->size} байт" . PHP_EOL;
+                                $file->save();
+                                $imageModel = new Images();
+                                $imageModel->file = $file->id;
+                                $imageModel->size = 1;
+                                $size = getimagesize($filename);
+                                $imageModel->width = $size[0];
+                                $imageModel->height = $size[1];
+                                $imageModel->source = $image;
+                                $imageModel->save();
+                                $goodsImage = new GoodsImages();
+                                $goodsImage->goods = $goods->id;
+                                $goodsImage->image = $imageModel->id;
+                                $goodsImage->save();
+                            } else {
+                                //echo "Image exists" . PHP_EOL;
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
     
