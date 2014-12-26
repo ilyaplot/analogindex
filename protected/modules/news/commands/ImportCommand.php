@@ -6,6 +6,7 @@ class ImportCommand extends CConsoleCommand
     {
         
         $urlManager = new UrlManager();
+        /**
         $brands = Brands::model()->findAll();
 
         foreach ($brands as $brand) {
@@ -47,11 +48,25 @@ class ImportCommand extends CConsoleCommand
         
         unset($brand, $brands);
         echo PHP_EOL;
-        $products = Goods::model()->with(["brand_data"])->findAll();
+         * 
+         */
+        $productsCriteria = new CDbCriteria();
+        $productsCriteria->order = 't.updated desc';
+        $products = Goods::model()->with(["brand_data"])->findAll($productsCriteria);
+        
+        unset($productsCriteria);
         
         foreach ($products as $product) {
-            $name = $product->brand_data->name." ".$product->name;
-            $news = $this->search($name);
+            
+            $memory = (!function_exists('memory_get_usage')) ? '' : round(memory_get_usage()/1024/1024, 2) . 'MB';
+            echo "Mem:".$memory." ";
+            unset($memory);
+            
+            $name = $product->brand_data->name."% ".$product->name;
+            $news = $this->search("%".$name."%");
+            echo $name.PHP_EOL;
+            unset ($name);
+            
             foreach ($news as $url=>$item) {
                 
                 $model = new News();
@@ -61,10 +76,13 @@ class ImportCommand extends CConsoleCommand
                 $model->created = $item['date'];
                 $model->link = $urlManager->translitUrl($model->title);
                 $model->source_url = $url;
+                
                 $id = '';
+                
                 if ($model->validate()) {
                     if ($model->save()) {
                         $id = $model->id;
+                        echo "+";
                     }
                 } else {
                     $model = News::model()->findByAttributes(['source_url'=>$url]);
@@ -76,6 +94,8 @@ class ImportCommand extends CConsoleCommand
                     }
                 }
                 
+                unset($model);
+                
                 if (!empty($id)) {
                     $model = new GoodsNews();
                     $model->goods = $product->id;
@@ -84,16 +104,80 @@ class ImportCommand extends CConsoleCommand
                         echo ".";
                         $model->save();
                     }
+                    unset($model, $id);
                 }
             }
+            echo PHP_EOL;
+            unset($product, $news, $url, $item);
         }
-        
+        unset($products);
         GoodsNews::model()->filter();
     }
     
     
-    public function search($query)
+    public function search($title)
     {
+        $criteria = new CDbCriteria();
+        $criteria->select = "t.topic_id, t.topic_title, t.topic_date_add, t.user_id, t.exported";
+        $criteria->condition = "t.topic_title LIKE :title and t.exported = 0";
+        $criteria->params = ["title"=>$title];
+        $criteria->order = "t.topic_date_add desc";
+
+        $result = [];
+        
+        try {
+            $items = Topics::model()->with("topic_content")->findAll($criteria);
+            unset ($criteria);
+            $ids = [];
+            
+            foreach ($items as &$item)
+            {
+                if (empty($item->topic_content->source_url) || empty($item->topic_content->topic_text)) {
+                    unset($item);
+                    continue;
+                }
+                
+                $ids[] = $item->topic_id;
+                
+                $result[$item->topic_content->source_url] = [
+                    'id' => $item->topic_id,
+                    'title' => $item->topic_title,
+                    'url' => $item->topic_content->source_url,
+                    'date' => $item->topic_date_add,
+                    'lang' => $item->lang,
+                    'content' => $item->topic_content->topic_text,
+                ];
+                
+                if (!$item->exported) {
+                    $connection = Yii::app()->teta;
+                    $query = "update ls_topic set exported = 1 where topic_id = {$item->topic_id}";
+                    usleep(1000);
+                    $connection->createCommand($query)->execute();
+                }
+                
+                unset($item, $connection, $query);
+            }
+            unset ($items);
+        } catch (CDbException $ex) {
+            echo $ex->getMessage().PHP_EOL;
+            unset ($ex, $items, $connection);
+            echo "Ошибка базы данных teta, попытка перезапуска соединения.".PHP_EOL;
+            try {
+                sleep(5);
+                Yii::app()->teta->setActive(false);
+                Yii::app()->teta->setActive(true);
+                echo "Repeat {$title}".PHP_EOL;
+                return $this->search($title);
+            } catch (CDbException $ex) {
+                echo $ex->getMessage().PHP_EOL;
+                unset ($ex, $items, $connection);
+                echo "Повторная базы данных teta, попытка перезапуска соединения.".PHP_EOL;
+                echo "Repeat {$title}".PHP_EOL;
+                return $this->search($title);
+            }
+        }
+        return $result;
+        /** sphinx 
         $searchCriteria = new stdClass();
         $search = Yii::app()->search;
 
@@ -121,6 +205,7 @@ class ImportCommand extends CConsoleCommand
         }
         
         return [];
+         */
     }
     
     protected function itemsByIds($ids)

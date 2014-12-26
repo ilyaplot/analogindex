@@ -107,7 +107,8 @@ class SiteController extends Controller
         $newsCriteria->limit = 5;
 
         $news = News::model()->with([
-            'product'
+            'product',
+            'preview_image'
         ])->findAll($newsCriteria);
         
         $countCriteria = new CDbCriteria();

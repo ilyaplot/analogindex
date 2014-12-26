@@ -23,26 +23,35 @@ class TopicContent extends CActiveRecord
     {
         $content = $this->topic_text_source;
         $html = phpQuery::newDocumentHtml($content);
+        
+        
         $p = pq($html)->find("p:last");
+        unset ($content);
+        
         if (preg_match("/<p>[\w]+: <a href=\"http:\/\/[\w]+\.&lt;.*&gt;(?P<link>.*)<\/p>/isu", $p->html(), $matches)) {
             $link = $matches['link'];
+            unset($matches);
         } else {
             $link = pq($p)->find("a")->attr("href"); 
         }
+        
         if (!empty($link) && (preg_match("/.*Источник:.*/isu", $p->html()) || preg_match("/.*Source:.*/isu", $p->html()))) {
             pq($html)->find("p:last")->remove();
             pq($html)->find("p:empty")->remove();
             $this->topic_text = (string) $html;
+            unset($html);
+            
             $link = str_replace("http://http//", "http//", $link);
             
             if (preg_match("/^.*[\.=]$/isu", $link)) {
                 if (preg_match("/&gt;(?P<link>.*)<\/p>/isu", $p, $matches)) {
                     $link = $matches['link'];
+                    unset($matches);
                 } else {
-                    echo $link.PHP_EOL;
-                    exit();
+                    return false;
                 }
             }
+            
             $ch = curl_init($link);
             
             curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
@@ -67,7 +76,9 @@ class TopicContent extends CActiveRecord
                 $link = preg_replace("/(.*)#.*/isu", "$1", $link);
             }
             curl_close($ch);
+            
             $this->source_url = $link;
+            unset ($ch, $link);
         } else {
             return false;
         }

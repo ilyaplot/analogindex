@@ -24,7 +24,7 @@
             <hr />
             <?php endif;?>
             <div class="news-content" itemprop="articleBody"><?php echo $news->content ?></div>
-            
+            <div style="clear: both;"></div>
             <?php if(!empty($tags)):?>
             <hr />
             <div>
@@ -46,6 +46,7 @@
                 <?php $export->reviews($tags, Yii::app()->language, 10); ?>
             </div>
             <?php endif; ?>
+            <div style="clear: both;"></div>
             <hr />
             <ul class="tags">
                 <?php foreach ($news->tags as $tag):?>
@@ -60,6 +61,7 @@
                 <?php endif;?>
                 <?php endforeach;?>
             </ul>
+            
             <span><?php echo Yii::t("main", "Эта новость")?> : 
                 <a href="<?php echo Yii::app()->createAbsoluteUrl("news/index", ['link'=>$news->link, 'id'=>$news->id, 'language'=>  Language::getCurrentZone()]);?>" itemprop="url"><?php echo Yii::app()->createAbsoluteUrl("news/index", ['link'=>$news->link, 'id'=>$news->id, 'language'=>  Language::getCurrentZone()]);?></a>
             </span><br />

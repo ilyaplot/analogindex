@@ -137,7 +137,8 @@
             
             <div class="review-content" itemprop="reviewBody"><?php echo $review->content ?></div>
             <?php if(!empty($tags)):?>
-            <hr />
+            
+            <hr   />
             <div>
                 <?php $export->trends($tags, Yii::app()->language, 20); ?>
             </div>

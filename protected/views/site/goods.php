@@ -143,7 +143,16 @@
                                             <a href="<?php echo Yii::app()->createAbsoluteUrl("news/index", ['link'=>$item->link, 'id'=>$item->id, 'language'=>  Language::getCurrentZone()]);?>" itemprop="url">
                                                 <h2 itemprop="name"><?php echo  $item->title ?></h2>
                                             </a>
+                                            <?php if (!empty($item->preview_image)) :?>
+                                            <a class="news-preview" href="<?php echo Yii::app()->createAbsoluteUrl("news/index", ['link'=>$item->link, 'id'=>$item->id, 'language'=>  Language::getCurrentZone()]); ?>">
+                                                <img itemprop="image" src="<?php echo $item->preview_image->getPreviewUrl()?>" class="news_preview" 
+                                                     alt="<?php echo $item->preview_image->alt?>"/>
+                                            </a>
+                                            <?php endif; ?>
                                             <span itemprop="description"><?php echo $item->getDescription()?></span>...
+                                            <?php if (!empty($item->preview_image)) :?>
+                                            <div style="clear: both;"></div>
+                                            <?php endif;?>
                                         </div>
                                     </div>
                                     <?php endforeach; ?>

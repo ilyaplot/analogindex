@@ -380,4 +380,62 @@ class TestCommand extends CConsoleCommand
         echo $product->brand_data->name." ".$product->name.PHP_EOL;
         return true;
     }
+    
+    public function actionParse()
+    {
+        $content = file_get_contents("/var/www/analogindex/www/phonearena.html");
+        $html = phpQuery::newDocumentHTML($content);
+        $fullspecs = pq($html)->find("div.s_specs_box");
+        $characteristicsTable = [];
+        foreach ($fullspecs as $specs) {
+            $title = pq($specs)->find("h2.htitle")->html();
+            pq($specs)->find("h2.htitle")->remove();
+            //echo $title.PHP_EOL;
+            $items = pq($specs)->find('ul > li');
+            foreach($items as $item) {
+                if ($subtitle = pq($item)->find('span.s_tooltip_anchor')->html()) {
+                    $subtitle = pq($item)->find('span.s_tooltip_anchor')->html();
+                    pq($item)->find('span.s_tooltip_anchor, span.s_tooltip_content')->remove();
+                } else {
+                    $subtitle = pq($item)->find('strong')->html();
+                }
+                pq($item)->find('strong')->remove();
+                $subsubtitle = pq($item)->find("li");
+                foreach ($subsubtitle as $subtitleitem) {
+                    $characteristicsTable[] = $title.":::".$subtitle.":::".pq($subtitleitem)->text();
+                }
+            }
+        }
+        $characteristicsTable = array_unique($characteristicsTable);
+        var_dump($characteristicsTable);
+        
+    }
+    
+    
+    public function actionImage() {
+        $item = PhonearenaUrls::model()->findByPk(200);
+        echo $item->photos;
+        if (preg_match_all("/paGallery\.image\('[^']+', '(?P<images>\/\/i\-cdn\.phonearena\.com\/images\/phones\/\d+\-[x]+large\/[^.]+\.jpg)', '[^']+', '\d+', '[^']+'\)/isu", $item->photos, $matches, PREG_PATTERN_ORDER)) {
+            $matches['images'] = array_map(function($value){return "http:".$value;}, $matches['images']);
+            var_dump($matches['images']);
+        }
+    }
+    
+    
+    public function actionProxy()
+    {
+        $downloader = new Downloader("http://google.com/", 2);
+        echo $downloader->getProxy().PHP_EOL;
+        $proxy = $downloader->getProxy();
+        $downloader->deleteProxy($proxy);
+        echo $downloader->getProxy().PHP_EOL;
+        $proxy = $downloader->getProxy();
+        $downloader->deleteProxy($proxy);
+        echo $downloader->getProxy().PHP_EOL;
+    }
+    
+    public function actionTrends()
+    {
+        //java -jar j-google-trends-client-1.2.8-jar-with-dependencies.jar -l INFO -q "Apple Iphone 6" -u ilyaplot@gmail.com -p 4qeruj4qeruj -m 1 -P "http://203.144.144.162:8080" -C ":"
+    }
 }

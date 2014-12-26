@@ -72,6 +72,7 @@ class NewsController extends Controller
         
         $news = News::model()->with([
             'product'=>['on'=>'product.goods = :goods', 'params'=>['goods'=>$product->id]],
+            'preview_image'
         ])->findAll($criteria);
         
         

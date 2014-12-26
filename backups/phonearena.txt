@@ -1,0 +1,177 @@
+rray(85) {
+  [0]=>
+  string(35) "Design:::Device type::::Smart phone"
+  [1]=>
+  string(30) "Design:::OS::::Android (4.4.4)"
+  [2]=>
+  string(32) "Design:::Form factor::::Candybar"
+  [3]=>
+  string(73) "Design:::Dimensions::::5.12 x 2.58 x 0.27 inches  (130.1 x 65.5 x 6.9 mm)"
+  [4]=>
+  string(64) "Design:::Weight::::3.89 oz  (110 g)the average is 4.8 oz (138 g)"
+  [5]=>
+  string(35) "Design:::Body material::::Aluminium"
+  [6]=>
+  string(66) "Design:::Side Keys::::Left: Volume control; Right: Lock/Unlock key"
+  [7]=>
+  string(55) "Design:::Colors::::Black, Gray, Pink, Blue, White, Gold"
+  [8]=>
+  string(37) "Display:::Physical size::::4.5 inches"
+  [9]=>
+  string(41) "Display:::Resolution::::540 x  960 pixels"
+  [10]=>
+  string(34) "Display:::Pixel density::::245 ppi"
+  [11]=>
+  string(36) "Display:::Technology::::Super AMOLED"
+  [12]=>
+  string(41) "Display:::Screen-to-body ratio::::66.09 %"
+  [13]=>
+  string(30) "Display:::Colors::::16 777 216"
+  [14]=>
+  string(48) "Display:::Touchscreen::::Capacitive, Multi-touch"
+  [16]=>
+  string(36) "Display::::::Capacitive, Multi-touch"
+  [17]=>
+  string(52) "Display:::Features::::Light sensor, Proximity sensor"
+  [18]=>
+  string(46) "Camera:::Camera:Flash:Features::::8 megapixels"
+  [20]=>
+  string(37) "Camera:::Camera:Flash:Features::::LED"
+  [22]=>
+  string(72) "Camera:::Camera:Flash:Features::::Autofocus, Face detection, Geo tagging"
+  [24]=>
+  string(24) "Camera::::::8 megapixels"
+  [25]=>
+  string(15) "Camera::::::LED"
+  [26]=>
+  string(50) "Camera::::::Autofocus, Face detection, Geo tagging"
+  [27]=>
+  string(77) "Camera:::Camcorder:Recording format:Features::::1920x1080 (1080p HD) (30 fps)"
+  [29]=>
+  string(72) "Camera:::Camcorder:Recording format:Features::::MPEG4, H.263, H.264, WMV"
+  [31]=>
+  string(61) "Camera:::Camcorder:Recording format:Features::::Video calling"
+  [33]=>
+  string(41) "Camera::::::1920x1080 (1080p HD) (30 fps)"
+  [34]=>
+  string(36) "Camera::::::MPEG4, H.263, H.264, WMV"
+  [35]=>
+  string(25) "Camera::::::Video calling"
+  [36]=>
+  string(44) "Camera:::Front-facing camera::::5 megapixels"
+  [38]=>
+  string(24) "Camera::::::5 megapixels"
+  [39]=>
+  string(54) "Hardware:::System chip::::Qualcomm Snapdragon 410 8916"
+  [40]=>
+  string(67) "Hardware:::Processor::::Quad core, 1200 MHz, ARM Cortex-A53, 64-bit"
+  [41]=>
+  string(43) "Hardware:::Graphics processor::::Adreno 306"
+  [43]=>
+  string(24) "Hardware::::::Adreno 306"
+  [44]=>
+  string(49) "Hardware:::System memory::::1024 MB RAM (533 MHz)"
+  [45]=>
+  string(36) "Hardware:::Built-in storage::::16 GB"
+  [46]=>
+  string(73) "Hardware:::Storage expansion::::microSD, microSDHC, microSDXC up to 64 GB"
+  [47]=>
+  string(30) "Battery:::Capacity::::1900 mAh"
+  [48]=>
+  string(37) "Battery:::Not user replaceable::::Yes"
+  [49]=>
+  string(90) "Multimedia:::Music player:Filter by:Features:Supported formats::::Album, Artist, Playlists"
+  [51]=>
+  string(102) "Multimedia:::Music player:Filter by:Features:Supported formats::::Album art cover, Background playback"
+  [53]=>
+  string(108) "Multimedia:::Music player:Filter by:Features:Supported formats::::MP3, AAC, AAC+, eAAC+, FLAC, WAV, AMR, OGG"
+  [55]=>
+  string(40) "Multimedia::::::Album, Artist, Playlists"
+  [56]=>
+  string(52) "Multimedia::::::Album art cover, Background playback"
+  [57]=>
+  string(58) "Multimedia::::::MP3, AAC, AAC+, eAAC+, FLAC, WAV, AMR, OGG"
+  [58]=>
+  string(68) "Multimedia:::Video playback:Supported formats::::MPEG4, H.263, H.264"
+  [60]=>
+  string(35) "Multimedia::::::MPEG4, H.263, H.264"
+  [61]=>
+  string(46) "Multimedia:::Speakers::::Earpiece, Loudspeaker"
+  [62]=>
+  string(34) "Multimedia:::YouTube player::::Yes"
+  [63]=>
+  string(53) "Internet browsing:::Browser:supports::::Google Chrome"
+  [65]=>
+  string(51) "Internet browsing:::Browser:supports::::HTML, HTML5"
+  [67]=>
+  string(36) "Internet browsing::::::Google Chrome"
+  [68]=>
+  string(34) "Internet browsing::::::HTML, HTML5"
+  [69]=>
+  string(88) "Internet browsing:::Built-in online services support::::YouTube (upload), Picasa/Google+"
+  [70]=>
+  string(44) "Technology:::GSM::::850, 900, 1800, 1900 MHz"
+  [71]=>
+  string(102) "Technology:::Data::::LTE Cat 4 (150/50 Mbit/s), HSDPA+ (4G) 42.2 Mbit/s, HSUPA 5.76 Mbit/s, EDGE, GPRS"
+  [72]=>
+  string(34) "Technology:::Global Roaming::::Yes"
+  [73]=>
+  string(47) "Technology:::Positioning::::GPS, A-GPS, Glonass"
+  [74]=>
+  string(30) "Technology:::Navigation::::Yes"
+  [75]=>
+  string(149) "Phone features:::Phonebook::::Unlimited entries, Caller groups, Multiple numbers per contact, Search by both first and last name, Picture ID, Ring ID"
+  [76]=>
+  string(57) "Phone features:::Organizer::::Calendar, Alarm, Calculator"
+  [77]=>
+  string(76) "Phone features:::Messaging::::SMS, MMS, Threaded view, Predictive text input"
+  [78]=>
+  string(63) "Phone features:::E-mail::::IMAP, POP3, SMTP, Microsoft Exchange"
+  [80]=>
+  string(56) "Phone features::::::IMAP, POP3, SMTP, Microsoft Exchange"
+  [81]=>
+  string(60) "Phone features:::Instant Messaging::::Hangouts / Google Talk"
+  [83]=>
+  string(42) "Phone features::::::Hangouts / Google Talk"
+  [84]=>
+  string(31) "Connectivity:::Bluetooth::::4.0"
+  [86]=>
+  string(21) "Connectivity::::::4.0"
+  [87]=>
+  string(38) "Connectivity:::Wi-Fi::::802.11 b, g, n"
+  [89]=>
+  string(32) "Connectivity::::::802.11 b, g, n"
+  [90]=>
+  string(48) "Connectivity:::USB:Connector:Features::::USB 2.0"
+  [92]=>
+  string(49) "Connectivity:::USB:Connector:Features::::microUSB"
+  [94]=>
+  string(74) "Connectivity:::USB:Connector:Features::::Mass storage device, USB charging"
+  [96]=>
+  string(25) "Connectivity::::::USB 2.0"
+  [97]=>
+  string(26) "Connectivity::::::microUSB"
+  [98]=>
+  string(51) "Connectivity::::::Mass storage device, USB charging"
+  [99]=>
+  string(44) "Connectivity:::Headphones connector::::3.5mm"
+  [100]=>
+  string(45) "Connectivity:::Charging connector::::microUSB"
+  [101]=>
+  string(63) "Connectivity:::Other::::NFC, Tethering, Computer sync, OTA sync"
+  [102]=>
+  string(145) "Other features:::Notifications::::Haptic feedback, Music ringtones (MP3), Polyphonic ringtones, Vibration, Flight mode, Silent mode, Speakerphone"
+  [103]=>
+  string(56) "Other features:::Sensors::::Accelerometer, Compass, Hall"
+  [105]=>
+  string(48) "Other features::::::Accelerometer, Compass, Hall"
+  [106]=>
+  string(66) "Other features::::::Voice dialing, Voice commands, Voice recording"
+  [107]=>
+  string(50) "Availability:::Officially announced::::30 Oct 2014"
+}
+
+paGallery.applyNavGallery ('gallery_images', 10, [ 
+new paGallery.image('//i-cdn.phonearena.com/images/phones/9432-default/Samsung-SGH-J750-0.jpg', '//i-cdn.phonearena.com/images/phones/9432-large/Samsung-SGH-J750-0.jpg', 'Samsung SGH-J750', '9432', '/phones/Samsung-SGH-J750_id2257/photos?image=9432'), 
+new paGallery.image('//i-cdn.phonearena.com/images/phones/9433-default/Samsung-SGH-J750-1.jpg', '//i-cdn.phonearena.com/images/phones/9433-large/Samsung-SGH-J750-1.jpg', 'Samsung SGH-J750', '9433', '/phones/Samsung-SGH-J750_id2257/photos?image=9433') 
+], 0, 0 );

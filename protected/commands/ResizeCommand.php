@@ -48,6 +48,8 @@ class ResizeCommand extends CConsoleCommand
                 $file->save();
             }
         }
+        
+        NewsImages::model()->createPreviews();
     }
 
     public function actionCount()

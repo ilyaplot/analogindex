@@ -26,6 +26,12 @@ return array(
         'http://analogindex.<language:\w+>/reviews/product/<brand:[\w\-]+>_<product:[\w\-]+>' =>
             array('reviews/list', 'urlSuffix' => '.html'),
         
+        'http://analogindex.<language:\w+>/news_image/id<id:\d+>/<name:.*>' =>
+            array('files/newsimage', 'urlSuffix' => ''),
+        
+        'http://analogindex.<language:\w+>/news_image/preview/id<id:\d+>/<name:.*>' =>
+            array('files/newsimagepreview', 'urlSuffix' => ''),
+        
         'http://analogindex.<language:\w+>/tag/<type:[\w\-]+>_<tag:[\w\-]+>/reviews' => 'tag/reviews',
         
         'http://analogindex.<language:\w+>/tag/<type:[\w\-]+>_<tag:[\w\-]+>/news/page-<page:\d+>' => 'tag/news',
@@ -53,6 +59,9 @@ return array(
         
         'http://analogindex.<language:\w+>/_image/id<id:\d+>/<name:.*>' =>
         array('files/image', 'urlSuffix' => ''),
+        
+        
+        
         'http://analogindex.<language:\w+>/brand/<link:[\d\w\-_]*>/<type:[\d\w\-_]*>/page<page:\d+>' =>
         array('site/brand', 'urlSuffix' => '.html'),
         'http://analogindex.<language:\w+>/brand/<link:[\d\w\-_]*>/page<page:\d+>' =>

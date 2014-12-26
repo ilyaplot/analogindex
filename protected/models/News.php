@@ -42,17 +42,15 @@ class News extends CActiveRecord
                 'joinType'=>'inner join',
                 'condition'=>'product.disabled = 0',
             ],
+            "preview_image"=>[self::HAS_ONE, "NewsImages", "news", 
+                'condition'=>'preview_image.has_preview = 1',
+            ],
             'tags'=>[self::HAS_MANY, 'NewsTags', 'news'],
         ];
     }
     
-    public function filteredContent()
+    public function filterContent()
     {
-        if (!empty($this->content_filtered)) {
-            return $this->content_filtered;
-        }
-        
-        
         $html = phpQuery::newDocumentHtml($this->content);
         $html->find("script")->remove();
         $source_domain = preg_replace("/(http:\/\/[^\/]+\/).*/isu", "$1", $this->source_url);
@@ -87,9 +85,20 @@ class News extends CActiveRecord
         return $html;
     }
     
+    public function filteredContent()
+    {
+        if (!empty($this->content_filtered)) {
+            return $this->content_filtered;
+        }
+        return $this->filterContent();
+    }
+    
     public function getWords($str, $length = 50)
     {
         $words = explode(" ", trim(strip_tags($str)));
+        if (count($words) ==1 && empty($words[0])) {
+            return [];
+        }
         return implode (" ", array_slice($words, 0, $length));
     }
     
@@ -99,8 +108,17 @@ class News extends CActiveRecord
             return $this->preview;
         }
         
-        $words = explode(" ", trim(strip_tags($this->filteredContent())));
+        $content = $this->filteredContent();
+        
+        if (empty($content)) {
+            return $this->preview;
+        }
+        
+        $words = explode(" ", trim(strip_tags($content)));
+        
         $description = $words[0];
+        
+        
         $key = 0;
         do {
             if (isset($words[$key]))
@@ -120,7 +138,8 @@ class News extends CActiveRecord
     
     public function afterSave()
     {
-        $this->preview = $this->getDescription();
+        //$this->preview = $this->getDescription();
         return parent::beforeSave();
     }
+    
 }

@@ -39,6 +39,7 @@ class PhonearenaUrls extends CActiveRecord
     public function setContent($content)
     {
         $this->content = $content;
+        unset($content);
         $this->downloaded = 1;
         $this->save();
     }
@@ -46,6 +47,7 @@ class PhonearenaUrls extends CActiveRecord
     public function setPhotos($content)
     {
         $this->photos = $content;
+        unset ($content);
         $this->save();
     }
 }
