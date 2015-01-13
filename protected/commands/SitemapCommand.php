@@ -5,12 +5,12 @@
  */
 class SitemapCommand extends ConsoleCommand
 {
-
     private $_sitemapDirectory;
-
+    
+    
     public function beforeAction($action, $params)
     {
-        $this->_sitemapDirectory = Yii::app()->basePath . "/runtime/sitemaps/";
+        $this->_sitemapDirectory = "/var/www/analogindex/www/sitemaps/";
 
         if (!is_dir($this->_sitemapDirectory) || !is_writable($this->_sitemapDirectory)) {
             $this->Log("Папка {$this->_sitemapDirectory} не существует или недоступна для записи.");
@@ -22,56 +22,106 @@ class SitemapCommand extends ConsoleCommand
 
     public function actionIndex()
     {
-        $goods = Goods::model()->with(array("brand_data", "type_data"))->findAll();
-        $reviews = Reviews::model()->with(array("goods_data"))->findAll();
-        $newsCriteria = new CDbCriteria();
-        $newsCriteria->select = "t.id, t.link, t.lang";
-        $newsCriteria->order = "t.created desc";
-        $news = News::model()->findAll();
-        $links = array(
-            "http://analogindex.ru/index.html",
-            "http://analogindex.com/index.html",
-        );
-        foreach ($goods as $item) {
-            echo ".";
-            $links[] = "http://analogindex.ru/" . $item->type_data->link . "/" . $item->brand_data->link . "/" . urlencode($item->link) . ".html";
-            $links[] = "http://analogindex.com/" . $item->type_data->link . "/" . $item->brand_data->link . "/" . urlencode($item->link) . ".html";
-        }
-        foreach ($reviews as $review) {
-            //http://analogindex.ru/review/nokia-asha-500/otli-nyj-telefon-v-vostorge-foto-_2027.html
-            if ($review->lang == 'ru') {
-                $links[] = "http://analogindex.ru/review/" . $review->goods_data->brand_data->link .
-                        "-" . $review->goods_data->link . "/" . $review->link . ".html";
-            } elseif ($review->lang == 'en') {
-                $links[] = "http://analogindex.com/review/" . $review->goods_data->brand_data->link .
-                        "-" . $review->goods_data->link . "/" . $review->link . ".html";
-            }
-            echo ".";
-        }
-        foreach ($news as $item) {
-            $links[] = "http://".Yii::app()->createUrl("news/index", ['link'=>$item->link, 'id'=>$item->id, 'language'=>  Language::getZoneForLang($item->lang)]);
-            echo ".";
-        }
-        echo PHP_EOL;
-        $this->_createSitemap($links);
-    }
+        
+        $domains = [
+            'ru'=>'ru', 
+            'en'=>'com'
+        ];
+        $criteria = new CDbCriteria();
+        $criteria->select = "t.link, brand_data.link, type_data.link, t.updated";
 
-    private function _createSitemap($urlset)
+        $products = Goods::model()->with([
+            "brand_data", 
+            "type_data"
+        ])->findAll($criteria);
+        
+        $criteria = new CDbCriteria();
+        $criteria->select = "t.link";
+
+        $brands = Brands::model()->findAll($criteria);
+        
+        foreach ($domains as $lang=>$domain) {
+            $urls = [
+                [
+                    'url'=>"http://analogindex.{$domain}/",
+                    'lastmod'=>date("Y-m-d\TH:i:s+00:00"),
+                ]
+            ];
+            
+            foreach($products as $product) {
+                $urls[] = [
+                    'url'=>"http://analogindex.{$domain}/{$product->type_data->link}/{$product->brand_data->link}/{$product->link}.html",
+                    'lastmod'=>date("Y-m-d\TH:i:s+00:00", strtotime($product->updated)),
+                ];
+            }
+            
+            foreach($brands as $brand) {
+                $urls[] = [
+                    'url'=>"http://analogindex.{$domain}/brand/{$brand->link}.html",
+                ];
+            }
+            
+            $criteria = new CDbCriteria();
+            $criteria->condition = "t.lang = :lang";
+            $criteria->params = ['lang'=>$lang];
+            $criteria->select = "t.link, t.id";
+
+            $news = News::model()->findAll($criteria);
+            
+            foreach ($news as $article) {
+                $urls[] = [
+                    'url'=>"http://analogindex.{$domain}/news/{$article->link}_{$article->id}.html",
+                ];
+            }
+            
+            $criteria = new CDbCriteria();
+            $criteria->condition = "t.lang = :lang and disabled = 0";
+            $criteria->params = ['lang'=>$lang];
+            $criteria->select = "t.link, t.id, goods_data.link";
+            $reviews = Reviews::model()->with(['goods_data'])->findAll($criteria);
+            
+            foreach ($reviews as $review) {
+                $urls[] = [
+                    'url'=>"http://analogindex.{$domain}/review/{$review->goods_data->link}/{$review->link}_{$review->id}.html",
+                ];
+            }
+            
+            echo $domain.": ".count($urls).PHP_EOL;
+            
+            $sitemapList = array_chunk($urls, 50000);
+            $sitemaps = [];
+            
+            foreach ($sitemapList as $id=>$urls) {
+                $this->_createSitemap($id, $domain, $urls);
+                $sitemaps[] = [
+                    'loc'=>"http://analogindex.{$domain}/sitemaps/{$domain}.sitemap{$id}.xml.gz",
+                    'lastmod'=> date("Y-m-d\TH:i:s+00:00"),
+                ];
+            }
+            $this->_createSitemapIndex($sitemaps, $domain);
+        }
+    }
+    
+    private function _createSitemap($id, $domain, $urls)
     {
-        $filename = $this->_sitemapDirectory . "sitemap";
+        $filename = $this->_sitemapDirectory . "{$domain}.sitemap";
         $dom = new domDocument("1.0", "utf-8");
         $root = $dom->createElement("urlset");
         $root->setAttribute("xmlns", "http://www.sitemaps.org/schemas/sitemap/0.9");
-        foreach ($urlset as $url) {
+        foreach ($urls as $url) {
             $urlNode = $dom->createElement("url");
-            $locNode = $dom->createElement("loc", $url);
+            $locNode = $dom->createElement("loc", $url['url']);
+            if (!empty($url['lastmod'])) {
+                $lastModNode = $dom->createElement("lastmod", $url['lastmod']);
+                $urlNode->appendChild($lastModNode);
+            }
             $urlNode->appendChild($locNode);
             $root->appendChild($urlNode);
         }
         $dom->appendChild($root);
         $dom->save($filename);
         try {
-            $fp = gzopen($filename . ".xml.gz", 'w');
+            $fp = gzopen("{$filename}{$id}.xml.gz", 'w');
             gzwrite($fp, file_get_contents($filename));
             gzclose($fp);
         } catch (Exception $ex) {
@@ -80,5 +130,25 @@ class SitemapCommand extends ConsoleCommand
 
         unlink($filename);
     }
-
+    
+    private function _createSitemapIndex($sitemaps, $domain)
+    {
+        $filename = $this->_sitemapDirectory . "{$domain}.sitemapindex.xml";
+        $dom = new domDocument("1.0", "utf-8");
+        $root = $dom->createElement("sitemapindex");
+        $root->setAttribute("xmlns", "http://www.sitemaps.org/schemas/sitemap/0.9");
+        foreach ($sitemaps as $sitemap) {
+            $sitemapNode = $dom->createElement("sitemap");
+            $locNode = $dom->createElement("loc", $sitemap['loc']);
+            $sitemapNode->appendChild($locNode);
+            if (!empty($sitemap['lastmod'])) {
+                $lastModNode = $dom->createElement("lastmod", $sitemap['lastmod']);
+                $sitemapNode->appendChild($lastModNode);
+            }
+            $root->appendChild($sitemapNode);
+        }
+        $dom->appendChild($root);
+        $dom->save($filename);
+        echo $filename.PHP_EOL;
+    }
 }

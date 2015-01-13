@@ -106,9 +106,9 @@ class SiteController extends Controller
         $newsCriteria->params = ['lang'=>Yii::app()->language, 'goods'=>$product->id];
         $newsCriteria->limit = 5;
 
-        $news = News::model()->with([
+        $news = News::model()->cache(60*60)->with([
             'product',
-            'preview_image'
+            //'preview_image'
         ])->findAll($newsCriteria);
         
         $countCriteria = new CDbCriteria();

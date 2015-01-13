@@ -2,7 +2,7 @@
 
 class NewsController extends Controller
 {
-    public function actionIndex($link, $id)
+    public function actionIndex($link, $id, $debug = false)
     {
         $news = News::model()->with(['tags'])->findByAttributes(['link'=>$link, 'id'=>$id, 'lang'=>Yii::app()->language]);
         
@@ -29,8 +29,10 @@ class NewsController extends Controller
                     $widget_in[] = $pid->goods;
                 }
             }
-            $news->content = $news->filteredContent();
             
+            if (!$debug)
+                $news->content = $news->filteredContent();
+
             $export = new Export();
             $this->addDescription($news->getDescription());
             $this->setPageTitle($news->title);
@@ -62,7 +64,7 @@ class NewsController extends Controller
         $criteria->condition = "t.lang = :lang";
         $criteria->params = ['lang'=>Yii::app()->language];
         
-        $newsCount = News::model()->with([
+        $newsCount = News::model()->cache(60*60)->with([
             'product'=>['on'=>'product.goods = :goods', 'params'=>['goods'=>$product->id]],
         ])->count($criteria);
         
@@ -70,9 +72,9 @@ class NewsController extends Controller
         $pages->setPageSize(15);
         $pages->applyLimit($criteria);
         
-        $news = News::model()->with([
+        $news = News::model()->cache(60*60)->with([
             'product'=>['on'=>'product.goods = :goods', 'params'=>['goods'=>$product->id]],
-            'preview_image'
+            //'preview_image'
         ])->findAll($criteria);
         
         
@@ -84,4 +86,14 @@ class NewsController extends Controller
         
     }
 
+    public function actionAll()
+    {
+        $criteria = new CDbCriteria();
+        $criteria->order = "t.id desc";
+        $criteria->limit = 500;
+        
+        $news = News::model()->findAll($criteria);
+        
+        $this->render("test_list", ["news"=>$news]);
+    }
 }

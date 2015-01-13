@@ -66,6 +66,7 @@ class NewsImages extends CActiveRecord
     public function setFile($filename)
     {
         $to = $this->getFilename();
+        
         if (!$to)
             return false;
         
@@ -221,9 +222,12 @@ class NewsImages extends CActiveRecord
             
             try {
                 $temp = "/tmp/_analogindex_preview_" . md5(time() . microtime()) . ".jpg";
-                copy($this->path . DIRECTORY_SEPARATOR 
+                if (!@copy($this->path . DIRECTORY_SEPARATOR 
                     . ceil($image['id'] / 10000) . DIRECTORY_SEPARATOR.md5($image['id']) 
-                    . ".file", $temp);
+                    . ".file", $temp)) {
+                    continue;
+                }
+                        
                 WideImage::load($temp)->resize($this->preview_size[0], $this->preview_size[1])
                     ->saveToFile($temp);
                 rename($temp, $path.md5($image['id']).".file");

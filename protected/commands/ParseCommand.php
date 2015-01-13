@@ -769,30 +769,8 @@ class ParseCommand extends CConsoleCommand
         echo PHP_EOL;
     }
     
-    public function actionNewsTagsServer()
-    {
-        $gmc= new GearmanClient();
-        $gmc->addServer();
-        $gmc->setCompleteCallback([$this, "news_completed"]);
-        $criteria = new CDbCriteria();
-        $criteria->order = 't.id desc';
-        $news = News::model()->findAll($criteria);
-        
-        foreach ($news as $item) {
-            $task= $gmc->doBackground("news_tag", serialize($item));
-            $task= $gmc->doBackground("news_filter", serialize($item));
-        }
-        
-        if (! $gmc->runTasks())
-        {
-            echo "ERROR " . $gmc->error() . "\n";
-            exit;
-        }
-        
-        echo PHP_EOL;
-    }
     
-    public function actionNewsTagsClient($function)
+    public function actionNewsTagsClient()
     {
         $criteria = new CDbCriteria();
         $criteria->condition = "disabled = 0";
@@ -807,43 +785,24 @@ class ParseCommand extends CConsoleCommand
         ));
         
         self::$brands = Brands::model()->findAll(array("condition"=>"t.id not in (167)"));
-        
-        # Создание обработчика.
-        $gmworker= new GearmanWorker();
-
-        # Указание сервера по умолчанию  (localhost).
-        $gmworker->addServer();
-        
-        $gmworker->addFunction($function, [$this,$function]);
-        unset($function);
-        
-        print "Waiting for job...\n";
-        $time = time();
-        while($gmworker->work())
-        {
-            if ($gmworker->returnCode() != GEARMAN_SUCCESS)
-            {
-              echo "return_code: " . $gmworker->returnCode() . "\n";
-              break;
-            }
-            if ($time > time()) {
-                $time = time();
-                echo (!function_exists('memory_get_usage')) ? '' : round(memory_get_usage()/1024/1024, 2) . 'MB'.PHP_EOL;
-            }
+        $criteria = new CDbCriteria();
+        $criteria->condition = "filtered = 0 OR content_filtered = ''";
+        $criteria->order = "id desc";
+        $news = News::model()->findAll($criteria);
+        foreach ($news as $item) {
+            echo $item->id.PHP_EOL;
+            $this->news_filter($item);
+            $this->news_tag($item);
+            $item->setFiltered();
         }
-        
     }
-    
-    public function news_completed($task)
-    {
-        echo "COMPLETE: " . $task->jobHandle() .PHP_EOL;
-    }
+
     
     public function news_tag($job)
     {
         echo ".";
         echo "news_tag".PHP_EOL;
-        $item = unserialize($job->workload());
+        $item = $job;
         echo "ID: {$item->id}".PHP_EOL;
         foreach (self::$tags as $tag) {
             if ($this->hasTag($item->title." ".$item->content, $tag->name)) {
@@ -913,6 +872,7 @@ class ParseCommand extends CConsoleCommand
                     if (!$file = fopen($tmpfname, 'w')) {
                         echo "Не могу открыть файл для записи {$tmpfname}".PHP_EOL;
                         Yii::app()->db->createCommand("update ai_news set broken_image = 1 where id = {$news}")->execute();
+                        @unlink($tmpfname);
                         continue;
                     }
                     
@@ -935,6 +895,7 @@ class ParseCommand extends CConsoleCommand
                         echo "Curl error #".curl_errno($ch)." " . curl_error($ch)." " .$url. PHP_EOL;
                         $image->remove();
                         Yii::app()->db->createCommand("update ai_news set broken_image = 1 where id = {$news}")->execute();
+                        @unlink($tmpfname);
                         continue;
                     } 
                     curl_close($ch);
@@ -946,10 +907,12 @@ class ParseCommand extends CConsoleCommand
                         $imageModel->alt_replaced = $alt_replaced;
                         $imageModel->save();
                         echo "OK".PHP_EOL;
+                        @unlink($tmpfname);
                     } else {
                         echo "Not saved File".PHP_EOL;
                         $image->remove();
                         Yii::app()->db->createCommand("update ai_news set broken_image = 1 where id = {$news}")->execute();
+                        @unlink($tmpfname);
                         continue;
                     }
                 } elseif($imageModel->alt_replaced != $alt_replaced) {
@@ -974,9 +937,10 @@ class ParseCommand extends CConsoleCommand
     {
         echo ".";
         //return false;
-        $news = unserialize($job->workload());
+        $news = $job;
         
         $content = $news->filterContent();
+
         Yii::app()->db->createCommand("update ai_news set broken_image = 0 where id = {$news->id}")->execute();
         $content = $this->filter_images($content, $news->source_url, $news->id, $news->title, $news->lang);
         
@@ -1040,8 +1004,7 @@ class ParseCommand extends CConsoleCommand
                 unset($synonim);
             }
         }
-        
-        
+
         /**
          * Расставляем ссылки на бренды
          */
@@ -1068,11 +1031,18 @@ class ParseCommand extends CConsoleCommand
         
         if (!empty($content)) {
             echo "news_filter: {$news->id}".PHP_EOL;
-            $news = News::model()->findByPk($news->id);
-            $news->content_filtered = $content;
-            $news->save();
+            
+            $sql = "update {{news}} set content_filtered = :content where id = :id";
+            
+            Yii::app()->db->createCommand($sql)->execute([
+                'content'=>(string) $content,
+                'id'=>$news->id,
+            ]);
+            
+            echo "LENGTH: ".mb_strlen($content, 'UTF-8').PHP_EOL;
+
         }
-        unset($news, $content);
+        unset($content);
         return true;
     }
     

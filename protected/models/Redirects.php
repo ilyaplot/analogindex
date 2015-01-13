@@ -14,4 +14,12 @@ class Redirects extends CActiveRecord
         return "{{redirects}}";
     }
 
+    
+    public function rules()
+    {
+        return [
+            ['from', 'unique', 'allowEmpty'=>false],
+            ['to', 'unique', 'allowEmpty'=>false],
+        ];
+    }
 }

@@ -24,6 +24,7 @@ class News extends CActiveRecord
         return [
             ['source_url, content', 'required'],
             ['source_url, content', 'type', 'type'=>'string', 'allowEmpty'=>false],
+            ['content', 'type', 'type'=>'string', 'allowEmpty'=>true],
             ['content', 'length', 'min'=>10],
             ['source_url', 'length', 'min'=>10, 'max'=>500],
             ['source_url', 'unique', 'allowEmpty'=>false],
@@ -140,6 +141,16 @@ class News extends CActiveRecord
     {
         //$this->preview = $this->getDescription();
         return parent::beforeSave();
+    }
+    
+    public function setFiltered($ok = true)
+    {
+        $this->getDbConnection()
+                ->createCommand("update {{news}} set filtered = :filtered where id = :id")
+                ->execute([
+                    'filtered'=>(int) $ok,
+                    'id'=>$this->getPrimaryKey(),
+                ]);
     }
     
 }
