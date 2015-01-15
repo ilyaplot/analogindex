@@ -2,6 +2,26 @@
 
 class DownloadCommand extends CConsoleCommand
 {
+    public function actionPhonearenaRss()
+    {
+        $feed = "http://www.phonearena.com/rss/rss_phones.php";
+        $downloader = new Downloader($feed, 1);
+        $xml = $downloader->getContent($feed);
+        $xml = new SimpleXMLElement($xml);
+        $counter = 0;
+        foreach ($xml->channel->item as $item) {
+            $model = new PhonearenaUrls();
+            $model->url = str_replace("http://www.phonearena.com", '', $item->link);
+            $model->downloaded = 0;
+            $model->parsed = 0;
+            if ($model->validate()) {
+                $model->save();
+                $counter++;
+            }
+        }
+        echo "Добавлено {$counter} URL.".PHP_EOL;
+    }
+    
     
     public function actionPhonearena()
     {

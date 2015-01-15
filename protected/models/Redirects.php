@@ -15,11 +15,15 @@ class Redirects extends CActiveRecord
     }
 
     
-    public function rules()
+    public function beforeSave()
     {
-        return [
-            ['from', 'unique', 'allowEmpty'=>false],
-            ['to', 'unique', 'allowEmpty'=>false],
+        $criteria = new CDbCriteria();
+        $criteria->condition = '`from` = :from or `to` = :to or `from` = :to or `to` = :from';
+        $criteria->params = [
+            'from'=> $this->from, 
+            'to'=>  $this->to
         ];
+        self::model()->deleteAll($criteria);
+        return parent::beforeSave();
     }
 }

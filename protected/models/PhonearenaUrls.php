@@ -27,6 +27,7 @@ class PhonearenaUrls extends CActiveRecord
         $criteria = new CDbCriteria();
         $criteria->select = "t.id, concat('http://www.phonearena.com', t.url) as fullurl, t.content, t.photos, t.url";
         $criteria->condition = "t.downloaded = 1 and t.parsed = 0";
+        $criteria->order = "t.id desc";
         return self::model()->findAll($criteria);
     }
 
@@ -49,6 +50,15 @@ class PhonearenaUrls extends CActiveRecord
         $this->photos = $content;
         unset ($content);
         $this->save();
+    }
+    
+    
+    public function rules()
+    {
+        return [
+            ["url", "length", "min"=>10, "allowEmpty"=>false],
+            ["url", "unique"],
+        ];
     }
 }
 

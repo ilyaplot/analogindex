@@ -23,7 +23,7 @@ class ListGoodsWidget extends CWidget
         $criteria->order = "brand_data.name asc, t.name asc";
         $criteria->limit = $this->limit;
         if (!empty($this->type)) {
-            $type = GoodsTypes::model()->cache(60 * 60 * 48)->findByAttributes(array("link" => $this->type));
+            $type = GoodsTypes::model()->cache(60 * 60 * 2)->findByAttributes(array("link" => $this->type));
             if ($type)
                 $criteria->compare("type", $type->id);
         } else {
@@ -38,7 +38,7 @@ class ListGoodsWidget extends CWidget
         $criteria->order = "t.updated desc";
         
         
-        $data = Goods::model()->cache(60 * 60 * 24)->with(array(
+        $data = Goods::model()->cache(60 * 60 * 2)->with(array(
                     "brand_data" => array(
                         "joinType" => "inner join"
                     ),

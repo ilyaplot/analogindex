@@ -117,11 +117,11 @@ class ParseCommand extends CConsoleCommand
                 }
             }
             $goods = new Goods();
-            
+            $goods->type = 1;
             $goods->brand = $brandModel->id;
             $goods->name = $name;
             $goods->link = $urlManager->translitUrl($name);
-            $goods->type = 1;
+            
             echo $urlManager->translitUrl($name) . PHP_EOL;
             if ($goods->validate()) {
                 echo "Добавлен товар {$brand} {$name}" . PHP_EOL;
@@ -155,6 +155,14 @@ class ParseCommand extends CConsoleCommand
         }
         
         foreach ($result as $characteristic) {
+            if (in_array($characteristic['id'], GoodsCharacteristics::$needReplace)) {
+                $gchCriteria = new CDbCriteria();
+                $gchCriteria->condition = 'characteristic = :id and goods = :goods';
+                $gchCriteria->params = ['id'=>$characteristic['id'], 'goods'=>$goods->id];
+                GoodsCharacteristics::model()->deleteAll($gchCriteria);
+                unset($gchCriteria);
+            }
+            
             $goodsCharacteristic = new GoodsCharacteristics();
             $goodsCharacteristic->goods = $goods->id;
             $goodsCharacteristic->characteristic = $characteristic['id'];
@@ -380,6 +388,13 @@ class ParseCommand extends CConsoleCommand
         }
 
         foreach ($result as $characteristic) {
+            if (in_array($characteristic['id'], GoodsCharacteristics::$needReplace)) {
+                $gchCriteria = new CDbCriteria();
+                $gchCriteria->condition = 'characteristic = :id and goods = :goods';
+                $gchCriteria->params = ['id'=>$characteristic['id'], 'goods'=>$goods->id];
+                GoodsCharacteristics::model()->deleteAll($gchCriteria);
+                unset($gchCriteria);
+            }
             $goodsCharacteristic = new GoodsCharacteristics();
             $goodsCharacteristic->goods = $goods->id;
             $goodsCharacteristic->characteristic = $characteristic['id'];
@@ -443,7 +458,7 @@ class ParseCommand extends CConsoleCommand
 
     public function actionPhonearena()
     {
-        $downloader = new Downloader("http://www.phonearena.com/");
+        $downloader = new Downloader("http://www.phonearena.com/", 15);
         $urlManager = new UrlManager();
         $types = GoodsTypes::model()->findAll();
         $goodsTypes = [];
@@ -613,6 +628,13 @@ class ParseCommand extends CConsoleCommand
             $result = $parser->run();
             unset($parser, $characteristicsTable);
             foreach ($result as $characteristic) {
+                if (in_array($characteristic['id'], GoodsCharacteristics::$needReplace)) {
+                    $gchCriteria = new CDbCriteria();
+                    $gchCriteria->condition = 'characteristic = :id and goods = :goods';
+                    $gchCriteria->params = ['id'=>$characteristic['id'], 'goods'=>$goods->id];
+                    GoodsCharacteristics::model()->deleteAll($gchCriteria);
+                    unset($gchCriteria);
+                }
                 $goodsCharacteristic = new GoodsCharacteristics();
                 $goodsCharacteristic->goods = $goods->id;
                 $goodsCharacteristic->characteristic = $characteristic['id'];
