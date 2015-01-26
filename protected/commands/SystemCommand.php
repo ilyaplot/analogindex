@@ -320,6 +320,8 @@ class SystemCommand extends ConsoleCommand
                 }
             }
         }
+        
+        Tags::model()->filter();
     }
 
     public function actionImportYoutube()

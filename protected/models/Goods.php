@@ -192,7 +192,9 @@ class Goods extends CActiveRecord
 
     public function getCharacteristics($ids = array(), $noCache = false)
     {
+        
         if (!empty($ids) && is_array($ids)) {
+            $ids = array_unique($ids, SORT_NUMERIC);
             $ids = " and c.id in (" . implode(", ", $ids) . ") ";
         } else {
             $ids = '';
@@ -216,12 +218,15 @@ class Goods extends CActiveRecord
                 and cn.lang = :lang 
                 and gc.goods = :goods
                 {$ids}
+                group by c.id
             order by cc.priority desc, c.priority desc";
         $params = array("lang" => Yii::app()->language, "goods" => $this->getPrimaryKey());
 
         $result = array();
-
-        if ($noCache || !$result = Yii::app()->cache->get("goods.characteristics" . serialize($params) . $ids)) {
+        if (empty(Yii::app()->cache)) {
+            $noCache = true;
+        }
+        if ($noCache || !$result = Yii::app()->cache->get("goods.characteristics." . serialize($params) . $ids)) {
             $connection = $this->getDbConnection();
             $items = $connection->createCommand($query)->queryAll(true, $params);
             if (!$items)
@@ -231,9 +236,10 @@ class Goods extends CActiveRecord
                 $item['value'] = Yii::app()->format->$item['formatter']($item['value']);
                 $result[$item['catalog_name']][] = $item;
             }
+
         }
         if (!$noCache)
-            Yii::app()->cache->set("goods.characteristics" . serialize($params) . $ids, $result, 60 * 60 * 12);
+            Yii::app()->cache->set("goods.characteristics." . serialize($params) . $ids, $result, 60 * 60 * 12);
         return $result;
     }
     
@@ -253,8 +259,11 @@ class Goods extends CActiveRecord
         $params = array("lang" => Yii::app()->language, "goods" => $this->getPrimaryKey());
 
         $result = [];
-
-        if (!$result = Yii::app()->cache->get("goods.characteristics.compare.with.url" . serialize($params))) {
+        $noCache = false;
+        if (empty(Yii::app()->cache)) {
+            $noCache = true;
+        }
+        if ($noCache || !$result = Yii::app()->cache->get("goods.characteristics.compare.with.url" . serialize($params))) {
             $connection = $this->getDbConnection();
             $items = $connection->createCommand($query)->queryAll(true, $params);
             
@@ -299,8 +308,11 @@ class Goods extends CActiveRecord
         $params = array("lang" => Yii::app()->language);
 
         $result = array();
-
-        if (!$result = Yii::app()->cache->get("goods.characteristics.list_" . serialize($params) )) {
+        $noCache = false;
+        if (empty(Yii::app()->cache)) {
+            $noCache = true;
+        }
+        if ($noCache || !$result = Yii::app()->cache->get("goods.characteristics.list_" . serialize($params) )) {
             $connection = $this->getDbConnection();
             $items = $connection->createCommand($query)->queryAll(true, $params);
             if (!$items)
@@ -309,7 +321,9 @@ class Goods extends CActiveRecord
                 $result[$item['catalog_name']][$item['id']] = $item;
             }
         }
-        Yii::app()->cache->set("goods.characteristics.list_" . serialize($params), $result, 60 * 60 * 12);
+        if (!$noCache) {
+            Yii::app()->cache->set("goods.characteristics.list_" . serialize($params), $result, 60 * 60 * 12);
+        }
         return $result;
     }
     

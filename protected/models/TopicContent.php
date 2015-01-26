@@ -22,6 +22,11 @@ class TopicContent extends CActiveRecord
     public function afterFind()
     {
         $content = $this->topic_text_source;
+        
+        if (empty($content)) {
+            return parent::afterFind();
+        }
+        
         $html = phpQuery::newDocumentHtml($content);
         
         
@@ -67,7 +72,7 @@ class TopicContent extends CActiveRecord
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
             curl_exec($ch);
 
-            if (curl_errno($ch) && !in_array(curl_errno($ch), [28,56]) ) {
+            if (curl_errno($ch) && !in_array(curl_errno($ch), [28,56,47]) ) {
                 echo "Curl error #".curl_errno($ch)." " . curl_error($ch) . PHP_EOL;
                 echo $link.PHP_EOL;
                 echo (string) $p.PHP_EOL;

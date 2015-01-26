@@ -39,12 +39,12 @@ class Downloader
      * @param type $host
      * @param type $limit
      */
-    public function __construct($host, $limit=0)
+    public function __construct($host, $limit=0, $disableCheck = false)
     {
         $this->limit = $limit;
         $this->cacheKey = md5(time().microtime());
         $this->setHost($host);
-        $this->proxyList();
+        $this->proxyList('', $disableCheck);
     }
     
     /**
@@ -61,7 +61,7 @@ class Downloader
      * 
      * @param type $filename
      */
-    public function proxyList($filename = '')
+    public function proxyList($filename = '', $disableCheck = false)
     {
         echo "Загрузка списка прокси...".PHP_EOL;
         $filename = empty($filename) ? $this->proxyPath : $filename;
@@ -82,12 +82,14 @@ class Downloader
             }
             if (!preg_match("/^\d+\.\d+\.\d+\.\d+:\d+/isu", $proxy)) {
                 unset($proxy);
+                continue;
             }
-            if ($this->testProxy($proxy)) {
+            if ($disableCheck || $this->testProxy($proxy)) {
                 echo "+";
                 $this->addProxy($proxy);
                 $iteration++;
             } else {
+                echo "-";
                 unset($proxy);
             }
         }
@@ -111,6 +113,7 @@ class Downloader
         curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
         curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.".rand(100, 900)." Safari/537.".rand(10, 90));
         curl_setopt($ch, CURLOPT_AUTOREFERER, true);
+        
         if (!empty($this->referer)) {
             curl_setopt($ch, CURLOPT_REFERER, $this->referer);
         }
@@ -133,7 +136,8 @@ class Downloader
         $info = curl_getinfo($ch);
         curl_close($ch);
         
-        if ($info['http_code'] != 200) {
+        if ($info['http_code'] != 200 && $info['http_code'] != 203) {
+            echo $info['http_code'].PHP_EOL;
             return false;
         }
 
@@ -222,7 +226,7 @@ class Downloader
             return $this->downloadFile($url, $filename);
         } else {
             $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            if ($code != 200) {
+            if ($code != 200 && $code != 203) {
                 $this->deleteProxy($proxy);
                 echo "Http code {$code}.".PHP_EOL;
                 @unlink($filename);
@@ -265,7 +269,7 @@ class Downloader
             return $this->getContent($url);
         } else {
             $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            if ($code != 200) {
+            if ($code != 200 && $code != 203) {
                 $this->deleteProxy($proxy);
                 echo "Http code {$code}.".PHP_EOL;
                 return $this->getContent($url);

@@ -22,6 +22,20 @@ class ExportController extends CController
     }
     
     /**
+     * Возвращает новости по тэгам
+     * @param string $tags тэги через запятую
+     * @param string $lang язык ru|en
+     * @param string $type тип записи review|opinion|news
+     * @param int $limit Количество новостей
+     * 
+     * @example http://analogindex.ru/export/articles?tags=tag1,tag2,tag+3&lang=ru&type=news&limit=10
+     */
+    public function actionArticles($tags, $lang, $type, $limit)
+    {
+        echo self::$export->Articles($tags, $lang, $type, $limit);
+    }
+    
+    /**
      * Отзывы по аппаратам, к которым привязаны тэги
      * @param string $tags Тэги через запятую
      * @param string $lang язык ru|en

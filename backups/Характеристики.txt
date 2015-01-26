@@ -147,3 +147,6 @@ array(48) {
   [47]=>
   string(95) "Misc.Price group::::<img src="http://cdn2.gsmarena.com/vv/price/pg9.gif" title="About 570 EUR">"
 }
+
+
+update ai_news set content_filtered=replace(content_filtered,'http://.ru/','http://analogindex.ru/') where 1;

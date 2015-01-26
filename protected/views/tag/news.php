@@ -15,7 +15,7 @@
 <div class="news">
     <?php
         foreach ($newsTags as $link):
-            $item = $link->news_data;
+            $item = $link->articles_data;
         ?>
     <div class="view_bl" itemscope itemtype="http://schema.org/NewsArticle">
         <div class="view_bl-head clr">
@@ -26,9 +26,18 @@
         </div>
         <div class="view_bl-textView">
             <h2 itemprop="name"><?php echo  $item->title ?></h2>
-            <span itemprop="description"><?php echo $item->getDescription()?></span>...
+            <?php if (!empty($item->preview_image)) :?>
+            <a class="news-preview" href="<?php echo Yii::app()->createAbsoluteUrl("articles/index", ['type'=>$item->type,'link'=>$item->link, 'id'=>$item->id, 'language'=>  Language::getCurrentZone()]); ?>">
+                <img itemprop="image" src="<?php echo $item->preview_image->getPreviewUrl()?>" class="news_preview" 
+                     alt="<?php echo $item->preview_image->alt?>"/>
+            </a>
+            <?php endif; ?>
+            <span itemprop="description"><?php echo $item->description?></span>...
+            <?php if (!empty($item->preview_image)) :?>
+            <div style="clear: both; "></div>
+            <?php endif; ?>
         </div>
-        <div class="view_bl-replyLink"><?php echo Yii::t("main", 'Читать полностью')?> : <a itemprop="url" href="<?php echo Yii::app()->createUrl("news/index", ['link'=>$item->link, 'id'=>$item->id, 'language'=>  Language::getCurrentZone()]); ?>"><?php echo $item->title?></a></div>
+        <div class="view_bl-replyLink"><?php echo Yii::t("main", 'Читать полностью')?> : <a itemprop="url" href="<?php echo Yii::app()->createUrl("articles/index", ['type'=>$item->type,'link'=>$item->link, 'id'=>$item->id, 'language'=>  Language::getCurrentZone()]); ?>"><?php echo $item->title?></a></div>
     </div>
     <?php endforeach; ?>
 </div>

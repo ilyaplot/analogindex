@@ -24,7 +24,11 @@ class ReviewsController extends Controller
                     "primary_image",
                     "rating"
                 ))->find($criteria);
-
+        
+        if (empty($product->name)) {
+            Yii::app()->request->redirect("/", true, 302);
+        }
+        
         $ratingDisabled = 1;
         if (!Yii::app()->user->isGuest &&
                 !Yii::app()->user->getState("readonly") &&

@@ -72,15 +72,43 @@ class SiteController extends Controller
             Yii::app()->request->redirect("/", true, 302);
             exit();
         }
-        $reviewsCriteria = new CDbCriteria();
-        $reviewsCriteria->condition = "t.goods = :goods and t.lang=:lang";
-        $reviewsCriteria->params = ['goods'=>$product->id, 'lang'=>Yii::app()->language];
-        $reviewsCount = Reviews::model()->cache(60*60*24)->count($reviewsCriteria);
-        $reviewsCriteria->select = "t.link, t.id, t.preview, t.title, t.created";
-        $reviewsCriteria->order = 't.created desc';
-        $reviewsCriteria->limit = 5;
-        $reviews = Reviews::model()->cache(60*60*24)->findAll($reviewsCriteria);
-
+       
+        $articlesCriteria = new CDbCriteria();
+        $articlesCriteria->select = 't.id, t.description, t.created, t.title, t.link, t.type';
+        $articlesCriteria->condition = 't.lang = :lang and t.type = :type and product.goods = :product';
+        $articlesCriteria->params = [
+            'lang'=>Yii::app()->language,
+            'type'=>  Articles::TYPE_NEWS,
+            'product'=>$product->id,
+        ];
+        
+        $newsCount = Articles::model()->with(['product'])->count($articlesCriteria);
+        $articlesCriteria->limit = 5;
+        $articlesCriteria->order = "t.created desc";
+        $news = Articles::model()->with(['product'])->findAll($articlesCriteria);
+        
+        $articlesCriteria->params = [
+            'lang'=>Yii::app()->language,
+            'type'=>  Articles::TYPE_OPINION,
+            'product'=>$product->id,
+        ];
+        
+        $opinionsCount = Articles::model()->with(['product'])->count($articlesCriteria);
+        $articlesCriteria->limit = 5;
+        $articlesCriteria->order = "t.created desc";
+        $opinions = Articles::model()->with(['product'])->findAll($articlesCriteria);
+        
+        $articlesCriteria->params = [
+            'lang'=>Yii::app()->language,
+            'type'=>  Articles::TYPE_REVIEW,
+            'product'=>$product->id,
+        ];
+        
+        $reviewsCount = Articles::model()->with(['product'])->count($articlesCriteria);
+        $articlesCriteria->limit = 5;
+        $articlesCriteria->order = "t.created desc";
+        $reviews = Articles::model()->with(['product'])->findAll($articlesCriteria);
+        
         
         
         $this->setPageTitle($product->type_data->name->item_name . " " . $brand->name . " " . $product->name);
@@ -99,31 +127,17 @@ class SiteController extends Controller
                 !RatingsGoods::model()->countByAttributes(array("goods" => $product->id, "user" => Yii::app()->user->id))) {
             $ratingDisabled = 0;
         }
-
-        $newsCriteria = new CDbCriteria();
-        $newsCriteria->order = "product.goods, t.created desc";
-        $newsCriteria->condition = "t.lang = :lang and product.goods = :goods";
-        $newsCriteria->params = ['lang'=>Yii::app()->language, 'goods'=>$product->id];
-        $newsCriteria->limit = 5;
-
-        $news = News::model()->cache(60*60)->with([
-            'product',
-            //'preview_image'
-        ])->findAll($newsCriteria);
-        
-        $countCriteria = new CDbCriteria();
-        $countCriteria->condition = "t.goods = :goods and t.disabled = 0 and news_data.lang = :lang";
-        $countCriteria->params = ['goods'=>$product->id, 'lang'=>Yii::app()->language];
-        $news_count = GoodsNews::model()->cache(60*60)->with(['news_data'=>['joinType'=>'inner join']])->count($countCriteria);
         
         $this->render("goods", array(
             "type" => $type,
             "brand" => $brand,
             "product" => $product,
             "reviews" => $reviews,
+            "opinions" => $opinions,
+            "opinions_count" => $opinionsCount,
             "reviews_count" => $reviewsCount,
             "news" => $news,
-            "news_count" => $news_count,
+            "news_count" => $newsCount,
             "ratingDisabled" => $ratingDisabled,
         ));
     }

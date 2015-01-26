@@ -50,14 +50,19 @@ class SitemapCommand extends ConsoleCommand
             
             foreach($products as $product) {
                 $urls[] = [
-                    'url'=>"http://analogindex.{$domain}/{$product->type_data->link}/{$product->brand_data->link}/{$product->link}.html",
+                    'url'=>str_replace("+", "%2B", "http://analogindex.{$domain}/{$product->type_data->link}/{$product->brand_data->link}/{$product->link}.html"),
                     'lastmod'=>date("Y-m-d\TH:i:s+00:00", strtotime($product->updated)),
                 ];
             }
             
             foreach($brands as $brand) {
+                
+                if (empty($brand->link)) {
+                    continue;
+                }
+                
                 $urls[] = [
-                    'url'=>"http://analogindex.{$domain}/brand/{$brand->link}.html",
+                    'url'=>str_replace("+", "%2B", "http://analogindex.{$domain}/brand/{$brand->link}.html"),
                 ];
             }
             
@@ -66,11 +71,11 @@ class SitemapCommand extends ConsoleCommand
             $criteria->params = ['lang'=>$lang];
             $criteria->select = "t.link, t.id";
 
-            $news = News::model()->findAll($criteria);
+            $articles = Articles::model()->findAll($criteria);
             
-            foreach ($news as $article) {
+            foreach ($articles as $article) {
                 $urls[] = [
-                    'url'=>"http://analogindex.{$domain}/news/{$article->link}_{$article->id}.html",
+                    'url'=>str_replace("+", "%2B", "http://analogindex.{$domain}/{$article->type}/{$article->link}_{$article->id}.html"),
                 ];
             }
             
@@ -81,8 +86,11 @@ class SitemapCommand extends ConsoleCommand
             $reviews = Reviews::model()->with(['goods_data'])->findAll($criteria);
             
             foreach ($reviews as $review) {
+                if (empty($review->goods_data->link)) {
+                    continue;
+                }
                 $urls[] = [
-                    'url'=>"http://analogindex.{$domain}/review/{$review->goods_data->link}/{$review->link}_{$review->id}.html",
+                    'url'=>str_replace("+", "%2B", "http://analogindex.{$domain}/review/{$review->goods_data->link}/{$review->link}_{$review->id}.html"),
                 ];
             }
             

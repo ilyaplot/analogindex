@@ -1,5 +1,5 @@
 <?php
-
+$_SERVER['SERVER_NAME'] = 'analogindex';
 ini_set('memory_limit', '8096M');
 $yii = './framework/yii.php';
 require_once($yii);

@@ -13,7 +13,6 @@ class Redirects extends CActiveRecord
     {
         return "{{redirects}}";
     }
-
     
     public function beforeSave()
     {

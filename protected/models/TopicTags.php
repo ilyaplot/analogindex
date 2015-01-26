@@ -25,6 +25,9 @@ class TopicTags extends CActiveRecord
             'topic_content'=>[self::BELONGS_TO, 'TopicContent', 'topic_id',
                 'joinType'=>'inner join',
             ],
+            'topics'=>[self::BELONGS_TO, 'Topics', 'topic_id',
+                'joinType'=>'inner join',
+            ],
         ];
     }
     
@@ -48,11 +51,29 @@ class TopicTags extends CActiveRecord
     public function getNewsByTag($name)
     {
         $criteria = new CDbCriteria();
-        $criteria->condition = "topic_tag_text like :name";
+        $criteria->condition = "t.topic_tag_text like :name and topics.exported = 0";
+        $criteria->select = "t.topic_id";
         $criteria->params = ['name'=>$name];
-        $criteria->select = "topic_id";
         
-        $items = self::findAll($criteria);
+        
+        try {
+            $items = self::model()->with('topics')->findAll($criteria);
+        } catch (CDbException $ex) {
+            while (true) {
+                echo "Ошибка базы данных teta, попытка перезапуска соединения.".PHP_EOL;
+                try {
+                    sleep(5);
+                    Yii::app()->teta->setActive(false);
+                    Yii::app()->teta->setActive(true);
+                    echo "Repeat items by ids".PHP_EOL;
+                    $items = self::model()->with('topics')->findAll($criteria);
+                    break;
+                } catch (CDbException $ex) {
+                    echo $ex->getMessage().PHP_EOL;
+                    echo "Повторная попытка перезапуска соединения c teta.".PHP_EOL;
+                }
+            }
+        }
         $ids = [];
         foreach ($items as $item) {
             $ids[] = $item['topic_id'];

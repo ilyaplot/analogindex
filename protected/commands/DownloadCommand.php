@@ -2,6 +2,121 @@
 
 class DownloadCommand extends CConsoleCommand
 {
+    
+    public function actionIrecommendSitemap()
+    {
+        $downloader = new Downloader("http://irecommend.ru/");
+        
+        $lastPage = SourcesIrecommend::model()->getLastUrl("phones");
+        
+        $list = [];
+        $page = "http://irecommend.ru/taxonomy/term/55/reviews";
+        $content = $downloader->getContent($page);
+        $html = phpQuery::newDocumentHTML($content);
+        $last = pq($html)->find("li.pager-last > a")->attr("href");
+        $last = preg_replace("/.*reviews\?page=(?P<last>\d+)/isu", "$1", $last);
+        phpQuery::unloadDocuments();
+        
+        $list = array_merge($list, $this->_getIrecommendUrlList($content));
+                
+        if (!$last) {
+            echo "Не удалось получить список страниц".PHP_EOL;
+            exit();
+        }
+
+        for($i = 1; $i < $last; $i++) {
+            $content = $downloader->getContent("http://irecommend.ru/taxonomy/term/55/reviews?page={$i}");
+            $list = array_merge($list, $this->_getIrecommendUrlList($content));
+            if (in_array($lastPage, $list)) {
+                break;
+            }
+            echo "{$i} of {$last}".PHP_EOL;
+        }
+
+        
+        foreach($list as $url) {
+            $source = new SourcesIrecommend();
+            $source->url = $url;
+            $source->type = "phones";
+            if ($source->validate()) {
+                $source->save();
+                echo "Downloading: {$url}".PHP_EOL;
+                $downloader->downloadFile($url, $source->getFilename());
+                $source->size = filesize($source->getFilename());
+                $source->downloaded = 1;
+                $source->save();
+            } else {
+                var_dump($source->getErrors());
+                if (!empty($source->getError("url"))) {
+                    break;
+                }
+            }
+        }
+        
+        
+        $downloader = new Downloader("http://irecommend.ru/");
+        
+        $lastPage = SourcesIrecommend::model()->getLastUrl("tablets");
+        
+        $list = [];
+        $page = "http://irecommend.ru/taxonomy/term/88/reviews?tid=228032";
+        $content = $downloader->getContent($page);
+        $html = phpQuery::newDocumentHTML($content);
+        $last = pq($html)->find("li.pager-last > a")->attr("href");
+        $last = preg_replace("/.*reviews\?page=(?P<last>\d+)/isu", "$1", $last);
+        phpQuery::unloadDocuments();
+        
+        $list = array_merge($list, $this->_getIrecommendUrlList($content));
+                
+        if (!$last) {
+            echo "Не удалось получить список страниц".PHP_EOL;
+            exit();
+        }
+
+        for($i = 1; $i < $last; $i++) {
+            $content = $downloader->getContent("http://irecommend.ru/taxonomy/term/55/reviews?page={$i}&?tid=228032");
+            $list = array_merge($list, $this->_getIrecommendUrlList($content));
+            if (in_array($lastPage, $list)) {
+                break;
+            }
+            echo "{$i} of {$last}".PHP_EOL;
+        }
+        
+        
+        foreach($list as $url) {
+            $source = new SourcesIrecommend();
+            $source->url = $url;
+            $source->type = "tablets";
+            if ($source->validate()) {
+                $source->save();
+                echo "Downloading: {$url}".PHP_EOL;
+                $downloader->downloadFile($url, $source->getFilename());
+                $source->size = filesize($source->getFilename());
+                $source->downloaded = 1;
+                $source->save();
+            } else {
+                var_dump($source->getErrors());
+                if (!empty($source->getError("url"))) {
+                    break;
+                }
+            }
+        }
+
+    }
+    
+    protected function _getIrecommendUrlList($content)
+    {
+        $result = [];
+        $html = phpQuery::newDocumentHTML($content);
+        $list = pq($html)->find("div.list-reviews");
+        foreach($list as $block) {
+            $result[] = "http://irecommend.ru".pq($block)->find("h3.review-head > a")->attr("href");
+        }
+        phpQuery::unloadDocuments();
+        return $result;
+    }
+    
+    
     public function actionPhonearenaRss()
     {
         $feed = "http://www.phonearena.com/rss/rss_phones.php";
@@ -22,7 +137,31 @@ class DownloadCommand extends CConsoleCommand
         echo "Добавлено {$counter} URL.".PHP_EOL;
     }
     
-    
+    public function actionPhonearenaBrands()
+    {
+        $page = "http://www.phonearena.com/phones/manufacturers";
+        $downloader = new Downloader($page, 10);
+        $content = $downloader->getContent($page);
+        $html = phpQuery::newDocumentHTML($content);
+        $items = pq($html)->find("div.s_block_4_s115");
+        foreach($items as $item) {
+            $brand = pq($item)->find("span.title")->text();
+            $image = pq($item)->find("a.s_thumb > img")->attr("src");
+            if (!empty($brand) && !empty($image)) {
+                if ($brand = Brands::model()->findByAttributes(['name'=>$brand, 'logo'=>0])) {
+                    $filename = tempnam("/tmp", "_analogindex_brand");
+                    echo $filename.PHP_EOL;
+                    if ($downloader->downloadFile($image, $filename)) {
+                        $brand->setFile($filename);
+                        echo $brand->name.PHP_EOL;
+                        sleep(1);
+                    }
+                }
+            }
+        }
+
+    }
+
     public function actionPhonearena()
     {
         $downloader = new Downloader("http://www.phonearena.com/", 10);

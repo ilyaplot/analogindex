@@ -49,7 +49,7 @@ class ResizeCommand extends CConsoleCommand
             }
         }
         
-        NewsImages::model()->createPreviews();
+        ArticlesImages::model()->createPreviews();
     }
 
     public function actionCount()

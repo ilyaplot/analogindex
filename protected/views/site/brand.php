@@ -19,9 +19,11 @@
                 </li>
             </ul>
             <div class="manufacture-categories clr">
+                <?php if($brand->logo):?>
                 <div class="mnf_logo">
-                        <img src="img/photo/samsung.png" alt="">
+                    <img src="<?php echo $brand->getLogoUrl()?>" alt="<?php echo htmlspecialchars($brand->name);?>">
                 </div>
+                <?php endif;?>
                 <div class="mnf_clr">
                         <div class="mnf-name">
                                 <span><?php echo $brand->name?></span>

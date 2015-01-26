@@ -17,14 +17,45 @@ class Export
             if (!empty($in)) {
                 $criteria = new CDbCriteria();
                 $criteria->addInCondition("t.tag", $in);
-                $criteria->compare("news_data.lang", $lang);
-                $criteria->order = "field(tag_data.type, 'product', 'brand', 'os', 'word'), news_data.created desc";
+                $criteria->compare("articles_data.lang", $lang);
+                $criteria->order = "field(tag_data.type, 'product', 'brand', 'os', 'word'), articles_data.created desc";
                 $criteria->limit = $limit;
-                $criteria->group = "news_data.id";
-                $newsTags = NewsTags::model()->cache(60)->with(['news_data', 'tag_data'])->findAll($criteria);
+                $criteria->group = "articles_data.id";
+                $newsTags = ArticlesTags::model()->cache(60)->with(['articles_data', 'tag_data'])->findAll($criteria);
                 
                 ob_start();
                 extract(['newsTags'=>$newsTags]);
+                require Yii::app()->basePath."/views/export/news.php";
+                echo ob_get_clean();
+            }
+        }
+    }
+    
+    public function Articles($tags, $lang, $type, $limit)
+    {
+        $tags = explode(",", $tags);
+        $tags = array_map(function($value){return trim($value);}, $tags);
+        if (!empty($tags)) {
+            $criteria = new CDbCriteria();
+            $criteria->addInCondition('name', $tags);
+            $criteria->select = "id";
+            $tags = Tags::model()->findAll($criteria);
+            $in = [];
+            foreach($tags as $tag) {
+                $in[] = $tag->id;
+            }
+            if (!empty($in)) {
+                $criteria = new CDbCriteria();
+                $criteria->addInCondition("t.tag", $in);
+                $criteria->compare("articles_data.lang", $lang);
+                $criteria->compare('articles_data.type', $type);
+                $criteria->order = "field(tag_data.type, 'product', 'brand', 'os', 'word'), articles_data.created desc";
+                $criteria->limit = $limit;
+                $criteria->group = "articles_data.id";
+                $newsTags = ArticlesTags::model()->cache(60)->with(['articles_data', 'tag_data'])->findAll($criteria);
+                
+                ob_start();
+                extract(['newsTags'=>$newsTags, 'type'=>$type]);
                 require Yii::app()->basePath."/views/export/news.php";
                 echo ob_get_clean();
             }
@@ -250,50 +281,11 @@ class Export
     
     public function Reviews($tags, $lang, $limit = 10)
     {
-        Yii::app()->language = $lang;
-        $tags = explode(",", $tags);
-        $tags = array_map(function($value){return trim($value);}, $tags);
-        if (!empty($tags)) {
-            $criteria = new CDbCriteria();
-            $criteria->addInCondition('name', $tags);
-            $criteria->compare('disabled', 0);
-            $criteria->select = "id, name";
-            $tags = Tags::model()->cache(60)->with(['goods'=>['joinType'=>'inner join']])->findAll($criteria);
-            $in = [];
-            foreach($tags as $tag) {
-                if (empty($tag->goods)) {
-                    continue;
-                }
-                $in[] = $tag->goods->goods;
-            }
-
-            if (!empty($in)) {
-                $criteria = new CDbCriteria();
-                $criteria->condition = "t.id in (".implode(", ", $in).")";
-                $criteria->order = "field (t.id, ".implode(", ", $in).")";
-                $products = Goods::model()->cache(60)->with(['brand_data', 'type_data'])->findAll($criteria);
-                
-                $productsList = [];
-              
-                foreach ($products as &$product) {
-                    $criteria = new CDbCriteria();
-                    $criteria->condition = 't.lang = :lang and t.goods = :id';
-                    $criteria->params = ['lang'=>$lang, 'id'=>$product->id];
-                    $criteria->limit = ceil($limit / count($products));
-                    $criteria->order = "t.created desc";
-                    $list = Reviews::model()->cache(60)->findAll($criteria);
-                    if (empty($list)) {
-                        continue;
-                    }
-                    $product->revs = $list;
-                    $productsList[$product->id] = $product;
-                    
-                }
-                ob_start();
-                extract(['products'=>$productsList]);
-                require Yii::app()->basePath."/views/export/reviews.php";
-                echo ob_get_clean();
-            }
-        }
+        return $this->Articles($tags, $lang, 'review', $limit);
+    }
+    
+    public function Opinions($tags, $lang, $limit = 10)
+    {
+        return $this->Articles($tags, $lang, 'opinion', $limit);
     }
 }

@@ -140,16 +140,16 @@
                                             </div>
                                         </div>
                                         <div class="view_bl-textView">
-                                            <a href="<?php echo Yii::app()->createAbsoluteUrl("news/index", ['link'=>$item->link, 'id'=>$item->id, 'language'=>  Language::getCurrentZone()]);?>" itemprop="url">
+                                            <a href="<?php echo Yii::app()->createAbsoluteUrl("articles/index", ['type'=>$item->type,'link'=>$item->link, 'id'=>$item->id, 'language'=>  Language::getCurrentZone()]);?>" itemprop="url">
                                                 <h2 itemprop="name"><?php echo  $item->title ?></h2>
                                             </a>
                                             <?php if (!empty($item->preview_image)) :?>
-                                            <a class="news-preview" href="<?php echo Yii::app()->createAbsoluteUrl("news/index", ['link'=>$item->link, 'id'=>$item->id, 'language'=>  Language::getCurrentZone()]); ?>">
+                                            <a class="news-preview" href="<?php echo Yii::app()->createAbsoluteUrl("articles/index", ['type'=>$item->type,'link'=>$item->link, 'id'=>$item->id, 'language'=>  Language::getCurrentZone()]); ?>">
                                                 <img itemprop="image" src="<?php echo $item->preview_image->getPreviewUrl()?>" class="news_preview" 
                                                      alt="<?php echo $item->preview_image->alt?>"/>
                                             </a>
                                             <?php endif; ?>
-                                            <span itemprop="description"><?php echo $item->getDescription()?></span>...
+                                            <span itemprop="description"><?php echo $item->description?></span>...
                                             <?php if (!empty($item->preview_image)) :?>
                                             <div style="clear: both;"></div>
                                             <?php endif;?>
@@ -164,61 +164,99 @@
                             </div>
                         </section>
                     </div>
-                    <div class="infoGoodItem-wp-updates" id="item4">
-                        <section class="infoGoodItem_content">
-                            <h3 class="infoGoodItem-infoTitle"><?php echo Yii::t('goods', 'Обновления и прошивки') ?></h3>
-                            <ul id="GoodItem-updates">
-                                <!--
-                                <li>
-                                    <div class="newsGood-name"><span class="count">9.</span>Что купить: новый Nexus 7 или iPad Mini</div>
-                                    <div class="newsGoods-link"><a href="#">http://www.mobile-review.com/articles/2012/apple-ipad-mini.html</a></div>
-                                </li>
-                                -->
-                            </ul>
+                    <div class="infoGoodItem-wp-comments" id="item5">
+                        <section class="infoGoodItem_content view-title">
+                            <div class="infoGoodItem_title-2 clr">
+                                <div class="flLeft"><h3 class="infoGoodItem-infoTitle"><?php echo Yii::t('goods', 'Обзоры') ?></h3></div> 
+                            </div>
+                        </section>
+                        
+                        <section class="views-list">
+                            <?php foreach ($reviews as $item):?>
+                                <div class="view_bl" itemscope itemtype="http://schema.org/NewsArticle">
+                                    <div class="view_bl-head clr">
+                                        <div class="view_bl-head-l flRight">
+                                            <date class="view_bl-date"><?php echo Yii::app()->dateFormatter->formatDateTime($item->created, 'long');?></date>
+                                            <span itemprop="datePublished" style="display: none;"><?php echo $item->created?></span>
+                                        </div>
+                                    </div>
+                                    <div class="view_bl-textView">
+                                        <a href="<?php echo Yii::app()->createAbsoluteUrl("articles/index", ['type'=>$item->type,'link'=>$item->link, 'id'=>$item->id, 'language'=>  Language::getCurrentZone()]);?>" itemprop="url">
+                                            <h2 itemprop="name"><?php echo  $item->title ?></h2>
+                                        </a>
+                                        <?php if (!empty($item->preview_image)) :?>
+                                        <a class="news-preview" href="<?php echo Yii::app()->createAbsoluteUrl("articles/index", ['type'=>$item->type,'link'=>$item->link, 'id'=>$item->id, 'language'=>  Language::getCurrentZone()]); ?>">
+                                            <img itemprop="image" src="<?php echo $item->preview_image->getPreviewUrl()?>" class="news_preview" 
+                                                 alt="<?php echo $item->preview_image->alt?>"/>
+                                        </a>
+                                        <?php endif; ?>
+                                        <span itemprop="description"><?php echo $item->description?></span>...
+                                        <?php if (!empty($item->preview_image)) :?>
+                                        <div style="clear: both;"></div>
+                                        <?php endif;?>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
+                            <?php if ($reviews_count): ?>
+                            <a href="<?php echo Yii::app()->createUrl("news/goodslist", ['brand'=>$brand->link, 'product'=>$product->link, 'language'=>  Language::getCurrentZone()]);?>">
+                                <?php echo Yii::t("goods","Читать все обзоры");?> (<?php echo $reviews_count?>)...
+                            </a>
+                            <?php endif; ?>
                         </section>
                     </div>
                     <div class="infoGoodItem-wp-comments" id="item5">
                         <section class="infoGoodItem_content view-title">
                             <div class="infoGoodItem_title-2 clr">
                                 <div class="flLeft"><h3 class="infoGoodItem-infoTitle"><?php echo Yii::t('goods', 'Отзывы') ?></h3></div> 
-                                <!--<div class="flRight"><a href="#" class="btn-link_st1" title=""><?php echo Yii::t('goods', "Написать отзыв") ?></a></div>-->
                             </div>
                         </section>
+                        
+                        <section class="views-list">
+                            <?php foreach ($opinions as $item):?>
+                                <div class="view_bl" itemscope itemtype="http://schema.org/NewsArticle">
+                                    <div class="view_bl-head clr">
+                                        <div class="view_bl-head-l flRight">
+                                            <date class="view_bl-date"><?php echo Yii::app()->dateFormatter->formatDateTime($item->created, 'long');?></date>
+                                            <span itemprop="datePublished" style="display: none;"><?php echo $item->created?></span>
+                                        </div>
+                                    </div>
+                                    <div class="view_bl-textView">
+                                        <a href="<?php echo Yii::app()->createAbsoluteUrl("articles/index", ['type'=>$item->type,'link'=>$item->link, 'id'=>$item->id, 'language'=>  Language::getCurrentZone()]);?>" itemprop="url">
+                                            <h2 itemprop="name"><?php echo  $item->title ?></h2>
+                                        </a>
+                                        <?php if (!empty($item->preview_image)) :?>
+                                        <a class="news-preview" href="<?php echo Yii::app()->createAbsoluteUrl("articles/index", ['type'=>$item->type,'link'=>$item->link, 'id'=>$item->id, 'language'=>  Language::getCurrentZone()]); ?>">
+                                            <img itemprop="image" src="<?php echo $item->preview_image->getPreviewUrl()?>" class="news_preview" 
+                                                 alt="<?php echo $item->preview_image->alt?>"/>
+                                        </a>
+                                        <?php endif; ?>
+                                        <span itemprop="description"><?php echo $item->description?></span>...
+                                        <?php if (!empty($item->preview_image)) :?>
+                                        <div style="clear: both;"></div>
+                                        <?php endif;?>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
+                            <?php if ($opinions_count): ?>
+                            <a href="<?php echo Yii::app()->createUrl("news/goodslist", ['brand'=>$brand->link, 'product'=>$product->link, 'language'=>  Language::getCurrentZone()]);?>">
+                                <?php echo Yii::t("goods","Читать все отзывы");?> (<?php echo $opinions_count?>)...
+                            </a>
+                            <?php endif; ?>
+                        </section>
+                    </div>
+                    <div class="infoGoodItem-wp-comments" id="item5">
+                        <section class="infoGoodItem_content view-title">
+                            <div class="infoGoodItem_title-2 clr">
+                                <div class="flLeft"><h3 class="infoGoodItem-infoTitle"><?php echo Yii::t('goods', 'Видео') ?></h3></div> 
+                            </div>
+                        </section>
+                        
                         <section class="views-list">
                             <div class="view_bl">
                                 <?php foreach ($product->getVideos() as $video): ?>
                                     <?php echo $video; ?>
                                 <?php endforeach; ?>
                             </div>
-                            <?php foreach ($reviews as $review): ?>
-                                <div class="view_bl">
-                                    <div class="view_bl-head clr">
-                                        <div class="view_bl-head-r flLeft">
-                                            <div class="view_bl-avatar"><img src="/assets/img/photo/avatar_view.png"></div>
-                                            <div class="view_bl-h2">
-                                                <div class="view_bl-h2_name">Аноним</div>
-                                                
-                                             </div>
-                                            <div class="clear"></div>
-                                        </div>
-                                        <div class="view_bl-head-l flRight">
-                                            <date class="view_bl-date"><?php echo Yii::app()->dateFormatter->formatDateTime($review->created, 'long');?></date>
-                                        </div>
-                                    </div>
-                                    <div class="view_bl-textView">
-                                        <a href="<?php echo Yii::app()->createAbsoluteUrl("reviews/index", array("goods" => $brand->link . "-" . $product->link, "link" => $review->link, "id" => $review->id, "language" => Language::getCurrentZone())) ?>">
-                                            <h2><?php echo $review->title ?></h2>
-                                        </a>
-                                        <span><?php echo $review->preview ?>...</span>
-                                    </div>
-                                </div>
-
-                            <?php endforeach; ?>
-                            <?php if ($reviews_count): ?>
-                                <a href="<?php echo Yii::app()->createUrl("reviews/list", ['brand'=>$brand->link, 'product'=>$product->link, 'language'=>  Language::getCurrentZone()]);?>">
-                                    <?php echo Yii::t("goods","Читать все отзывы");?> (<?php echo $reviews_count?>)...
-                                </a>
-                            <?php endif; ?>
                         </section>
                         <?php foreach ($product->comments as $comment): ?>
                             <div><?php echo $comment->text ?></div>
@@ -233,81 +271,7 @@
                             </section>
                         <?php endif; ?>
                     </div>
-
-                    <div class="infoGoodItem-wp-comments" id="item6">
-                        <section class="infoGoodItem_content view-title">
-                            <div class="infoGoodItem_title-2 clr">
-                                <div class="flLeft">
-                                    <h3 class="infoGoodItem-infoTitle"><?php echo Yii::t('goods', 'FAQ') ?></h3>
-                                    <small><?php //echo $product->id?></small>
-                                    <small><?php //echo $product->source_url?></small>
-                                </div> 
-                            </div>
-                        </section>
-
-                        <section class="views-list">
-                            <?php foreach ($product->faq as $question): ?>
-                                <div class="view_bl">
-                                    <div class="view_bl-textView">
-                                        <h2><?php echo $question['question'] ?></h2>
-                                        <?php echo $question['answer'] ?>
-                                    </div>
-                                </div>
-
-                            <?php endforeach; ?>
-                        </section>
-
-                    </div>
-
-                    <!--
-            <div class="infoGoodItem-wp-new_comment" id="item6">
-                <section class="infoGoodItem_content">
-                    <div class="infoGoodItem_title-2 clr">
-                        <div class="flLeft"><h3 class="infoGoodItem-infoTitle">Ваш отзыв</h3></div>
-                        <div class="flRight"><a href="#" class="link-st3" title="">Посмотреть отзывы</a></div>
-                    </div>
-                    <div class="view_read-bl">
-                        <form action="#" method="post">
-                            <div class="view_read-head">
-                                <div class="clr">
-                                    <div class="view_read-avatar">
-                                        <img src="/assets/img/photo/avatar_view2.png" height="40" width="40">
-                                    </div>
-                                    <div class="view_read-h2">
-                                        <div class="view_r-name">Анна Аннова</div>
-                                        <div class="view_r-setRating">
-                                            <div>Оцените товар:</div>
-                                            <ul class="rating2">
-                                                <li><a href="#">1</a></li>
-                                                <li><a href="#">2</a></li>
-                                                <li><a href="#">3</a></li>
-                                                <li><a href="#">4</a></li>
-                                                <li><a href="#">5</a></li>
-                                            </ul>
-                                            <div class="clear"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="view_read-text">
-                                <textarea name="view_text" class="textarea-st3"></textarea>
-                            </div>
-                            <div class="view_read-bottom clr">
-                                <div class="view_read-bottom-left flLeft">
-                                    <div class="view_r_b-replytext">
-                                        Вы отвечаете на комментарий:<br>
-                                        «Открыл, взял в руки и понял - ОНО. Честно говоря  с...»
-                                    </div>
-                                    <div class="view_r_b-linkOff"><a href="#" class="link-st3">Отменить</a></div>
-                                </div>
-                                <div class="flRight"><input type="submit" class="btn_submit2" value="Отправить" name="submit_readView"></div>
-                            </div>
-                            <input type="hidden" name="GoodItemSetRating" class="GoodItemSetRating" value="">
-                        </form>
-                    </div>
-                </section>
-            </div>
-                    -->
+                    
                 </div>
             </div>
         </div>
@@ -328,64 +292,6 @@
                     </script>
                     <script type="text/javascript" charset="utf-8" defer="defer" async="async" src="http://loader.topadvert.ru/load.js"></script>
                 </div>
-                <!--
-                <div class="bl_min_price first">
-                    <div class="bl_min_price-name">
-                        <span>"М-Видео"</span>
-                    </div>
-                    <div class="bl_min_price-price">
-                        <span class="price_c_minimum">10 000</span>
-                    </div>
-                    <div class="bl_min_price-buy">
-                        <a href="#" class="link-btn_buy-big">Купить</a>
-                    </div>
-                </div>
-                <div class="bl_min_price">
-                    <div class="bl_min_price-name">
-                        <span>"Связной"</span>
-                    </div>
-                    <div class="bl_min_price-price">
-                        <span class="price_c_other">11 500</span>
-                    </div>
-                    <div class="bl_min_price-buy">
-                        <a href="#" class="link-btn_buy-small">Купить</a>
-                    </div>
-                </div>
-                <div class="bl_min_price">
-                    <div class="bl_min_price-name">
-                        <span>"Связной"</span>
-                    </div>
-                    <div class="bl_min_price-price">
-                        <span class="price_c_other">12 000</span>
-                    </div>
-                    <div class="bl_min_price-buy">
-                        <a href="#" class="link-btn_buy-small">Купить</a>
-                    </div>
-                </div>
-                <div class="bl_min_price">
-                    
-                    <div class="bl_min_price-name">
-                        <span>"Евросеть"</span>
-                    </div>
-                    <div class="bl_min_price-price">
-                        <span class="price_c_other">13 000</span>
-                    </div>
-                    <div class="bl_min_price-buy">
-                        <a href="#" class="link-btn_buy-small">Купить</a>
-                    </div>
-                </div>
-                <div class="bl_min_price">
-                    <div class="bl_min_price-name">
-                        <span>"Альт"</span>
-                    </div>
-                    <div class="bl_min_price-price">
-                        <span class="price_c_other">13 500</span>
-                    </div>
-                    <div class="bl_min_price-buy">
-                        <a href="#" class="link-btn_buy-small">Купить</a>
-                    </div>
-                </div>
-                -->
             </div>
 
         </div>
