@@ -5,7 +5,7 @@ class DownloadCommand extends CConsoleCommand
     
     public function actionIrecommendSitemap()
     {
-        $downloader = new Downloader("http://irecommend.ru/");
+        $downloader = new Downloader("http://irecommend.ru/", 50);
         
         $lastPage = SourcesIrecommend::model()->getLastUrl("phones");
         
@@ -30,20 +30,20 @@ class DownloadCommand extends CConsoleCommand
             if (in_array($lastPage, $list)) {
                 break;
             }
+            
+            if (SourcesIrecommend::model()->checkExists('phones', $list[count($list)-1])) {
+                break;
+            }
+            
             echo "{$i} of {$last}".PHP_EOL;
         }
 
-        
+        $list = array_unique($list);
         foreach($list as $url) {
             $source = new SourcesIrecommend();
             $source->url = $url;
             $source->type = "phones";
             if ($source->validate()) {
-                $source->save();
-                echo "Downloading: {$url}".PHP_EOL;
-                $downloader->downloadFile($url, $source->getFilename());
-                $source->size = filesize($source->getFilename());
-                $source->downloaded = 1;
                 $source->save();
             } else {
                 var_dump($source->getErrors());
@@ -54,7 +54,7 @@ class DownloadCommand extends CConsoleCommand
         }
         
         
-        $downloader = new Downloader("http://irecommend.ru/");
+        $downloader = new Downloader("http://irecommend.ru/", 50);
         
         $lastPage = SourcesIrecommend::model()->getLastUrl("tablets");
         
@@ -63,7 +63,7 @@ class DownloadCommand extends CConsoleCommand
         $content = $downloader->getContent($page);
         $html = phpQuery::newDocumentHTML($content);
         $last = pq($html)->find("li.pager-last > a")->attr("href");
-        $last = preg_replace("/.*reviews\?page=(?P<last>\d+)/isu", "$1", $last);
+        $last = preg_replace("/.*reviews\?page=(?P<last>\d+)\&.*/isu", "$1", $last);
         phpQuery::unloadDocuments();
         
         $list = array_merge($list, $this->_getIrecommendUrlList($content));
@@ -74,25 +74,25 @@ class DownloadCommand extends CConsoleCommand
         }
 
         for($i = 1; $i < $last; $i++) {
-            $content = $downloader->getContent("http://irecommend.ru/taxonomy/term/55/reviews?page={$i}&?tid=228032");
+            $content = $downloader->getContent("http://irecommend.ru/taxonomy/term/88/reviews?page={$i}&tid=228032");
             $list = array_merge($list, $this->_getIrecommendUrlList($content));
             if (in_array($lastPage, $list)) {
                 break;
             }
+            
+            if (SourcesIrecommend::model()->checkExists('phones', $list[count($list)-1])) {
+                break;
+            }
+            
             echo "{$i} of {$last}".PHP_EOL;
         }
         
-        
+        $list = array_unique($list);
         foreach($list as $url) {
             $source = new SourcesIrecommend();
             $source->url = $url;
             $source->type = "tablets";
             if ($source->validate()) {
-                $source->save();
-                echo "Downloading: {$url}".PHP_EOL;
-                $downloader->downloadFile($url, $source->getFilename());
-                $source->size = filesize($source->getFilename());
-                $source->downloaded = 1;
                 $source->save();
             } else {
                 var_dump($source->getErrors());
@@ -104,6 +104,26 @@ class DownloadCommand extends CConsoleCommand
 
     }
     
+    public function actionIrecommend()
+    {
+        $criteria = new CDbCriteria();
+        $criteria->condition = "downloaded = 0";
+        $criteria->order = "created asc";
+        $criteria->limit = "50";
+        $urls = SourcesIrecommend::model()->findAll($criteria);
+        $downloader = new Downloader("http://irecommend.ru/", 50);
+        foreach ($urls as $url) {
+            $downloader->downloadFile($url->url, $url->getFilename());
+            $url->downloaded = 1;
+            $url->size = filesize($url->getFilename());
+            if ($url->validate()) {
+                echo "+";
+                $url->save();
+            }
+        }
+        echo PHP_EOL;
+    }
+
     protected function _getIrecommendUrlList($content)
     {
         $result = [];

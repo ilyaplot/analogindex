@@ -7,19 +7,6 @@ class ExportController extends CController
         self::$export = new Export();
         return parent::beforeAction($action);
     }
-
-    /**
-     * Возвращает новости по тэгам
-     * @param string $tags тэги через запятую
-     * @param string $lang язык ru|en
-     * @param int $limit Количество новостей
-     * 
-     * @example http://analogindex.ru/export/news?tags=tag1,tag2,tag+3&lang=ru&limit=10
-     */
-    public function actionNews($tags, $lang, $limit)
-    {
-        echo self::$export->News($tags, $lang, $limit);
-    }
     
     /**
      * Возвращает новости по тэгам
@@ -32,21 +19,10 @@ class ExportController extends CController
      */
     public function actionArticles($tags, $lang, $type, $limit)
     {
+        Yii::app()->language = $lang;
         echo self::$export->Articles($tags, $lang, $type, $limit);
     }
-    
-    /**
-     * Отзывы по аппаратам, к которым привязаны тэги
-     * @param string $tags Тэги через запятую
-     * @param string $lang язык ru|en
-     * @param int $limit Количество отзывов
-     * 
-     * @example http://analogindex.ru/export/reviews?tags=tag1,tag2,tag+3&lang=ru&limit=10
-     */
-    public function actionReviews($tags, $lang, $limit = 10)
-    {
-        echo self::$export->Reviews($tags, $lang, $limit);
-    }
+
     
     /**
      * Видео по аппаратам, к которым привязаны тэги

@@ -9,6 +9,89 @@ class ParseCommand extends CConsoleCommand
     
     protected static $downloader = null;
 
+    public function actionIrecommend()
+    {
+        $criteria = new CDbCriteria();
+        $criteria->condition = "downloaded = 1 and completed = 0";
+        $criteria->order = "id asc";
+        $criteria->limit = 50;
+        
+        $items = SourcesIrecommend::model()->findAll($criteria);
+        $articlesFilter = new ArticlesFilter();
+        foreach ($items as $item) {
+            
+            $review = Articles::model()->findByAttributes(['source_url'=>$item->url]);
+            if (empty($review->id)) {
+                $review = new Articles();
+                $review->source_url = $item->url;
+                $review->has_filtered = 0;
+                $review->lang = 'ru';
+            }
+            
+            $review->type = Articles::TYPE_OPINION;
+            
+            $html = phpQuery::newDocumentHTML($item->getContent());
+            $element = pq($html)->find('li.qtab-myreviewinfo.active.last a');
+            if ($element->text() != "Отзыв")
+            {
+                echo "Страница не является отзывом".PHP_EOL;
+                continue;
+            }
+            $element->remove();
+            echo $item->url.PHP_EOL;
+            
+            $productElem = pq($html)->find("div[itemprop=itemReviewed]");
+            $product = pq($productElem)->find("span[itemprop=name]")->text();
+            if ($item->type == 'phones') {
+                $product = preg_replace("/смартфон/isu", "", $product);
+                $product = preg_replace("/мобильный телефон/isu", "", $product);
+            } else if ($item->type = 'tablets') {
+                $product = preg_replace("/планшет/isu", "", $product);
+            }
+            
+            $element = pq($html)->find('div.main-comment');
+            $title = $element->find("h2.summary")->text();
+
+            $title = preg_replace("/".preg_quote($product)."/isu", '' ,  $title);
+            $title = $product." : ".trim($title);
+            
+            if (empty($review->title) && empty($review->id)) {
+                $review->link = Yii::app()->urlManager->translitUrl($title);
+            }
+            $review->title = $title;
+
+            $plus = trim(pq($element)->find("span.plus")->text());
+            $minus = trim(pq($element)->find("span.minus")->text());
+            
+            $content = $element->find('div.views-field-teaser');
+            $images = pq($content)->find(".field-items")->html();
+            $content->find('.social_buttons_wrapper, .add-ticket-button-wrapper, div.clear, fieldset, .smiley-content')->remove();
+            $content = pq($content)->find(".description")->html().(!empty($images) ? "<br />".$images : '');
+            
+            if (!empty($minus)) {
+                $content = "<strong class='minus'>Недостатки:</strong> <span>{$minus}</span><br /> <hr /><br />".PHP_EOL.$content;
+            }
+            if (!empty($plus)) {
+                $content = "<strong class='plus'>Достоинства:</strong> <span>{$plus}</span><br />".PHP_EOL.$content;
+            }
+            
+            $review->source_content = $content."<!--{$product}-->";
+
+            $created = pq($html)->find("meta[itemprop=datePublished]")->attr("content");
+            if (!empty($created)) {
+                $review->created = date("Y-m-d H:i:s", strtotime($created));
+            }
+            if ($review->validate()) {
+                $review->save();
+                $review = $articlesFilter->filter($review);
+                $review->save();
+                echo "+";
+                $item->completed = 1;
+                $item->save();
+            }
+            phpQuery::unloadDocuments();
+        }
+    }
 
     public function actionGsmArena()
     {

@@ -67,6 +67,7 @@
             </span><br />
             <?php echo Yii::t("main", "Источник")?>: <a target="_blank" href="<?php echo $article->source_url?>"><?php echo $article->source_url?></a>
             <br />
+            <?php  echo $this->renderPartial("_comments")?>
         </div>
     </div>
 

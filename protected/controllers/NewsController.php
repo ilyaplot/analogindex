@@ -53,14 +53,4 @@ class NewsController extends Controller
         
     }
 
-    public function actionAll()
-    {
-        $criteria = new CDbCriteria();
-        $criteria->order = "t.id desc";
-        $criteria->limit = 50;
-        
-        $news = News::model()->findAll($criteria);
-        
-        $this->render("test_list", ["news"=>$news]);
-    }
 }

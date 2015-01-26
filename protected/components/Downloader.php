@@ -85,11 +85,9 @@ class Downloader
                 continue;
             }
             if ($disableCheck || $this->testProxy($proxy)) {
-                echo "+";
                 $this->addProxy($proxy);
                 $iteration++;
             } else {
-                echo "-";
                 unset($proxy);
             }
         }
@@ -130,6 +128,7 @@ class Downloader
 
         if (curl_errno($ch)) {
             curl_close($ch);
+            echo "-";
             return false;
         }
         
@@ -137,10 +136,10 @@ class Downloader
         curl_close($ch);
         
         if ($info['http_code'] != 200 && $info['http_code'] != 203) {
-            echo $info['http_code'].PHP_EOL;
+            echo "@";
             return false;
         }
-
+        echo "+";
         return true;
     }
     

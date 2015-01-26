@@ -30,6 +30,14 @@ class SourcesIrecommend extends CActiveRecord
         }
         return $folder.md5($this->id).".file";
     }
+    
+    public function getContent()
+    {
+        if ($this->downloaded = 0) {
+            return false;
+        }
+        return file_get_contents($this->getFilename());
+    }
 
     public function rules() {
         return array(
@@ -46,12 +54,24 @@ class SourcesIrecommend extends CActiveRecord
     public function getLastUrl($type)
     {
         $criteria = new CDbCriteria();
-        $criteria->order = "created desc";
+        $criteria->order = "id desc";
         $criteria->select = "url";
         $criteria->condition = "type = :type";
         $criteria->params = ['type'=>$type];
         $item = self::model()->find($criteria);
         return !empty($item->url) ? $item->url : null;
+    }
+    
+    /**
+     * 
+     * @param type $type phones|tablets
+     */
+    public function checkExists($type, $url)
+    {
+        $criteria = new CDbCriteria();
+        $criteria->condition = "type = :type and url = :url";
+        $criteria->params = ['type'=>$type, 'url'=>$url];
+        return self::model()->count($criteria);
     }
     
     public function beforeSave()

@@ -35,7 +35,11 @@ class Export
     {
         $tags = explode(",", $tags);
         $tags = array_map(function($value){return trim($value);}, $tags);
+        
+        
+        
         if (!empty($tags)) {
+
             $criteria = new CDbCriteria();
             $criteria->addInCondition('name', $tags);
             $criteria->select = "id";
@@ -44,6 +48,7 @@ class Export
             foreach($tags as $tag) {
                 $in[] = $tag->id;
             }
+ 
             if (!empty($in)) {
                 $criteria = new CDbCriteria();
                 $criteria->addInCondition("t.tag", $in);
