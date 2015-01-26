@@ -25,7 +25,7 @@ class TagController extends Controller
         $this->render("news", ['newsTags'=>$newsTags, 'tag'=>$tag, 'pages'=>$pages]);
     }
     
-    public function actionOpinions($type, $tag)
+    public function actionOpinion($type, $tag)
     {
         $criteria = new CDbCriteria();
         $criteria->condition = "type = :type and link = :link and disabled = 0";
@@ -48,7 +48,7 @@ class TagController extends Controller
         $this->render("news", ['newsTags'=>$newsTags, 'tag'=>$tag, 'pages'=>$pages]);
     }
     
-    public function actionReviews($type, $tag)
+    public function actionReview($type, $tag)
     {
         $criteria = new CDbCriteria();
         $criteria->condition = "type = :type and link = :link and disabled = 0";

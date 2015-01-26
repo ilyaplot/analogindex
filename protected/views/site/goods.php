@@ -157,7 +157,7 @@
                                     </div>
                                     <?php endforeach; ?>
                                 <?php if ($news_count): ?>
-                                <a href="<?php echo Yii::app()->createUrl("news/goodslist", ['brand'=>$brand->link, 'product'=>$product->link, 'language'=>  Language::getCurrentZone()]);?>">
+                                <a href="<?php echo Yii::app()->createUrl("articles/list", ['type'=>'news','brand'=>$brand->link, 'product'=>$product->link, 'language'=>  Language::getCurrentZone()]);?>">
                                     <?php echo Yii::t("goods","Читать все новости");?> (<?php echo $news_count?>)...
                                 </a>
                                 <?php endif; ?>
@@ -198,7 +198,7 @@
                                 </div>
                                 <?php endforeach; ?>
                             <?php if ($reviews_count): ?>
-                            <a href="<?php echo Yii::app()->createUrl("news/goodslist", ['brand'=>$brand->link, 'product'=>$product->link, 'language'=>  Language::getCurrentZone()]);?>">
+                            <a href="<?php echo Yii::app()->createUrl("articles/list", ['type'=>'review','brand'=>$brand->link, 'product'=>$product->link, 'language'=>  Language::getCurrentZone()]);?>">
                                 <?php echo Yii::t("goods","Читать все обзоры");?> (<?php echo $reviews_count?>)...
                             </a>
                             <?php endif; ?>
@@ -238,7 +238,7 @@
                                 </div>
                                 <?php endforeach; ?>
                             <?php if ($opinions_count): ?>
-                            <a href="<?php echo Yii::app()->createUrl("news/goodslist", ['brand'=>$brand->link, 'product'=>$product->link, 'language'=>  Language::getCurrentZone()]);?>">
+                            <a href="<?php echo Yii::app()->createUrl("articles/list", ['type'=>'opinion','brand'=>$brand->link, 'product'=>$product->link, 'language'=>  Language::getCurrentZone()]);?>">
                                 <?php echo Yii::t("goods","Читать все отзывы");?> (<?php echo $opinions_count?>)...
                             </a>
                             <?php endif; ?>

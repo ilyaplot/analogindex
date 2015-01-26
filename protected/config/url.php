@@ -11,18 +11,22 @@ return array(
         'http://analogindex.<language:\w+>/<url:.*>' => [
             'class' => 'application.components.Redirect',
         ],
+        
+        
+        'http://analogindex.<language:\w+>/<type:[news|opinion|review]+>/product/<brand:[\w\-]+>_<product:[\w\-]+>/page_<page:\d+>' =>
+            array('articles/list', 'urlSuffix' => '.html'),
+        
+        'http://analogindex.<language:\w+>/<type:[news|opinion|review]+>/product/<brand:[\w\-]+>_<product:[\w\-]+>' =>
+            array('articles/list', 'urlSuffix' => '.html'),
+        
+        'http://analogindex.<language:\w+>/<type:[news|opinion|review]+>/brand/<brand:[\d\w\-_]*>' =>
+            array('articles/list', 'urlSuffix' => '.html'),
+        
         'http://analogindex.<language:\w+>/<type:[news|review|opinion]+>/<link:[\d\w\-_]+>_<id:\d+>' =>
             array('articles/index', 'urlSuffix' => '.html'),
         
         
-        'http://analogindex.<language:\w+>/news/product/<brand:[\w\-]+>_<product:[\w\-]+>/page_<page:\d+>' =>
-            array('news/goodslist', 'urlSuffix' => '.html'),
         
-        'http://analogindex.<language:\w+>/news/product/<brand:[\w\-]+>_<product:[\w\-]+>' =>
-            array('news/goodslist', 'urlSuffix' => '.html'),
-        
-        'http://analogindex.<language:\w+>/news/brand/<brand:[\d\w\-_]*>' =>
-            array('news/brandlist', 'urlSuffix' => '.html'),
         
         'http://analogindex.<language:\w+>/reviews/product/<brand:[\w\-]+>_<product:[\w\-]+>' =>
             array('reviews/list', 'urlSuffix' => '.html'),
@@ -36,7 +40,11 @@ return array(
         'http://analogindex.<language:\w+>/brandsimage/id<id:\d+>/<name:.*>' =>
             array('files/brandsimage', 'urlSuffix' => ''),
         
-        'http://analogindex.<language:\w+>/tag/<type:[\w\-]+>_<tag:[\w\-]+>/reviews' => 'tag/reviews',
+        'http://analogindex.<language:\w+>/tag/<type:[\w\-]+>_<tag:[\w\-]+>/opinion/page-<page:\d+>' => 'tag/opinion',
+        'http://analogindex.<language:\w+>/tag/<type:[\w\-]+>_<tag:[\w\-]+>/opinion' => 'tag/opinion',
+        
+        'http://analogindex.<language:\w+>/tag/<type:[\w\-]+>_<tag:[\w\-]+>/reviews/page-<page:\d+>' => 'tag/review',
+        'http://analogindex.<language:\w+>/tag/<type:[\w\-]+>_<tag:[\w\-]+>/reviews' => 'tag/review',
         
         'http://analogindex.<language:\w+>/tag/<type:[\w\-]+>_<tag:[\w\-]+>/news/page-<page:\d+>' => 'tag/news',
         'http://analogindex.<language:\w+>/tag/<type:[\w\-]+>_<tag:[\w\-]+>/news' => 'tag/news',
