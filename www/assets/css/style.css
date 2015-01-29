@@ -1792,3 +1792,16 @@ ul.tags > li > a {
 ul.tags > li > a:visited {
     color: #4a6b82;
 }
+
+
+#gallery {
+    background: #fff;
+    border: 1px solid #e6e6e6;
+    box-shadow: 0 2px 3px rgba(0,0,0,0.15);
+    padding-top: 15px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 20px;
+    width: 922px;
+    min-height: 400px;
+}

@@ -53,6 +53,15 @@ class SitemapCommand extends ConsoleCommand
                     'url'=>str_replace("+", "%2B", "http://analogindex.{$domain}/{$product->type_data->link}/{$product->brand_data->link}/{$product->link}.html"),
                     'lastmod'=>date("Y-m-d\TH:i:s+00:00", strtotime($product->updated)),
                 ];
+                    
+                $imagesCount = Images::model()->getProductGalleryCount($product->id) + Images::model()->getProductGalleryCount1($product->id);
+                if ($imagesCount > 1) {
+                    for($i = 1; $i < $imagesCount+1; $i++) {
+                        $urls[] = [
+                            'url'=>str_replace("+", "%2B", "http://analogindex.{$domain}/gallery/{$product->brand_data->link}_{$product->link}/page_{$i}.html"),
+                        ];
+                    }
+                }
             }
             
             foreach($brands as $brand) {

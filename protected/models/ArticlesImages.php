@@ -211,7 +211,7 @@ class ArticlesImages extends CActiveRecord
     public function createPreviews()
     {
         include_once 'WideImage/WideImage.php';
-        $query = "select i.id, i.article, i.width, i.height from {{articles_images}} i group by i.article having max(i.has_preview) = 0 order by i.id asc";
+        $query = "select i.id, i.article, i.width, i.height from {{articles_images}} i order by i.id asc";
         $list = $this->getDbConnection()->createCommand($query)->queryAll(true);
         $updateQuery = "update {{articles_images}} set has_preview = 1 where id = :id";
         foreach ($list as $image) {
@@ -230,10 +230,12 @@ class ArticlesImages extends CActiveRecord
                         
                 WideImage::load($temp)->resize($this->preview_size[0], $this->preview_size[1])
                     ->saveToFile($temp);
-                rename($temp, $path.md5($image['id']).".file");
-                $this->getDbConnection()->createCommand($updateQuery)->execute([
-                    'id'=>$image['id'],
-                ]);
+                if (file_exists($temp)) {
+                    rename($temp, $path.md5($image['id']).".file");
+                    $this->getDbConnection()->createCommand($updateQuery)->execute([
+                        'id'=>$image['id'],
+                    ]);
+                }
                 echo "+";
             } catch (Exception $ex) {
                 echo $ex->getMessage() . PHP_EOL;
@@ -243,4 +245,6 @@ class ArticlesImages extends CActiveRecord
         }
         echo PHP_EOL;
     }
+
+            
 }

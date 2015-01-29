@@ -58,11 +58,12 @@ class Export
                 $criteria->limit = $limit;
                 $criteria->group = "articles_data.id";
                 $newsTags = ArticlesTags::model()->cache(60)->with(['articles_data', 'tag_data'])->findAll($criteria);
-                
-                ob_start();
-                extract(['newsTags'=>$newsTags, 'type'=>$type]);
-                require Yii::app()->basePath."/views/export/news.php";
-                echo ob_get_clean();
+                if (!empty($newsTags)) {
+                    ob_start();
+                    extract(['newsTags'=>$newsTags, 'type'=>$type]);
+                    require Yii::app()->basePath."/views/export/news.php";
+                    echo ob_get_clean();
+                }
             }
         }
     }
@@ -93,16 +94,18 @@ class Export
                 $criteria->order = "t.priority";
                 $criteria->group = 't.goods, t.lang';
                 $videos = Videos::model()->findAll($criteria);
-                echo "<ul>".PHP_EOL;
-                foreach ($videos as $video) {
-                   
-                    echo "<li>";
-                    echo "<h2>".Yii::t("models", "Видео обзор");
-                    echo " {$video->goods_data->brand_data->name} {$video->goods_data->name}</h2>";
-                    echo $video->getTemplate();
-                    echo "</li>";
+                if (!empty($videos)) {
+                    echo "<ul>".PHP_EOL;
+                    foreach ($videos as $video) {
+
+                        echo "<li>";
+                        echo "<h2>".Yii::t("models", "Видео обзор");
+                        echo " {$video->goods_data->brand_data->name} {$video->goods_data->name}</h2>";
+                        echo $video->getTemplate();
+                        echo "</li>";
+                    }
+                    echo "</ul>";
                 }
-                echo "</ul>";
             }
         }
     }

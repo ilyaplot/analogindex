@@ -35,6 +35,8 @@ class ParseCommand extends CConsoleCommand
             if ($element->text() != "Отзыв")
             {
                 echo "Страница не является отзывом".PHP_EOL;
+                $item->downloaded = 0;
+                $item->save();
                 continue;
             }
             $element->remove();
@@ -52,8 +54,9 @@ class ParseCommand extends CConsoleCommand
             $element = pq($html)->find('div.main-comment');
             $title = $element->find("h2.summary")->text();
 
-            $title = preg_replace("/".preg_quote($product)."/isu", '' ,  $title);
-            $title = $product." : ".trim($title);
+            if (!preg_match("/".preg_quote($product, '/')."/isu",  $title)) {
+                $title = $product." : ".trim($title);
+            }
             
             if (empty($review->title) && empty($review->id)) {
                 $review->link = Yii::app()->urlManager->translitUrl($title);

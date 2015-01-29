@@ -6,6 +6,7 @@ class Articles extends CActiveRecord
     const TYPE_NEWS = 'news'; // Новость
     const TYPE_REVIEW = 'review'; // Обзор
     const TYPE_OPINION = 'opinion'; // Отзыв
+    const TYPE_HOWTO = 'howto'; // FAQ
 
     public static function model($className = __CLASS__)
     {
@@ -104,6 +105,7 @@ class Articles extends CActiveRecord
             self::TYPE_NEWS,
             self::TYPE_OPINION,
             self::TYPE_REVIEW,
+            self::TYPE_HOWTO,
         ])) {
             return false;
         }

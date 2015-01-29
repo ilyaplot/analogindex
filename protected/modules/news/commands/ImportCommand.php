@@ -145,7 +145,7 @@ class ImportCommand extends CConsoleCommand
             echo PHP_EOL;
             unset($product, $news, $url, $item);
         }
-
+        GoodsArticles::model()->filter();
     }
     
     

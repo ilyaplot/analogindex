@@ -24,4 +24,5 @@ return array(
     'Читать полностью'=>'Read more',
     'Эта новость'=>'This page',
     'Источник'=>'Source',
+    'Фотогалерея'=>'Photo gallery'
 );

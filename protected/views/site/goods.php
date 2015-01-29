@@ -125,6 +125,15 @@
                             <?php $this->renderPartial("_goods_many_images", array("product" => $product, "brand" => $brand)) ?>
                         <?php endif; ?>
                         <div class="clear"></div>
+                        <br />
+                        <?php if((Images::model()->getProductGalleryCount($product->id) + Images::model()->getProductGalleryCount1($product->id)) > 1):?>
+                         <a href="<?php echo Yii::app()->createAbsoluteUrl("gallery/product",[
+                            'product'=>$product->link,
+                            'brand'=>$product->brand_data->link,
+                            'language'=>Language::getCurrentZone(),
+                        ])?>"><?php echo Yii::t("main", 'Фотогалерея');?></a>
+                        <?php endif;?>
+                       
                     </div>
                     <?php $this->renderPartial("_goods_characteristics", array("product" => $product)) ?>
                     <div class="infoGoodItem-wp-news" id="item3">
@@ -240,6 +249,46 @@
                             <?php if ($opinions_count): ?>
                             <a href="<?php echo Yii::app()->createUrl("articles/list", ['type'=>'opinion','brand'=>$brand->link, 'product'=>$product->link, 'language'=>  Language::getCurrentZone()]);?>">
                                 <?php echo Yii::t("goods","Читать все отзывы");?> (<?php echo $opinions_count?>)...
+                            </a>
+                            <?php endif; ?>
+                        </section>
+                    </div>
+                    <div class="infoGoodItem-wp-comments" id="item5">
+                        <section class="infoGoodItem_content view-title">
+                            <div class="infoGoodItem_title-2 clr">
+                                <div class="flLeft"><h3 class="infoGoodItem-infoTitle"><?php echo Yii::t('goods', 'Инструкции') ?></h3></div> 
+                            </div>
+                        </section>
+                        
+                        <section class="views-list">
+                            <?php foreach ($howto as $item):?>
+                                <div class="view_bl" itemscope itemtype="http://schema.org/NewsArticle">
+                                    <div class="view_bl-head clr">
+                                        <div class="view_bl-head-l flRight">
+                                            <date class="view_bl-date"><?php echo Yii::app()->dateFormatter->formatDateTime($item->created, 'long');?></date>
+                                            <span itemprop="datePublished" style="display: none;"><?php echo $item->created?></span>
+                                        </div>
+                                    </div>
+                                    <div class="view_bl-textView">
+                                        <a href="<?php echo Yii::app()->createAbsoluteUrl("articles/index", ['type'=>$item->type,'link'=>$item->link, 'id'=>$item->id, 'language'=>  Language::getCurrentZone()]);?>" itemprop="url">
+                                            <h2 itemprop="name"><?php echo  $item->title ?></h2>
+                                        </a>
+                                        <?php if (!empty($item->preview_image)) :?>
+                                        <a class="news-preview" href="<?php echo Yii::app()->createAbsoluteUrl("articles/index", ['type'=>$item->type,'link'=>$item->link, 'id'=>$item->id, 'language'=>  Language::getCurrentZone()]); ?>">
+                                            <img itemprop="image" src="<?php echo $item->preview_image->getPreviewUrl()?>" class="news_preview" 
+                                                 alt="<?php echo $item->preview_image->alt?>"/>
+                                        </a>
+                                        <?php endif; ?>
+                                        <span itemprop="description"><?php echo $item->description?></span>...
+                                        <?php if (!empty($item->preview_image)) :?>
+                                        <div style="clear: both;"></div>
+                                        <?php endif;?>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
+                            <?php if ($howto_count): ?>
+                            <a href="<?php echo Yii::app()->createUrl("articles/list", ['type'=>'howto','brand'=>$brand->link, 'product'=>$product->link, 'language'=>  Language::getCurrentZone()]);?>">
+                                <?php echo Yii::t("goods","Читать все инструкции");?> (<?php echo $howto_count?>)...
                             </a>
                             <?php endif; ?>
                         </section>

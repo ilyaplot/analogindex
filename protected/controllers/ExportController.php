@@ -12,7 +12,7 @@ class ExportController extends CController
      * Возвращает новости по тэгам
      * @param string $tags тэги через запятую
      * @param string $lang язык ru|en
-     * @param string $type тип записи review|opinion|news
+     * @param string $type тип записи review|opinion|news|howto
      * @param int $limit Количество новостей
      * 
      * @example http://analogindex.ru/export/articles?tags=tag1,tag2,tag+3&lang=ru&type=news&limit=10

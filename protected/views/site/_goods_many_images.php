@@ -20,7 +20,14 @@ $(document).ready(function(){
 
 <div class="clear" ></div>
 <div class="infoGoodItem-wp-photos_all">
-    <?php foreach ($product->images as $image): ?>
+    <?php
+    $counter = 0;
+    foreach ($product->images as $image):
+        $counter++;
+        if ($counter > 20)
+            break;
+        
+        ?>
     <?php 
         if (!isset($image->image_data->size3_data) || !isset($image->image_data->file_data))
             continue;

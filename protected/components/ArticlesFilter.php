@@ -36,6 +36,7 @@ class ArticlesFilter
         
         $this->_setDescription();
         $this->_downloadImages();
+        $this->_setType();
         $this->_runRules();
         
         $links = $this->tagList();
@@ -267,8 +268,34 @@ class ArticlesFilter
     public function _setType()
     {
         $patterns = [
-            "/.*\bобзор\b.*/isu" => Articles::TYPE_REVIEW,
-            "/.*\bотзыв\b.*/isu" => Articles::TYPE_OPINION,
+            
+            "/отзыв/isu" => Articles::TYPE_OPINION,
+            
+            "/review/isu" => Articles::TYPE_REVIEW,
+            "/обзор/isu" => Articles::TYPE_REVIEW,
+            
+            "/FAQ/isu" => Articles::TYPE_HOWTO,
+            "/how ?to/isu" => Articles::TYPE_HOWTO,
+            "/recovery/isu" => Articles::TYPE_HOWTO,
+            "/download/isu" => Articles::TYPE_HOWTO,
+            "/unlock/isu" => Articles::TYPE_HOWTO,
+            "/root/isu" => Articles::TYPE_HOWTO,
+            "/unroot/isu" => Articles::TYPE_HOWTO,
+            "/downgrade/isu" => Articles::TYPE_HOWTO,
+            "/upgrade/isu" => Articles::TYPE_HOWTO,
+            "/firmware/isu" => Articles::TYPE_HOWTO,
+            "/прошивк./isu" => Articles::TYPE_HOWTO,
+            "/прошить/isu" => Articles::TYPE_HOWTO,
+            "/скачать/isu" => Articles::TYPE_HOWTO,
+            "/разобрать./isu" => Articles::TYPE_HOWTO,
+            "/разборка/isu" => Articles::TYPE_HOWTO,
+            "/tutorial/isu" => Articles::TYPE_HOWTO,
+            "/install/isu" => Articles::TYPE_HOWTO,
+            "/guide/isu" => Articles::TYPE_HOWTO,
+            "/руководство/isu" => Articles::TYPE_HOWTO,
+            "/manual/isu" => Articles::TYPE_HOWTO,
+            "/set ?up/" => Articles::TYPE_HOWTO,
+            "/install/isu" => Articles::TYPE_HOWTO,
         ];
         
         foreach ($patterns as $pattern=>$type) {

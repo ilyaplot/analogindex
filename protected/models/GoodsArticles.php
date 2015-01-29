@@ -33,7 +33,7 @@ class GoodsArticles extends CActiveRecord
             $query = "select gn.id from {{goods}} g "
                 . "inner join {{brands}} b on g.brand = b.id "
                 . "inner join {{goods_articles}} gn on gn.goods = g.id "
-                . "inner join {{articles}} n on n.id = gn.articles "
+                . "inner join {{articles}} n on n.id = gn.article "
                 . "where n.title not like concat('%', b.name, '%', g.name, '%')";
             $connection = $this->getDbConnection();
             $ids = $connection->createCommand($query)->queryAll();

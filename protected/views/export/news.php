@@ -7,6 +7,9 @@ $type = empty($type) ? 'news' : $type;
         case 'review':
             echo Yii::t("goods", "Обзоры по теме");
             break;
+        case 'howto':
+            echo Yii::t("goods", "Инструкции по теме");
+            break;
         default:
             echo Yii::t("goods", "Новости по теме");
             break;

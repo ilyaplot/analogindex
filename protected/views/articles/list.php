@@ -78,8 +78,11 @@
                     (object)[
                         'link'=>'review',
                         'name'=>Yii::t("goods",'Обзоры'),
+                    ],
+                    (object)[
+                        'link'=>'howto',
+                        'name'=>Yii::t("goods",'Инструкции'),
                     ]
-                    
                 ];
                 ?>
                 

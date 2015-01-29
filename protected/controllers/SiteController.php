@@ -55,10 +55,10 @@ class SiteController extends Controller
         $brand = Brands::model()->findByAttributes(array("link" => $brand));
         if (!$brand)
             throw new CHttpException(404, Yii::t("errors", "Страница не найдена"));
-        
+
         $criteria = new CDbCriteria();
-        $criteria->condition = "t.link = :link and t.brand = :brand and t.type = :type";
-        $criteria->params = array("link" => $link, "brand" => $brand->id, "type" => $type->id);
+        $criteria->condition = "t.link = :link and t.brand = :brand";
+        $criteria->params = array("link" => $link, "brand" => $brand->id);
         $product = Goods::model()->with(array(
                     "rating",
                     //"images",
@@ -67,11 +67,18 @@ class SiteController extends Controller
                     //),
                     "primary_image",
                 ))->find($criteria);
-
         if (!$product) {
+            
             Yii::app()->request->redirect("/", true, 302);
             exit();
         }
+        
+        if ($product->type !== $type->id) {
+            $redirect = "/{$product->type_data->link}/{$brand->link}/{$product->link}.html";
+            Redirects::model()->deleteAllByAttributes(['from'=>$redirect]);
+            Yii::app()->request->redirect($redirect, true, 302);
+        }
+        
        
         $articlesCriteria = new CDbCriteria();
         $articlesCriteria->select = 't.id, t.description, t.created, t.title, t.link, t.type';
@@ -100,6 +107,17 @@ class SiteController extends Controller
         
         $articlesCriteria->params = [
             'lang'=>Yii::app()->language,
+            'type'=>  Articles::TYPE_HOWTO,
+            'product'=>$product->id,
+        ];
+        
+        $howtoCount = Articles::model()->with(['product'])->count($articlesCriteria);
+        $articlesCriteria->limit = 5;
+        $articlesCriteria->order = "t.created desc";
+        $howto = Articles::model()->with(['product'])->findAll($articlesCriteria);
+        
+        $articlesCriteria->params = [
+            'lang'=>Yii::app()->language,
             'type'=>  Articles::TYPE_REVIEW,
             'product'=>$product->id,
         ];
@@ -108,8 +126,6 @@ class SiteController extends Controller
         $articlesCriteria->limit = 5;
         $articlesCriteria->order = "t.created desc";
         $reviews = Articles::model()->with(['product'])->findAll($articlesCriteria);
-        
-        
         
         $this->setPageTitle($product->type_data->name->item_name . " " . $brand->name . " " . $product->name);
         $this->addKeywords(array($product->type_data->name->item_name, $brand->name, $product->name));
@@ -134,6 +150,8 @@ class SiteController extends Controller
             "product" => $product,
             "reviews" => $reviews,
             "opinions" => $opinions,
+            "howto" => $howto,
+            "howto_count" => $howtoCount,
             "opinions_count" => $opinionsCount,
             "reviews_count" => $reviewsCount,
             "news" => $news,
