@@ -34,10 +34,14 @@ class ArticlesFilter
         $this->_brands = [];
         $this->_images = [];
         
-        $this->_setDescription();
+        
         $this->_downloadImages();
         $this->_setType();
         $this->_runRules();
+        $this->_setDescription();
+        
+        $this->_model->title = str_replace("[Из песочницы]", "", $this->_model->title);
+        $this->_model->title = str_replace("[Песочница]", "", $this->_model->title);
         
         $links = $this->tagList();
         $this->_model->linkTags($links['tags']);
@@ -54,6 +58,26 @@ class ArticlesFilter
         $this->_model->broken_images = 0;
         
         $html = phpQuery::newDocumentHTML($this->_model->content);
+
+        /**
+         * Ищет все ссылки в документе.
+         * Если в ссылке только один вложенны элемент, то проверяем, img ли это.
+         * Если img, берем src из href ссылки, alt из img.
+         * Заменяем a на img.
+         */
+        foreach (pq($html)->find("a") as $a) {
+            if (pq($a)->children()->length() == 1) {
+                if (pq($a)->find("img")->length() == 1) {
+                    $src = pq($a)->attr("href");
+                    $img = pq($a)->find("img");
+                    $alt = pq($img)->attr('alt');
+                    if (!empty($alt)) {
+                        pq($a)->replaceWith("<img src=\"{$src}\" alt=\"{$alt}\"");
+                    }
+                }
+            }
+        }
+
         
         foreach (pq($html)->find("img") as $image) {
             $image = pq($image);
@@ -65,8 +89,15 @@ class ArticlesFilter
                 $alt = mb_substr($this->_model->title, 0, 255, 'UTF-8');
             }
             $url = $image->attr("src");
-            // Если пустой url, удаляем изображение
-            if (empty($url)) {
+            $lazySrc = $image->attr("data-lazy-src");
+            
+            if (!empty($lazySrc)) {
+                $url = $lazySrc;
+            }
+            
+            if (preg_match("/^data:image/isu", $url)) {
+                $image->remove();
+            } else if (empty($url)) {
                 $image->remove();
                 $this->_model->broken_images = 1;
                 continue;
@@ -113,7 +144,7 @@ class ArticlesFilter
                     curl_exec($ch);
                     fclose($file);
                     
-                    if (curl_errno($ch)) {
+                    if (curl_errno($ch)) { 
                         echo "Curl error #".curl_errno($ch)." " . curl_error($ch)." " .$url. PHP_EOL;
                         $image->remove();
                         $this->_model->broken_images = 1;
@@ -124,10 +155,12 @@ class ArticlesFilter
                     $imageModel->save();
                     if($imageModel->setFile($tmpfname)) {
                         $imageModel->name = Yii::app()->urlManager->translitUrl($this->_model->title).".".$imageModel->getExt();
+                        $imageModel->name = str_replace("x-ms-bmp", "bmp", $imageModel->name);
                         $imageModel->article = $this->_model->id;
                         $imageModel->alt = htmlspecialchars(strip_tags($alt));
                         $imageModel->alt_replaced = $alt_replaced;
                         $imageModel->save();
+                        echo "+";
                         @unlink($tmpfname);
                     } else {
                         $image->remove();
@@ -296,10 +329,15 @@ class ArticlesFilter
             "/manual/isu" => Articles::TYPE_HOWTO,
             "/set ?up/" => Articles::TYPE_HOWTO,
             "/install/isu" => Articles::TYPE_HOWTO,
+            "/improve/isu" => Articles::TYPE_HOWTO,
+            "/tweak/isu" => Articles::TYPE_HOWTO,
+            "/customize/isu" => Articles::TYPE_HOWTO,
+            "/установ[ка|ить]+/isu" => Articles::TYPE_HOWTO,
+            "/настро[ить|йка]+/isu" => Articles::TYPE_HOWTO,
         ];
         
         foreach ($patterns as $pattern=>$type) {
-            if (preg_match($pattern, $this->_model->title) && $this->_model->type = Articles::TYPE_NEWS) {
+            if (preg_match($pattern, $this->_model->title) && $this->_model->type == Articles::TYPE_NEWS) {
                 echo "ID: {$this->_model->id} сменен тип с {$this->_model->source_type} на {$type}".PHP_EOL;
                 return $this->_model->setType($type);
             }
@@ -318,6 +356,17 @@ class ArticlesFilter
                     return $html;
                 }
             ],
+            [ // sharing
+                'function'=>function($html)
+                {
+                    foreach ($html->find('div[style="text-align:left;"]') as $div) {
+                        if(preg_match("/Enter Giveaway by sharing/isu", pq($div)->text())) {
+                            pq($div)->remove();
+                        }
+                    }
+                    return $html;
+                }
+            ],
             [   // Удаляет ссылки
                 'function'=>function($html)
                 {
@@ -329,8 +378,8 @@ class ArticlesFilter
                         "/^http:\/\/\w+\.academic\.ru\/\w+\/[\w\%]+/isu",
                     ];
         
-                    if (!empty($source_domain))
-                        $blacklist[] = "/".preg_quote ($source_domain, '/').".*/isu";
+                    //if (!empty($source_domain))
+                    //    $blacklist[] = "/".preg_quote ($source_domain, '/').".*/isu";
                     
                     foreach ($html->find("a") as $a) {
                         foreach ($blacklist as $rule) {
@@ -360,6 +409,23 @@ class ArticlesFilter
                 'function'=>function($html)
                 {
                     return preg_replace("/\shref=\"http:\/\/dic\.academic\.ru\/dic\.nsf\/\w+\/\d+\"/isu", "", (string) $html);
+                }
+            ],
+            [   // &amp;http://www.androidauthority.com/best-ces-2014-awards-335034/#8217; - удаляем
+                'function'=>function($html)
+                {
+                    $link = preg_quote($this->_model->source_url, '/');
+                    return preg_replace("/[^\"](&amp;{$link}#\d+;)[^\"]/isu", '', (string) $html);
+                }
+            ],
+            [   // Ссылка на оригинал открытым текстом - удаляем
+                'function'=>function($html)
+                {
+                    $link = preg_quote($this->_model->source_url, '/');
+                    $link2 = preg_replace("/^h/isu" ,"p\/p", $link);
+                    $link2 = preg_replace("~\\\/$~isu" ,"[\/|p\>]", $link2);
+                    $html =  preg_replace("/[^\"]({$link})[^\"]/isu", '', (string) $html);
+                    return preg_replace("/[^\"]({$link2})[^\"]/isu", '', (string) $html);
                 }
             ],
         ];

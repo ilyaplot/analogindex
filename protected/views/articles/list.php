@@ -1,14 +1,34 @@
+ <?php 
+$types = (object)[
+    (object)[
+        'link'=>'news',
+        'name'=>Yii::t("goods",'Новости'),
+    ],
+    (object)[
+        'link'=>'opinion',
+        'name'=>Yii::t("goods",'Отзывы'),
+    ],
+    (object)[
+        'link'=>'review',
+        'name'=>Yii::t("goods",'Обзоры'),
+    ],
+    (object)[
+        'link'=>'howto',
+        'name'=>Yii::t("goods",'Инструкции'),
+    ]
+];
+?>
 <ul class="breadcrumbs breadcrumb">
     <li itemscope itemtype="http://data-vocabulary.org/Breadcrumb" itemref="breadcrumb-1">
-        <span itemprop="title"><a href="http://analogindex.<?php echo Language::getCurrentZone() ?>/"><?php echo Yii::t('main', 'Главная') ?></a></span>
+        <span itemprop="title"><a itemprop="url" href="http://analogindex.<?php echo Language::getCurrentZone() ?>/"><?php echo Yii::t('main', 'Главная') ?></a></span>
         <span class="divider">/</span>
     </li>
     <li itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-1" itemref="breadcrumb-2">
-        <span itemprop="title"><a href="<?php echo Yii::app()->createUrl("site/type", array("type" => $product->type_data->link)) ?>"><?php echo $product->type_data->name->name ?></a></span>
+        <span itemprop="title"><a itemprop="url" href="<?php echo Yii::app()->createUrl("site/type", array("type" => $product->type_data->link)) ?>"><?php echo $product->type_data->name->name ?></a></span>
         <span class="divider">/</span>
     </li>
     <li itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-2" itemref="breadcrumb-3">
-        <span itemprop="title"><a href="<?php
+        <span itemprop="title"><a itemprop="url" href="<?php
         echo Yii::app()->createUrl("site/brand", array(
             "link" => $product->brand_data->link,
             "language" => Language::getCurrentZone(),
@@ -18,7 +38,7 @@
         <span class="divider">/</span>
     </li>
     <li itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-3" itemref="breadcrumb-4">
-        <span itemprop="title"><a href="<?php
+        <span itemprop="title"><a itemprop="url" href="<?php
         echo Yii::app()->createUrl("site/goods", array(
             'link' => $product->link,
             'brand' => $product->brand_data->link,
@@ -30,8 +50,21 @@
             </a></span>
         <span class="divider">/</span>
     </li>
+    
     <li itemprop="child" class="active" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-4">
-        <span itemprop="title"><?php echo Yii::t("goods", "Новости") ?></span>
+        <span itemprop="title">
+        <?php foreach ($types as $type):?>
+            <?php if ($type->link == $type_selected) :?>
+            <a itemprop="url"
+                href="<?php echo Yii::app()->createAbsoluteUrl("articles/list", array(
+                "product"=>$product->link,
+                "type"=>$type->link,
+                "brand"=>$brand->link,
+                "language"=>Language::getCurrentZone(),
+            ))?>"><?php echo $type->name?></a>
+            <?php endif; ?>
+        <?php endforeach;?>
+        </span>
     </li>
 </ul>
 <div class="manufacture-categories clr">
@@ -65,26 +98,7 @@
                     ))
                     ?>"><span itemprop="itemReviewed"><?php echo $product->brand_data->name . " " . $product->name ?></span></a>
                 </div>
-                <?php 
-                $types = (object)[
-                    (object)[
-                        'link'=>'news',
-                        'name'=>Yii::t("goods",'Новости'),
-                    ],
-                    (object)[
-                        'link'=>'opinion',
-                        'name'=>Yii::t("goods",'Отзывы'),
-                    ],
-                    (object)[
-                        'link'=>'review',
-                        'name'=>Yii::t("goods",'Обзоры'),
-                    ],
-                    (object)[
-                        'link'=>'howto',
-                        'name'=>Yii::t("goods",'Инструкции'),
-                    ]
-                ];
-                ?>
+               
                 
                 <small>
                     <?php

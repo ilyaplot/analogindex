@@ -9,6 +9,45 @@ class ParseCommand extends CConsoleCommand
     
     protected static $downloader = null;
 
+    
+    public function actionDevspec()
+    {
+        $tasks = SourcesDevspec::model()->findAllByAttributes(['downloaded'=>1, 'lang'=>'ru']);
+        foreach ($tasks as $task) {
+            $lang = $task->lang;
+            $product = $task->product;
+            $brand = $task->brand;
+            $content = $task->getContent();
+            $html = phpQuery::newDocumentHTML($content);
+            pq($html)->find("header:eq(0)")->remove();
+            pq($html)->find("meta")->remove();
+            
+            do {
+                $header = pq($html)->find("#main header.section-header:eq(0)");
+                $table = pq($html)->find("#main table.model-information-table.row-selection:eq(0)");
+                
+                if (empty($header->html()) || empty($table->html())) {
+                    break;
+                }
+                
+                $category = $header->find("h2.header")->text();
+                $categoryDescription = $header->find("h3.subheader")->text();
+                echo "##################".PHP_EOL;
+                echo $category.PHP_EOL;
+                echo $categoryDescription.PHP_EOL;
+                echo PHP_EOL;
+                echo $table->html().PHP_EOL;
+
+                $header->remove();
+                $table->remove();
+            
+            } while (true);
+            
+            exit();
+            phpQuery::unloadDocuments();
+        }
+    }
+
     public function actionIrecommend()
     {
         $criteria = new CDbCriteria();

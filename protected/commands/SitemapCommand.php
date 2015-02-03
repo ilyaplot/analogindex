@@ -41,6 +41,7 @@ class SitemapCommand extends ConsoleCommand
         $brands = Brands::model()->findAll($criteria);
         
         foreach ($domains as $lang=>$domain) {
+            Yii::app()->language = $lang;
             $urls = [
                 [
                     'url'=>"http://analogindex.{$domain}/",
@@ -54,13 +55,12 @@ class SitemapCommand extends ConsoleCommand
                     'lastmod'=>date("Y-m-d\TH:i:s+00:00", strtotime($product->updated)),
                 ];
                     
-                $imagesCount = Images::model()->getProductGalleryCount($product->id) + Images::model()->getProductGalleryCount1($product->id);
-                if ($imagesCount > 1) {
-                    for($i = 1; $i < $imagesCount+1; $i++) {
-                        $urls[] = [
-                            'url'=>str_replace("+", "%2B", "http://analogindex.{$domain}/gallery/{$product->brand_data->link}_{$product->link}/page_{$i}.html"),
-                        ];
-                    }
+                list($countImages, $gallery, $image) = Images::model()->getProductGallery($product->id);
+                
+                foreach ($gallery as $item) {
+                    $urls[] = [
+                        'url'=>str_replace("+", "%2B", $item->link),
+                    ];
                 }
             }
             

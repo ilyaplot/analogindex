@@ -76,6 +76,8 @@ class Export
         if (!empty($tags)) {
             $criteria = new CDbCriteria();
             $criteria->addInCondition('name', $tags);
+            $criteria->addCondition("type = 'product'");
+            $criteria->addCondition("disabled = 0");
             $criteria->select = "id, name";
             $tags = Tags::model()->cache(60)->with(['goods'=>['joinType'=>'inner join']])->findAll($criteria);
             $in = [];
@@ -285,6 +287,44 @@ class Export
                 }
             }
         }
+    }
+    
+    public function ProductsArray($tags, $lang, $limit=20)
+    {
+        Yii::app()->language = $lang;
+        $tags = explode(",", $tags);
+        $tags = array_map(function($value){return trim($value);}, $tags);
+        if (!empty($tags)) {
+            $criteria = new CDbCriteria();
+            $criteria->addInCondition('name', $tags);
+            $criteria->compare("t.disabled", 0);
+            $criteria->select = "id, name";
+            $criteria->limit = $limit;
+            $tags = Tags::model()->cache(60)->with(['goods'=>['joinType'=>'inner join']])->findAll($criteria);
+            $in = [];
+            foreach($tags as $tag) {
+                if (empty($tag->goods)) {
+                    continue;
+                }
+                $in[] = $tag->goods->goods;
+            }
+            $in = array_unique($in);
+            
+            if (!empty($in)) {
+                $criteria = new CDbCriteria();
+                $criteria->condition = 't.id in ('.implode(", ", $in).')';
+                $criteria->group = 't.id';
+                
+                $criteria->order = "t.updated desc";
+                $goods = Goods::model()->cache(60)->with(["brand_data"])->findAll($criteria);
+                $goodsList = [];
+                foreach ($goods as $product) {
+                    $goodsList[] = urlencode($product->brand_data->name." ".$product->name);
+                }
+                return $goodsList;
+            }
+        }
+        return false;
     }
     
     public function Reviews($tags, $lang, $limit = 10)

@@ -86,6 +86,7 @@ class ArticlesImages extends CActiveRecord
             
             $this->width = $size[0];
             $this->height = $size[1];
+            
             return true;
         }
         
@@ -186,7 +187,6 @@ class ArticlesImages extends CActiveRecord
     }
     
     public function isImage() {
-        echo $this->getMimeType().PHP_EOL;
         return preg_match("/^image\/.*$/isu", $this->getMimeType());
     }
     
@@ -211,7 +211,7 @@ class ArticlesImages extends CActiveRecord
     public function createPreviews()
     {
         include_once 'WideImage/WideImage.php';
-        $query = "select i.id, i.article, i.width, i.height from {{articles_images}} i order by i.id asc";
+        $query = "select i.id, i.article, i.width, i.height from {{articles_images}} i where i.has_preview = 0 order by i.id asc";
         $list = $this->getDbConnection()->createCommand($query)->queryAll(true);
         $updateQuery = "update {{articles_images}} set has_preview = 1 where id = :id";
         foreach ($list as $image) {
@@ -228,15 +228,17 @@ class ArticlesImages extends CActiveRecord
                     continue;
                 }
                         
-                WideImage::load($temp)->resize($this->preview_size[0], $this->preview_size[1])
-                    ->saveToFile($temp);
+                WideImage::load($temp)->resize($this->preview_size[0], $this->preview_size[1])->saveToFile($temp);
+                
                 if (file_exists($temp)) {
                     rename($temp, $path.md5($image['id']).".file");
                     $this->getDbConnection()->createCommand($updateQuery)->execute([
                         'id'=>$image['id'],
                     ]);
+                    echo "+";
+                    continue;
                 }
-                echo "+";
+                @unlink($temp); 
             } catch (Exception $ex) {
                 echo $ex->getMessage() . PHP_EOL;
                 continue;

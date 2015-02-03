@@ -69,7 +69,7 @@
             <br />
             <small>
                 <?php
-                $characteristics = $product->getCharacteristics($product->generalCharacteristics);
+                
                 $characteristicsLinks = new CharacteristicsLinks($characteristics);
                 $characteristics = $characteristicsLinks->getCharacteristics($product->type_data->link);
                 ?>
@@ -214,33 +214,22 @@
     }
     </script>
     <div id="gallery">
-        <div class="image">
+        <div itemscope itemtype="http://schema.org/ImageObject" class="image">
             <div id="loader">
                 <img onload="imageLoaded();" src="/assets/img/loading.gif" /> <?php echo Yii::t("gallery", 'Подождите, фотография загружается')?>... 
             </div>
-            <img src="<?php echo $image->src?>" alt="<?php echo $image->alt?>" title="<?php echo $image->alt?>"/>
-            <?php if ($image->page > 0):?>
-            <a title="<?php echo Yii::t("gallery",'Предыдущее фото')?>" href="<?php 
-            echo Yii::app()->createAbsoluteUrl("gallery/product", [
-                'brand'=>$brand->link,
-                'product'=>$product->link,
-                'page'=>$image->page,
-                'language'=>  Language::getCurrentZone(),
-            ])?>#gallery" class="button_prev"></a>
+            <span itemprop="name" style="display: none"><?php echo $image->alt?></span>
+            <img itemprop="image" src="<?php echo $image->src?>" alt="<?php echo $image->alt?>" title="<?php echo $image->alt?>"/>
+            <?php if ($image->prev_url != null):?>
+            <a title="<?php echo Yii::t("gallery",'Предыдущее фото')?>" href="<?php echo $image->prev_url?>#gallery" class="button_prev"></a>
             <?php endif;?>
-            <?php if ($image->page+1 < $countImages):?>
-                <a title="<?php echo Yii::t("gallery",'Следующее фото')?>" href="<?php 
-            echo Yii::app()->createAbsoluteUrl("gallery/product", [
-                'brand'=>$brand->link,
-                'product'=>$product->link,
-                'page'=>$image->page+2,
-                'language'=>  Language::getCurrentZone(),
-            ])?>#gallery" class="button_next"></a>
+            <?php if ($image->next_url != null):?>
+                <a title="<?php echo Yii::t("gallery",'Предыдущее фото')?>" href="<?php echo $image->next_url?>#gallery" class="button_next"></a>
             <?php endif;?>
             <?php if(!empty($image->article)):?>
-            <div class="article">
-                <?php echo Yii::t("gallery", 'Фотография из')?> <?php echo Yii::t("gallery", $image->article->type_name)?>: <a href="<?php echo $image->article->url?>"><?php echo $image->article->title?></a>
-                <p><?php echo $image->article->description?></p>
+                <div class="article">
+                <?php echo Yii::t("gallery", 'Фотография из')?> <?php echo Yii::t("gallery", $image->article->type_name)?>: <a itemprop="associatedArticle" href="<?php echo $image->article->url?>"><?php echo $image->article->title?></a>
+                <p itemprop="description"><?php echo $image->article->description?></p>
             </div>
             <?php endif;?>
         </div>
@@ -248,15 +237,9 @@
             <?php foreach($gallery as $list): ?>
             <tr>
                 <?php foreach($list as $item):?>
-                <td<?php echo ($item->active) ? ' class="active"' : ''?>>
-                    <a href="<?php 
-                        echo Yii::app()->createAbsoluteUrl("gallery/product", [
-                            'brand'=>$brand->link,
-                            'product'=>$product->link,
-                            'page'=>$item->page+1,
-                            'language'=>  Language::getCurrentZone(),
-                        ])?>#gallery">
-                    <img src="<?php echo $item->preview_src?>" alt="<?php echo $item->alt?>" title="<?php echo $item->alt?>" />
+                <td itemscope itemtype="http://schema.org/ImageObject">
+                    <a itemtype="contentUrl" href="<?php echo $item->link?>#gallery">
+                        <img itemtype="thumbnail" src="<?php echo $item->preview_src?>" alt="<?php echo $item->alt?>" title="<?php echo $item->alt?>" />
                     </a>
                 </td>
                 <?php endforeach; ?>

@@ -68,7 +68,7 @@ class Downloader
         $list = file_get_contents($filename);
         $list = explode("\n", $list);
         $list = array_unique($list);
-        shuffle($list);
+        //shuffle($list);
         $count = count($list);
         echo "Тестирование списка прокси ({$count})...".PHP_EOL;
         if ($this->limit) {
@@ -240,7 +240,7 @@ class Downloader
      * @param type $url
      * @return boolean
      */
-    public function getContent($url)
+    public function getContent($url, $recursion = true)
     {
         if (!$proxy = $this->getProxy()) {
             echo "Нет свободных прокси".PHP_EOL;
@@ -269,9 +269,15 @@ class Downloader
         } else {
             $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             if ($code != 200 && $code != 203) {
-                $this->deleteProxy($proxy);
-                echo "Http code {$code}.".PHP_EOL;
-                return $this->getContent($url);
+                if ($recursion) {
+                    $this->deleteProxy($proxy);
+                } else {
+                    if ($code == 404) {
+                        return false;
+                    }
+                }
+                echo "Http code {$code} {$url}.".PHP_EOL;
+                return ($recursion) ? $this->getContent($url) : false;
             }
         }
         $this->referer = $url;

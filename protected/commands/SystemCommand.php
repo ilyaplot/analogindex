@@ -28,54 +28,7 @@ class SystemCommand extends ConsoleCommand
             }
         }
     }
-
-    public function actionImportReviews()
-    {
-        $connection = Yii::app()->reviews;
-        $urlManager = new UrlManager;
-        $goods = Goods::model()->with(array(
-                    "brand_data",
-                    "synonims",
-                ))->findAll();
-        foreach ($goods as $product) {
-            $query = "select * from reviews where product like :name ";
-            $queryParams = array("name" => $product->brand_data->name . " " . $product->name);
-            $params = array();
-            foreach ($product->synonims as $synonim) {
-                $params[] = $product->brand_data->name . " " . $synonim->name;
-            }
-
-            foreach ($params as $paramKey => $paramValue) {
-                $query .= ' or product like :name' . $paramKey;
-                $queryParams["name" . $paramKey] = $paramValue;
-            }
-            $reviews = $connection->createCommand($query)->queryAll(true, $queryParams);
-            foreach ($reviews as $review) {
-                if (!Reviews::model()->countByAttributes(array("source" => $review['url']))) {
-                    $reviewModel = new Reviews("import");
-                    $reviewModel->source = $review['url'];
-                    $reviewModel->goods = $product->id;
-                    $reviewModel->title = $review['title'];
-                    $reviewModel->link = $urlManager->translitUrl($review['title']);
-                    $reviewModel->author = 0;
-                    $reviewModel->content = $review['content'];
-                    $reviewModel->original = $review['content'];
-                    $reviewModel->disabled = 0;
-                    $reviewModel->save();
-                    if ($review['rating']) {
-                        $rating = new RatingsGoods("import");
-                        $rating->goods = $product->id;
-                        $rating->user = 0;
-                        $rating->value = $review['rating'];
-                        $rating->save();
-                    }
-                    echo ".";
-                }
-            }
-        }
-        echo PHP_EOL;
-    }
-
+/*
     public function actionReviewFilter()
     {
         $reviews = Reviews::model()->findAllByAttributes(array('filtered' => 0));
@@ -121,6 +74,8 @@ class SystemCommand extends ConsoleCommand
         }
         echo PHP_EOL;
     }
+ * 
+ */
 
     public function actionFillSelector()
     {

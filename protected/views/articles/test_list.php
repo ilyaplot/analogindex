@@ -14,6 +14,7 @@
             <div>Type: <?php echo $item->type?></div>
         </div>
         <div class="view_bl-replyLink"><?php echo Yii::t("main", 'Фильтрованый')?> : <a target="_blank" itemprop="url" href="<?php echo Yii::app()->createAbsoluteUrl("articles/index", ['type'=>$item->type,'link'=>$item->link, 'id'=>$item->id, 'language'=>  Language::getZoneForLang($item->lang)]); ?>"><?php echo $item->title?></a></div>
+        <div class="view_bl-replyLink"><?php echo Yii::t("main", 'Не фильтрованный')?> : <a target="_blank" itemprop="url" href="<?php echo Yii::app()->createAbsoluteUrl("articles/index", ['type'=>$item->type,'link'=>$item->link, 'id'=>$item->id, 'language'=>  Language::getZoneForLang($item->lang), 'debug'=>1]); ?>"><?php echo $item->title?></a></div>
         
     </div>
     <?php endforeach; ?>

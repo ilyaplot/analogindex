@@ -72,6 +72,9 @@
     </div>
 
     <div class="col-sidebars">
+        <?php if (!empty($tags)): ?>
+        <?php echo $this->renderPartial('_topadvert', ['products'=>$export->ProductsArray($tags, Yii::app()->language, 1)]); ?>
+        <?php endif;?>
         <div class="informer sidebar-informer">
             <?php 
                 $widget_params = ['style' => 'inner'];
@@ -84,6 +87,8 @@
             ?>
             <?php $this->widget('application.widgets.ListGoodsWidget', $widget_params); ?>
         </div>
+        
     </div>
+    
 </div>
 

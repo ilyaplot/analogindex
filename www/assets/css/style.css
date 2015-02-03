@@ -1193,6 +1193,8 @@ li.active a.menu_lFix-item5 { background-position: 0 -33px; }
     border: 1px solid #e6e6e6;
     box-shadow: 0 2px 3px rgba(0,0,0,0.15);
     padding: 0 0 8px;
+    min-height: 150px;
+    max-height: 250px;
 }
 
 .mnf_logo {
@@ -1509,7 +1511,7 @@ a.lang-select {
 /* END Content */
 
 /*  Breadcrumbs  */
-.breadcrumb>.active {
+.breadcrumb a.active {
     color: #999;
 }
 .breadcrumb>li {
@@ -1745,7 +1747,7 @@ a.lang-select {
     height: auto;
     max-width: 500px;
     max-height: 1000px;
-    float: left;
+    
     margin: 7px;
 }
 

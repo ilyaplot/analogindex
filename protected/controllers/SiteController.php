@@ -217,6 +217,7 @@ class SiteController extends Controller
                         "joinType" => "inner join",
                     )
                 ))->findAll($criteria);
+        $this->pageTitle = $brand->name . (isset($type->name->name) ? ': '.$type->name->name : null);
         $this->render("brand", array(
             "brand" => $brand,
             "goods" => $goods,
@@ -528,46 +529,8 @@ class SiteController extends Controller
         ));
     }
     
-    public function actionTest($query)
+    public function actionTest()
     {
-
-        $searchCriteria = new stdClass();
-        $search = Yii::app()->search;
-
-
-
-        $pages = new CPagination(10000000000000);
-        $pages->pageSize = 10000000000000;
-        
-
-        $searchCriteria->paginator = $pages;
-       
-        $searchCriteria->from = 'heplix_reviews_index';
-        try {
-            $query = $search->escape($query);
-            $searchCriteria->query = "{$query}";
-            $pages->applyLimit($searchCriteria);
-            $search->setMatchMode(SPH_MATCH_EXTENDED2);
-            $resIterator = $search->search($searchCriteria); // interator result
-        } catch (Exception $ex) {
-            
-        }
-        $items = [];
-        
-        if (!empty($resIterator) && $resIterator->getTotal()) {
-
-            $pages->setItemCount($resIterator->getTotalFound());
-            $criteria = new CDbCriteria();
-            $criteria->select = "id, mobile, title";
-            $criteria->addInCondition("id", $resIterator->getIdList());
-            $criteria->order = "FIELD(id, ".implode($resIterator->getIdList()).")";
-            $items = HelpixReviews::model()->findAll($criteria);
-        }
-        echo "<table>";
-        foreach ($items as $item)
-        {
-            echo "<tr><td>".$item->id."</td><td>".$item->mobile." </td><td> {$item->title}</td></tr>".PHP_EOL;
-        }
-        echo "</table>";
+        $this->widget('application.widgets.BreadcrumbsWidget.BreadcrumbsWidget',['items'=>[]]);
     }
 }

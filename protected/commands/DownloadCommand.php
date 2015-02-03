@@ -3,6 +3,185 @@
 class DownloadCommand extends CConsoleCommand
 {
     
+    public function actionDevSpecSitemap()
+    {
+        $downloader = new Downloader("http://www.devicespecifications.com/", 20);
+        $content = $downloader->getContent("http://www.devicespecifications.com/");
+        $html = phpQuery::newDocumentHTML($content);
+        $brands = pq($html)->find("table.link-table a");
+        foreach ($brands as $brand) {
+            
+            if (!$brandModel = Brands::model()->findByAttributes(['name'=>pq($brand)->text()])) {
+                $brandModel = new Brands();
+                $brandModel->name = pq($brand)->text();
+                if ($brandModel->validate()) {
+                    $brandModel->save();
+                    echo "Добавлен бренд {$brandModel->name}".PHP_EOL;
+                }
+            }
+            
+            $content = $downloader->getContent(pq($brand)->attr("href"));
+            $brand = pq($brand)->text();
+            $brandHtml = phpQuery::newDocumentHTML($content);
+            $lists = pq($brandHtml)->find("div.model-listing-container-80");
+            foreach ($lists as $list) {
+                $blocks = pq($list)->find('div');
+                foreach ($blocks as $block) {
+                    $href = pq($block)->find('a:first-child')->attr("href");
+                    $product = pq($block)->find('h3>a')->text();
+                    $productModel = new Goods();
+                    $productModel->brand = $brandModel->id;
+                    $productModel->name = $product;
+                    $productModel->type = 1;
+                    $productModel->source_url = $href;
+                    if ($productModel->validate()) {
+                        $productModel->save();
+                        echo "Добавлен продукт {$brand} {$product}".PHP_EOL;
+                    } else {
+                        var_dump($productModel->getErrors());
+                    }
+                    echo PHP_EOL;
+                    if (preg_match("/^http:\/\/www\.devicespecifications\.com\/\w+\/model\/(?P<model>\w+)$/isu", $href, $matches)) {
+                        $url = "http://www.devicespecifications.com/en/model/{$matches['model']}";
+                        $sourceModel = new SourcesDevspec();
+                        $sourceModel->url = $url;
+                        $sourceModel->lang = 'en';
+                        $sourceModel->brand = $brand;
+                        $sourceModel->product = $product;
+                        if ($sourceModel->validate()) {
+                            $sourceModel->save();
+                        }
+
+                        $url = "http://www.devicespecifications.com/ru/model/{$matches['model']}";
+                        $sourceModel = new SourcesDevspec();
+                        $sourceModel->url = $url;
+                        $sourceModel->lang = 'ru';
+                        $sourceModel->brand = $brand;
+                        $sourceModel->product = $product;
+                        if ($sourceModel->validate()) {
+                            $sourceModel->save();
+                        }
+                    } else {
+                        echo "Не валидная ссылка {$href}".PHP_EOL;
+                    }
+                }
+            }
+        }
+    }
+    
+    public function actionDevspec()
+    {
+        $downloader = new Downloader("http://www.devicespecifications.com/", 1);
+        $tasks = SourcesDevspec::model()->findAllByAttributes(['downloaded'=>0]);
+        foreach ($tasks as $task) {
+            phpQuery::unloadDocuments();
+            $url = $task->url;
+            $brand = $task->brand;
+            $product = $task->product;
+            $criteria = new CDbCriteria();
+            $criteria->condition = "t.name = :product and brand_data.name = :brand, images.disabled = 0";
+            $criteria->params = ['product'=>$product, 'brand'=>$brand];
+            $productModel = Goods::model()->with(['brand_data', 'images'])->find();
+            
+            if (empty($productModel->brand_data->id)) {
+                echo "Не найден продукт {$brand} {$product}.".PHP_EOL;
+                $task->downloaded = 2;
+                $task->save();
+                continue;
+            }
+
+            if (preg_match("/^http:\/\/www\.devicespecifications\.com\/(?P<lang>\w{2})\/model\/(?P<model>\w{8})$/isu", $url, $matches)) {
+                $lang = $matches['lang'];
+                $model = $matches['model'];
+                
+                
+                $content = $downloader->getContent($url);
+                if (!empty($content)) {
+                    $task->writeContent($content);
+                    $task->downloaded = 1;
+                    $task->save();
+                } else {
+                    echo "Empty content {$url}".PHP_EOL;
+                    $task->downloaded = 2;
+                    $task->save();
+                    continue;
+                }
+                
+                $html = phpQuery::newDocumentHTML($content); 
+                
+                $imagesCount = count($productModel->images);
+                echo date("Y-m-d H:i:s ")."{$brand} {$product} {$lang} {$imagesCount}".PHP_EOL;
+                if (!$imagesCount) {
+                    if (pq($html)->find("a[href='http://www.devicespecifications.com/{$lang}/model-gallery/{$model}']")->length() > 0) {
+                        echo "Photo gallery exists.".PHP_EOL;
+                        $imagesContent = $downloader->getContent("http://www.devicespecifications.com/{$lang}/model-gallery/{$model}", false);
+                        if (!empty($imagesContent)) {
+                            $imagesHtml = phpQuery::newDocumentHTML($imagesContent);
+                            $images = pq($html)->find(".gallery-container > img");
+                            $transaction = Yii::app()->db->beginTransaction();
+                            foreach($images as $image) {
+                                try {
+                                    $productImage = GoodsImages::model()->with([
+                                        "image_data" => [
+                                            "joinType" => "INNER JOIN",
+                                            "condition" => "image_data.source  = :source",
+                                            "params" => ["source" => pq($image)->attr("src")],
+                                        ]
+                                    ])->count();
+                                    if (!$productImage) {
+                                        $ext = explode(".", pq($image)->attr("src"));
+                                        $ext = end($ext);
+                                        $file = new Files();
+                                        $file->name = "{$brand} {$product}.{$ext}";
+                                        $file->save();
+                                        $filename = $file->getFilename();
+                                        $downloader->downloadFile(pq($image)->attr("src"), $filename);
+                                        $file->size = $file->getFilesize();
+                                        $file->mime_type = $file->getMimeType();
+                                        if (!preg_match("/image.*/isu", $file->mime_type)) {
+                                            $file->delete();
+                                            echo "Тип изображения не соответствует image. {$file->mime_type}" . PHP_EOL;
+                                            continue;
+                                        }
+                                        echo "Добавлено изображение" . PHP_EOL;
+                                        $file->save();
+                                        $imageModel = new Images();
+                                        $imageModel->file = $file->id;
+                                        $imageModel->size = 1;
+                                        $size = getimagesize($filename);
+                                        $imageModel->width = $size[0];
+                                        $imageModel->height = $size[1];
+                                        $imageModel->source = $image;
+                                        $imageModel->save();
+                                        $goodsImage = new GoodsImages();
+                                        $goodsImage->goods = $productModel->id;
+                                        $goodsImage->image = $imageModel->id;
+                                        $goodsImage->save();
+                                    } else {
+                                        //echo "Image exists" . PHP_EOL;
+                                    }
+                                } catch (Exception $ex) {
+                                    $transaction->rollback();
+                                    break;
+                                }
+
+
+                            }
+                            $transaction->commit();
+                        }
+                    }
+                }
+            } else {
+                echo "Url {$url} не подходит под регулярное выражение.".PHP_EOL;
+                $task->downloaded = 2;
+                $task->save();
+                continue;
+            }
+            
+            
+        }
+    }
+
     public function actionIrecommendSitemap()
     {
         $downloader = new Downloader("http://irecommend.ru/", 50);

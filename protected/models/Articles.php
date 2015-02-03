@@ -166,4 +166,10 @@ class Articles extends CActiveRecord
             'tags'=>[self::HAS_MANY, 'ArticlesTags', 'article'],
         ];
     }
+    
+    public function afterSave()
+    {
+        GoodsArticles::model()->filter();
+        return parent::afterSave();
+    }
 }

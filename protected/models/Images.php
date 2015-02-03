@@ -87,56 +87,84 @@ class Images extends CActiveRecord
         );
     }
 
-    public function getProductGalleryCount1($product)
+    public function getProductGalleryCount($product)
     {
-        $queryCount="select 
+        $query="select 
             count(f.id) as count
-        from ai_goods_images gi 
-        inner join ai_images i on i.id = gi.image
-        inner join ai_files f on i.size6 = f.id
-        where gi.goods = :product and i.size6 > 0 and gi.disabled = 0";
-        return $this->getDbConnection()->createCommand($queryCount)->queryScalar([
+            from ai_goods_images gi 
+            inner join {{goods}} g on g.id = gi.goods
+            inner join {{brands}} b on b.id = g.brand
+            inner join {{images}} i on i.id = gi.image
+            inner join {{files}} f on i.size6 = f.id
+            where 
+                gi.goods = :product 
+                and i.width > 299
+                and i.height > 299
+                and i.size6 > 0 
+                and gi.disabled = 0";
+        return $this->getDbConnection()->createCommand($query)->queryScalar([
             'product'=>$product,
         ]);
     }
     
-    public function getProductGalleryCount($product)
+    public function getProductGalleryArticlesCount($product)
     {
-        $queryCount="select 
+        $query="select 
             count(a.id) as count
-        from ai_goods_articles ga 
-        inner join ai_articles_images ai on ai.article = ga.article
-        inner join ai_articles a on ai.article = a.id
+        from {{goods_articles}} ga 
+        inner join {{goods}} g on g.id = ga.goods
+        inner join {{brands}} b on b.id = g.brand
+        inner join {{articles_images}} ai on ai.article = ga.article
+        inner join {{articles}} a on ai.article = a.id
         where 
             ga.goods = :product
-            and a.has_filtered = 1
             
             and ai.has_preview = 1
             and ga.disabled = 0
+            and (
+                ai.alt like concat('%', REPLACE(g.name, ' ', '_'), '%')
+                or ai.alt like concat('%', REPLACE(b.name, ' ', '_'), '%')
+            )
             and ai.width > 299
             and ai.height > 299";
-        return $this->getDbConnection()->createCommand($queryCount)->queryScalar([
+        
+        return $this->getDbConnection()->createCommand($query)->queryScalar([
             'product'=>$product,
         ]);
+        //and a.has_filtered = 1
     }
     
-    public function getProductGallery($product, $page=0)
+    public function getProductGallery($product, $type=null, $id=null)
     {
         $result = [];
-        $page = abs(intval($page));
+        $currentImage = (object)[];
+        $countProduct = $this->getProductGalleryCount($product);
+        $countArticles = $this->getProductGalleryArticlesCount($product);
 
-        $query1 = "select 
+        $queryProduct = "select 
             f.id as image_preview_id,
             i.file as image_id,
             f.name as image_name,
-            f.mime_type as image_mime_type
-        from ai_goods_images gi 
-        inner join ai_images i on i.id = gi.image
-        inner join ai_files f on i.size6 = f.id
-        where gi.goods = :product and i.size6 > 0 and gi.disabled = 0
+            b.link as brand_link,
+            g.link as product_link,
+            replace(concat(b.name, ' ', g.name), '_', '-') as image_alt
+            from {{goods_images}} gi 
+            inner join {{goods}} g on g.id = gi.goods
+            inner join {{brands}} b on b.id = g.brand
+            inner join {{images}} i on i.id = gi.image
+            inner join {{files}} f on i.size6 = f.id
+            where 
+                gi.goods = :product 
+                and i.width > 299
+                and i.height > 299
+                and i.size6 > 0 
+                and gi.disabled = 0
         order by gi.priority desc, i.id asc";
         
-        $query="select 
+        
+        $queryArticles="select 
+            b.link as brand_link,
+            g.link as product_link,
             a.id as article_id,
             a.link as article_link,
             a.type as article_type,
@@ -144,97 +172,150 @@ class Images extends CActiveRecord
             a.description as article_description,
             a.lang as article_lang,
             ai.id as image_id,
-            ai.alt as image_alt,
+            replace(ai.alt, '_', '-') as image_alt,
             ai.width as image_width,
             ai.height as image_height,
             ai.mime_type as image_mime_type,
             ai.name as image_name
-        from ai_goods_articles ga 
-        inner join ai_articles_images ai on ai.article = ga.article
-        inner join ai_articles a on ai.article = a.id
+        from {{goods_articles}} ga 
+        inner join {{goods}} g on g.id = ga.goods
+        inner join {{brands}} b on b.id = g.brand
+        inner join {{articles_images}} ai on ai.article = ga.article
+        inner join {{articles}} a on ai.article = a.id
         where 
             ga.goods = :product
-            and a.has_filtered = 1
+            
             and ai.has_preview = 1
             and ga.disabled = 0
+            and (
+                ai.alt like concat('%', REPLACE(g.name, ' ', '_'), '%')
+                or ai.alt like concat('%', REPLACE(b.name, ' ', '_'), '%')
+            )
             and ai.width > 299
             and ai.height > 299
         order by a.created asc, ai.id asc ";
-        
-        $countImages1 = $this->getProductGalleryCount1($product);
-
-        $countImages = $this->getProductGalleryCount($product);
-
-        if ($countImages1 > 0) {
-            $images = $this->getDbConnection()->createCommand($query1)->queryAll(true, [
+        //and a.has_filtered = 1
+        $prev_url = null;
+        $next_url = null;
+        $key = 0;
+        $assocImages = [];
+        if ($countProduct > 0) {
+            
+            $images = $this->getDbConnection()->createCommand($queryProduct)->queryAll(true, [
                 'product'=>$product,
-                //'lang'=>Yii::app()->language,
             ]);
 
             foreach($images as $key=>$image) {
-                //$key = ($page+2 > $limit) ? ($page-2)+$key : $key;
                 $image = (object)$image;
+                
+                $link = Yii::app()->createAbsoluteUrl("gallery/product", [
+                    'language'=>Language::getCurrentZone(),
+                    'brand'=>$image->brand_link,
+                    'product'=>$image->product_link,
+                    'prefix'=>'p',
+                    'alt'=>Yii::app()->urlManager->translitUrl($image->image_alt),
+                    'id'=>$image->image_id,
+                ]);
+                
                 $result[$key] = (object)[
-                    'page'=>$key,
-                    'active'=>($key == $page) ? true : false,
-                    'src' => Yii::app()->createAbsoluteUrl("files/image", [
-                        'language' => Language::getCurrentZone(),
-                        'id'=>$image->image_id,
-                        'name'=>$image->image_name,
-                    ]),
+                    'link'=>$link,
+                    'prev_url'=>!empty($prev_url) ? $prev_url : null,
+                    'next_url'=>null,
+                    'alt'=>$image->image_alt,
                     'preview_src' => Yii::app()->createAbsoluteUrl("files/image", [
                         'language' => Language::getCurrentZone(),
                         'id'=>$image->image_preview_id,
                         'name'=>$image->image_name,
                     ]),
-                    'alt'=>'',
+                    'src' => Yii::app()->createAbsoluteUrl("files/image", [
+                        'language' => Language::getCurrentZone(),
+                        'id'=>$image->image_id,
+                        'name'=>$image->image_name,
+                    ]),
                 ];
+                
+                if ($key > 0) {
+                    $result[$key-1]->next_url = $link;
+                }
+                $assocImages['p'][$image->image_id] = $key;
+                $prev_url = $link;
             }
         }
-        $images = $this->getDbConnection()->createCommand($query)->queryAll(true, [
-            'product'=>$product,
-            //'lang'=>Yii::app()->language,
-        ]);
         
-        $articleTypes = [
-            'news'=>'новости',
-            'opinion'=>'отзыва',
-            'review'=>'обзора'
-        ];
+        if ($countArticles > 0) {
         
-        foreach($images as $key=>$image) {
-            $key = $key+$countImages1-1;
-            //$key = ($page+2 > $limit) ? ($page-2)+$key : $key;
-            $image = (object)$image;
-            $result[$key] = (object)[
-                'page'=>$key,
-                'active'=>($key == $page) ? true : false,
-                'src' => Yii::app()->createAbsoluteUrl("files/newsimage", [
-                    'language' => Language::getZoneForLang($image->article_lang),
-                    'id'=>$image->image_id,
-                    'name'=>$image->image_name,
-                ]),
-                'preview_src' => Yii::app()->createAbsoluteUrl("files/newsimagepreview", [
-                    'language' => Language::getZoneForLang($image->article_lang),
-                    'id'=>$image->image_id,
-                    'name'=>$image->image_name,
-                ]),
-                'alt'=>$image->image_alt,
-                'article'=>(object)[
-                    'url'=>Yii::app()->createAbsoluteUrl("articles/index", [
-                        'type'=>$image->article_type,
-                        'link'=>$image->article_link, 
-                        'id'=>$image->article_id, 
-                        'language'=>  Language::getZoneForLang($image->article_lang),
-                    ]),
-                    'type'=>$image->article_type,
-                    'type_name'=>isset($articleTypes[$image->article_type]) ? $articleTypes[$image->article_type] : '',
-                    'description'=>$image->article_description,
-                    'title'=>$image->article_title,
-                ]
+            
+            $images = $this->getDbConnection()->createCommand($queryArticles)->queryAll(true, [
+                'product'=>$product,
+            ]);
+
+            $articleTypes = [
+                'news'=>'новости',
+                'opinion'=>'отзыва',
+                'review'=>'обзора',
+                'howto'=>'инструкции',
             ];
+
+            foreach($images as $key=>$image) {
+                $key = $key+$countProduct;
+                $image = (object)$image;
+                $link = Yii::app()->createAbsoluteUrl("gallery/product", [
+                    'language'=>Language::getCurrentZone(),
+                    'brand'=>$image->brand_link,
+                    'product'=>$image->product_link,
+                    'prefix'=>'a',
+                    'alt'=>  mb_substr(Yii::app()->urlManager->translitUrl($image->image_alt), 0, 100),
+                    'id'=>$image->image_id,
+                ]);
+                $result[$key] = (object)[
+                    'link'=>$link,
+                    'prev_url'=>!empty($prev_url) ? $prev_url : null,
+                    'next_url'=>null,
+                    'alt'=>$image->image_alt,
+                    'src' => Yii::app()->createAbsoluteUrl("files/newsimage", [
+                        'language' => Language::getZoneForLang($image->article_lang),
+                        'id'=>$image->image_id,
+                        'name'=>$image->image_name,
+                    ]),
+                    'preview_src' => Yii::app()->createAbsoluteUrl("files/newsimagepreview", [
+                        'language' => Language::getZoneForLang($image->article_lang),
+                        'id'=>$image->image_id,
+                        'name'=>$image->image_name,
+                    ]),
+                    'article'=>(object)[
+                        'url'=>Yii::app()->createAbsoluteUrl("articles/index", [
+                            'type'=>$image->article_type,
+                            'link'=>$image->article_link, 
+                            'id'=>$image->article_id, 
+                            'language'=>  Language::getZoneForLang($image->article_lang),
+                        ]),
+                        'lang'=>$image->article_lang,
+                        'type'=>$image->article_type,
+                        'type_name'=>isset($articleTypes[$image->article_type]) ? $articleTypes[$image->article_type] : '',
+                        'description'=>$image->article_description,
+                        'title'=>$image->article_title,
+                    ]
+                ];
+                
+                if ($key > (0)) {
+                    $result[$key-1]->next_url = $link;
+                }
+                
+                $prev_url = $link;
+                $assocImages['a'][$image->image_id] = $key;
+            }
         }
-        
-        return [$countImages+$countImages1, $result];
+
+        if ($type != null && $id != null) {
+            $currentImage = isset($assocImages[$type][$id]) ? $assocImages[$type][$id] : null;
+            if (!isset($result[$currentImage])) {
+                return [$countArticles+$countProduct, $result, null];
+            }
+            $currentImage = $result[$currentImage];
+        } else {
+            $currentImage = reset($result);
+        }
+
+        return [$countArticles+$countProduct, $result, $currentImage];
     }
 }

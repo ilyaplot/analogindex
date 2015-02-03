@@ -10,29 +10,35 @@
 </script>
 <script src="/assets/js/lightbox.js"></script>
 <link href="/assets/css/lightbox.css" rel="stylesheet" />
-<ul class="breadcrumbs breadcrumb">
-    <li itemscope itemtype="http://data-vocabulary.org/Breadcrumb" itemref="breadcrumb-1">
-        <span itemprop="title"><a itemprop="url" href="http://analogindex.<?php echo Language::getCurrentZone() ?>/"><?php echo Yii::t('main', 'Главная') ?></a></span>
-        <span class="divider">/</span>
-    </li>
-    <li itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-1" itemref="breadcrumb-2">
-        <span itemprop="title"><a itemprop="url" href="<?php echo Yii::app()->createAbsoluteUrl("site/type", array("type" => $type->link, "language" => Language::getCurrentZone())) ?>"><?php echo $type->name->name ?></a></span>
-        <span class="divider">/</span>
-    </li>
-    <li itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-2" itemref="breadcrumb-3">
-        <span itemprop="title"><a itemprop="url" href="<?php
-        echo Yii::app()->createAbsoluteUrl("site/brand", array(
+<?php
+$this->widget('application.widgets.BreadcrumbsWidget.BreadcrumbsWidget',['items'=>[
+    [
+        'url'=>'http://analogindex.'.Language::getCurrentZone().'/',
+        'title'=>Yii::t('main', 'Главная'),
+    ],
+    [
+        'url'=>Yii::app()->createAbsoluteUrl("site/type", array("type" => $type->link, "language" => Language::getCurrentZone())),
+        'title'=>$type->name->name,
+    ],
+    [
+        'url'=>Yii::app()->createAbsoluteUrl("site/brand", array(
             "link" => $brand->link,
             "language" => Language::getCurrentZone(),
             "type" => $type->link,
-        ));
-        ?>"><?php echo $brand->name ?></a></span>
-        <span class="divider">/</span>
-    </li>
-    <li class="active" itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-3">
-        <span itemprop="title"><?php echo $brand->name ?> <?php echo $product->name ?></span>
-    </li>
-</ul>
+        )),
+        'title'=>$brand->name,
+    ],
+    [
+        'url'=>Yii::app()->createAbsoluteUrl("site/goods", array(
+            "link" => $product->link,
+            "brand" => $brand->link,
+            "language" => Language::getCurrentZone(),
+            "type" => $type->link,
+        )),
+        'title'=>$brand->name.' '.$product->name,
+    ],
+]]);
+?>
 <div class="wp_col_fix clr">
     <div class="col-infoGoods">
         <div class="infoGoodItem">
@@ -126,12 +132,12 @@
                         <?php endif; ?>
                         <div class="clear"></div>
                         <br />
-                        <?php if((Images::model()->getProductGalleryCount($product->id) + Images::model()->getProductGalleryCount1($product->id)) > 1):?>
+                        <?php if((Images::model()->getProductGalleryArticlesCount($product->id) + Images::model()->getProductGalleryCount($product->id)) > 1):?>
                          <a href="<?php echo Yii::app()->createAbsoluteUrl("gallery/product",[
                             'product'=>$product->link,
                             'brand'=>$product->brand_data->link,
                             'language'=>Language::getCurrentZone(),
-                        ])?>"><?php echo Yii::t("main", 'Фотогалерея');?></a>
+                        ])?>"><?php echo Yii::t("main", 'Фотогалерея');?> (<?php echo (Images::model()->getProductGalleryArticlesCount($product->id) + Images::model()->getProductGalleryCount($product->id)) ?>)</a>
                         <?php endif;?>
                        
                     </div>

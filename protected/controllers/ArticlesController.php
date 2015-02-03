@@ -4,7 +4,12 @@ class ArticlesController extends Controller
 {
     public function actionIndex($type, $link, $id, $debug = false)
     {
-        $article = Articles::model()->with(['tags'])->findByAttributes(['link'=>$link, 'id'=>$id, 'lang'=>Yii::app()->language]);
+        
+        if (!$debug) {
+            $article = Articles::model()->cache(60*60)->with(['tags'])->findByAttributes(['link'=>$link, 'id'=>$id, 'lang'=>Yii::app()->language]);
+        } else {
+            $article = Articles::model()->with(['tags'])->findByAttributes(['id'=>$id]);
+        }
         
         $widget_in = [];
         $tag_ids = [];
@@ -14,13 +19,20 @@ class ArticlesController extends Controller
             Yii::app()->request->redirect("/", true, 302);
             exit();
         } else {
+            if ($debug) {
+                echo $article->source_content;
+                exit();
+            }
+            
             if ($article->type != $type) {
                 Yii::app()->request->redirect("/{$article->type}/{$article->link}_{$article->id}.html", true, 302);
             }
             
             foreach ($article->tags as $tag) {
-            if (!empty($tag->tag_data) && $tag->tag_data->disabled == 0)
-                $tag_ids[] = $tag->tag;
+                if (!empty($tag->tag_data->name) && $tag->tag_data->disabled == 0) {
+                    $tag_ids[] = $tag->tag;
+                    $this->addKeyword($tag->tag_data->name);
+                }
             }
             $tag_ids = array_unique($tag_ids);
 

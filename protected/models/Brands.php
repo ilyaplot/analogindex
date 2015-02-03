@@ -16,11 +16,18 @@ class Brands extends CActiveRecord
     public function rules()
     {
         return [
-            ['name', 'length', 'min'=>3, 'allowEmpty'=>false],
+            ['name, link', 'length', 'min'=>2],
+            ['name, link', 'unique', 'allowEmpty'=>false, 'caseSensitive'=>false],
         ];
     }
 
-    
+    public function beforeValidate()
+    {
+        if ($this->isNewRecord) {
+            $this->link = Yii::app()->urlManager->translitUrl(str_replace("+"," plus",$this->name));
+        }
+        return parent::beforeSave();
+    }
 
     public function tableName() 
     {

@@ -66,6 +66,7 @@
         <footer id="footer">
             <section class="container">
                 <div class="f_menu">
+                    <!--
                     <nav class="nav-footer">
                         <a href="#"><?php echo Yii::t('main' ,'Информер на свой сайт')?></a>
                         <a href="#"><?php echo Yii::t('main' ,'Конструктор информеров')?></a>
@@ -73,8 +74,9 @@
                         <a href="#"><?php echo Yii::t('main' ,'Пользовательское предложение')?></a>
                         <a href="#"><?php echo Yii::t('main' ,'Обратная связь')?></a>
                     </nav>
+                    -->
                 </div>
-                <p class="f_copyright">&quot;Analogindex.com&quot; &copy; <?php echo date("Y")?></p>
+                <p class="f_copyright">&quot;Analogindex.com&quot; &copy; 2014 - <?php echo date("Y")?></p>
             </section>
             <script>
             (function(i,s,o,g,r,a,m){
@@ -89,32 +91,32 @@
 
             </script>
             <!-- Yandex.Metrika counter -->
-<script type="text/javascript">
-(function (d, w, c) {
-    (w[c] = w[c] || []).push(function() {
-        try {
-            w.yaCounter25369559 = new Ya.Metrika({id:25369559,
-                    webvisor:true,
-                    clickmap:true,
-                    trackLinks:true,
-                    accurateTrackBounce:true});
-        } catch(e) { }
-    });
+            <script type="text/javascript">
+            (function (d, w, c) {
+                (w[c] = w[c] || []).push(function() {
+                    try {
+                        w.yaCounter25369559 = new Ya.Metrika({id:25369559,
+                                webvisor:true,
+                                clickmap:true,
+                                trackLinks:true,
+                                accurateTrackBounce:true});
+                    } catch(e) { }
+                });
 
-    var n = d.getElementsByTagName("script")[0],
-        s = d.createElement("script"),
-        f = function () { n.parentNode.insertBefore(s, n); };
-    s.type = "text/javascript";
-    s.async = true;
-    s.src = (d.location.protocol == "https:" ? "https:" : "http:") + "//mc.yandex.ru/metrika/watch.js";
+                var n = d.getElementsByTagName("script")[0],
+                    s = d.createElement("script"),
+                    f = function () { n.parentNode.insertBefore(s, n); };
+                s.type = "text/javascript";
+                s.async = true;
+                s.src = (d.location.protocol == "https:" ? "https:" : "http:") + "//mc.yandex.ru/metrika/watch.js";
 
-    if (w.opera == "[object Opera]") {
-        d.addEventListener("DOMContentLoaded", f, false);
-    } else { f(); }
-})(document, window, "yandex_metrika_callbacks");
-</script>
-<noscript><div><img src="//mc.yandex.ru/watch/25369559" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
-<!-- /Yandex.Metrika counter -->
+                if (w.opera == "[object Opera]") {
+                    d.addEventListener("DOMContentLoaded", f, false);
+                } else { f(); }
+            })(document, window, "yandex_metrika_callbacks");
+            </script>
+            <noscript><div><img src="//mc.yandex.ru/watch/25369559" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+            <!-- /Yandex.Metrika counter -->
         </footer>
     </div>
 </body>

@@ -67,6 +67,7 @@ class FilesController extends Controller
         }
         
         $src = "/brands_images/".$image->getSubdirectory()."/".md5($image->getPrimaryKey()).".file";
+        
         header("Content-Type: ".$image->logo_mime_type);
         header("Content-Length: ".$image->logo_size);
         header("Content-Disposition: inline; filename=\"{$image->link}.".$image->getExt()."\""); 

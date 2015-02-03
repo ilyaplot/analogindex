@@ -34,6 +34,7 @@ class Goods extends CActiveRecord
                 "order" => "images.priority asc, images.id asc",
                 "on" => "images.disabled = 0",
             ),
+            'images_count' => [self::STAT, 'GoodsImages', 'goods'],
             "primary_image" => array(self::HAS_ONE, "GoodsImages", "goods",
                 "order" => "primary_image.priority desc, primary_image.id asc",
             ),
@@ -103,7 +104,15 @@ class Goods extends CActiveRecord
         );
     }
 
-    public function beforeSave()
+    public function beforeValidate()
+    {
+        if ($this->isNewRecord) {
+            $this->link = Yii::app()->urlManager->translitUrl(str_replace("+", " plus", $this->name));
+        }
+        return parent::beforeValidate();
+    }
+
+        public function beforeSave()
     {
         $this->updated = new CDbExpression("NOW()");
         return parent::beforeSave();

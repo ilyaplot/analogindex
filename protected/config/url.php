@@ -65,16 +65,22 @@ return array(
             'class' => 'application.components.TypeRule',
         ),
         
+        // Редирект со старых ссылок review
         'http://analogindex.<language:\w+>/review/<goods:[\d\w\-_]*>/<link:[\d\w\-_]+>_<id:\d+>' =>
         array('reviews/index', 'urlSuffix' => '.html'),
         
         'http://analogindex.<language:\w+>/_image/id<id:\d+>/<name:.*>' =>
         array('files/image', 'urlSuffix' => ''),
         
-        'http://analogindex.<language:\w+>/gallery/<brand:[\w\-]+>_<product:[\w\-]+>/page_<page:\d+>' =>
-            array('gallery/product', 'urlSuffix' => '.html'),
         
-        'http://analogindex.<language:\w+>/gallery/<brand:[\w\-]+>_<product:[\w\-]+>' =>
+        
+        'http://analogindex.<language:\w+>/gallery/<brand:[\w\-\+]+>_<product:[\w\-\+]+>/<prefix:[p|a]{1}>_<alt:[^_]+>_<id:\d+>' =>
+            array('gallery/product', 'urlSuffix' => '.html'),
+        // Редирект со старых url
+        'http://analogindex.<language:\w+>/gallery/<brand:[\w\-\+]+>_<product:[\w\-\+]+>/page_\d+'=>
+            array('gallery/productRedirect', 'urlSuffix' => '.html'),
+        
+        'http://analogindex.<language:\w+>/gallery/<brand:[\w\-\+]+>_<product:[\w\-\+]+>' =>
             array('gallery/product', 'urlSuffix' => '.html'),
         
         
