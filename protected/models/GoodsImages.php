@@ -33,4 +33,12 @@ class GoodsImages extends CActiveRecord
         );
     }
 
+    public function rules()
+    {
+        return [
+            ['goods', 'unique', 'allowEmpty'=>false,
+                'criteria'=>['condition'=>'image = :image','params'=>['image'=>  $this->image]]
+            ]
+        ];
+    }
 }

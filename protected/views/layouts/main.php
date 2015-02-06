@@ -25,12 +25,12 @@
             <section class="container">
                 <div class="auth-login">
                     <div class="flRight">
-                        <?php if (Yii::app()->user->isGuest):?>
+                        <!--<?php if (Yii::app()->user->isGuest):?>
                             <a class="auth_link-in" href="<?php echo Yii::app()->createUrl("user/login")?>"><?php echo Yii::t('main', 'Вход'); ?></a> / 
                             <a href="<?php echo Yii::app()->createUrl("user/registration")?>" class="auth_link-out"><?php echo Yii::t('main', 'Регистрация'); ?></a> /
                         <?php else: ?>
                             <?php echo Yii::app()->user->getState("name")?> <a class="auth_link-in" href="<?php echo Yii::app()->createUrl("user/logout")?>"><?php echo Yii::t('main', 'Выход'); ?></a> /
-                        <?php endif;?>
+                        <?php endif;?>-->
                         <?php echo Yii::t('main', '<a href="http://analogindex.com/lang.html">English version</a>') ?>
                     </div>
                     <div class="clear"></div>
@@ -76,7 +76,7 @@
                     </nav>
                     -->
                 </div>
-                <p class="f_copyright">&quot;Analogindex.com&quot; &copy; 2014 - <?php echo date("Y")?></p>
+                <p class="f_copyright">&quot;Analog Index&quot; &copy; 2014 - <?php echo date("Y")?></p>
             </section>
             <script>
             (function(i,s,o,g,r,a,m){

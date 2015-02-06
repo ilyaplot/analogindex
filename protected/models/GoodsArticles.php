@@ -58,5 +58,16 @@ class GoodsArticles extends CActiveRecord
             'article_data'=>[self::BELONGS_TO, 'Articles', 'article'],
         ];
     }
+    
+    public function getCount($product, $type = null)
+    {
+        $condition = 't.disabled = 0 and t.goods = :product and article_data.lang = :lang';
+        $params = ['product'=>$product, 'lang'=>Yii::app()->language];
+        if ($type != null) {
+            $condition.=' and article_data.type = :type';
+            $params['type'] = $type;
+        }
+        return self::model()->cache(60*60)->with(['article_data'=>['joinType'=>'inner join']])->count($condition, $params);
+    }
 
 }

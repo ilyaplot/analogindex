@@ -246,6 +246,44 @@ class Export
         }
     }
     
+    public function ProductsFull($tags, $lang, $limit=20)
+    {
+        Yii::app()->language = $lang;
+        $tags = explode(",", $tags);
+        $tags = array_map(function($value){return trim($value);}, $tags);
+        if (!empty($tags)) {
+            $criteria = new CDbCriteria();
+            $criteria->addInCondition('name', $tags);
+            $criteria->compare("disabled", 0);
+            $criteria->select = "id, name";
+            $criteria->limit = $limit;
+            $tags = Tags::model()->cache(60)->with(['goods'=>['joinType'=>'inner join']])->findAll($criteria);
+            $in = [];
+            foreach($tags as $tag) {
+                if (empty($tag->goods)) {
+                    continue;
+                }
+                $in[] = $tag->goods->goods;
+            }
+            $in = array_unique($in);
+            
+            if (!empty($in)) {
+                $criteria = new CDbCriteria();
+                $criteria->condition = 't.id in ('.implode(", ", $in).')';
+                $criteria->group = 't.id';
+                $criteria->order = "t.updated desc";
+                $goods = Goods::model()->cache(60)->with(["brand_data", 'type_data'])->findAll($criteria);
+            }
+        }
+        
+        if (!empty($goods)) {
+            ob_start();
+            extract(['goods'=>$goods]);
+            require Yii::app()->basePath."/views/export/products_full.php";
+            echo ob_get_clean();
+        }
+    }
+    
     public function Trends($tags, $lang, $limit=20)
     {
         Yii::app()->language = $lang;

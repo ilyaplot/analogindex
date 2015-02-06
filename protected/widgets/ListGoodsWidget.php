@@ -35,7 +35,7 @@ class ListGoodsWidget extends CWidget
         }
         
         $criteria->group = "t.id, rating.value";
-        $criteria->order = "t.updated desc";
+        //$criteria->order = "t.updated desc";
         
         
         $data = Goods::model()->cache(60 * 60 * 2)->with(array(

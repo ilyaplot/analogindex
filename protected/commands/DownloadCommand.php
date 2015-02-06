@@ -71,17 +71,19 @@ class DownloadCommand extends CConsoleCommand
     
     public function actionDevspec()
     {
-        $downloader = new Downloader("http://www.devicespecifications.com/", 1);
+        $downloader = new Downloader("http://www.devicespecifications.com/", 10);
         $tasks = SourcesDevspec::model()->findAllByAttributes(['downloaded'=>0]);
+        $emptyImageHash = md5_file("/var/www/analogindex/devspec-empty.jpg");
+        
         foreach ($tasks as $task) {
             phpQuery::unloadDocuments();
             $url = $task->url;
             $brand = $task->brand;
             $product = $task->product;
             $criteria = new CDbCriteria();
-            $criteria->condition = "t.name = :product and brand_data.name = :brand, images.disabled = 0";
+            $criteria->condition = "t.name = :product and brand_data.name = :brand";
             $criteria->params = ['product'=>$product, 'brand'=>$brand];
-            $productModel = Goods::model()->with(['brand_data', 'images'])->find();
+            $productModel = Goods::model()->with(['brand_data', 'images'])->find($criteria);
             
             if (empty($productModel->brand_data->id)) {
                 echo "Не найден продукт {$brand} {$product}.".PHP_EOL;
@@ -89,7 +91,8 @@ class DownloadCommand extends CConsoleCommand
                 $task->save();
                 continue;
             }
-
+            $imagesCount = GoodsImages::model()->countByAttributes(['goods'=>$productModel->id, 'disabled'=>0]);
+            
             if (preg_match("/^http:\/\/www\.devicespecifications\.com\/(?P<lang>\w{2})\/model\/(?P<model>\w{8})$/isu", $url, $matches)) {
                 $lang = $matches['lang'];
                 $model = $matches['model'];
@@ -109,16 +112,17 @@ class DownloadCommand extends CConsoleCommand
                 
                 $html = phpQuery::newDocumentHTML($content); 
                 
-                $imagesCount = count($productModel->images);
-                echo date("Y-m-d H:i:s ")."{$brand} {$product} {$lang} {$imagesCount}".PHP_EOL;
+                
+                
                 if (!$imagesCount) {
+                    // Есть кнопка галереи
                     if (pq($html)->find("a[href='http://www.devicespecifications.com/{$lang}/model-gallery/{$model}']")->length() > 0) {
                         echo "Photo gallery exists.".PHP_EOL;
                         $imagesContent = $downloader->getContent("http://www.devicespecifications.com/{$lang}/model-gallery/{$model}", false);
                         if (!empty($imagesContent)) {
                             $imagesHtml = phpQuery::newDocumentHTML($imagesContent);
-                            $images = pq($html)->find(".gallery-container > img");
-                            $transaction = Yii::app()->db->beginTransaction();
+                            $images = pq($imagesHtml)->find(".gallery-container > img");
+                            
                             foreach($images as $image) {
                                 try {
                                     $productImage = GoodsImages::model()->with([
@@ -151,25 +155,76 @@ class DownloadCommand extends CConsoleCommand
                                         $size = getimagesize($filename);
                                         $imageModel->width = $size[0];
                                         $imageModel->height = $size[1];
-                                        $imageModel->source = $image;
+                                        $imageModel->source = pq($image)->attr("src");
                                         $imageModel->save();
                                         $goodsImage = new GoodsImages();
                                         $goodsImage->goods = $productModel->id;
                                         $goodsImage->image = $imageModel->id;
                                         $goodsImage->save();
                                     } else {
-                                        //echo "Image exists" . PHP_EOL;
+                                        echo "Image exists 1" . PHP_EOL;
                                     }
                                 } catch (Exception $ex) {
-                                    $transaction->rollback();
+      
                                     break;
                                 }
 
 
                             }
-                            $transaction->commit();
+
+                        }
+                        //  Нет галереи, одна картинка
+                    } else {
+                        $pattern = "/url\((?P<url>http:\/\/www\.devicespecifications\.com\/images\/models\/{$model}\/320\/main\.jpg)\);/isu";
+                        if (preg_match($pattern, $content, $matches)) {
+                            $productImage = GoodsImages::model()->with([
+                                "image_data" => [
+                                    "joinType" => "INNER JOIN",
+                                    "condition" => "image_data.source  = :source",
+                                    "params" => ["source" => $matches['url']],
+                                ]
+                            ])->count();
+                            if (!$productImage) {
+                                $ext = explode(".", $matches['url']);
+                                $ext = end($ext);
+                                $file = new Files();
+                                $file->name = "{$brand} {$product}.{$ext}";
+                                $file->save();
+                                $filename = $file->getFilename();
+                                $downloader->downloadFile($matches['url'], $filename);
+                                if (md5_file($filename)!= $emptyImageHash) {
+                                    $file->size = $file->getFilesize();
+                                    $file->mime_type = $file->getMimeType();
+                                    if (!preg_match("/image.*/isu", $file->mime_type)) {
+                                        $file->delete();
+                                        echo "Тип изображения не соответствует image. {$file->mime_type}" . PHP_EOL;
+                                        continue;
+                                    }
+                                    echo "Добавлено изображение" . PHP_EOL;
+                                    $file->save();
+                                    $imageModel = new Images();
+                                    $imageModel->file = $file->id;
+                                    $imageModel->size = 1;
+                                    $size = getimagesize($filename);
+                                    $imageModel->width = $size[0];
+                                    $imageModel->height = $size[1];
+                                    $imageModel->source = $matches['url'];
+                                    $imageModel->save();
+                                    $goodsImage = new GoodsImages();
+                                    $goodsImage->goods = $productModel->id;
+                                    $goodsImage->image = $imageModel->id;
+                                    $goodsImage->save();
+                                } else {
+                                    echo "Заглушка, удаляем файл".PHP_EOL;
+                                    $file->delete();
+                                }
+                            } else {
+
+                                echo "Image exists! 2" . PHP_EOL;
+                            }
                         }
                     }
+                    
                 }
             } else {
                 echo "Url {$url} не подходит под регулярное выражение.".PHP_EOL;
@@ -177,7 +232,7 @@ class DownloadCommand extends CConsoleCommand
                 $task->save();
                 continue;
             }
-            
+            echo date("Y-m-d H:i:s ")."{$brand} {$product} {$lang} {$imagesCount}".PHP_EOL;
             
         }
     }
@@ -207,7 +262,7 @@ class DownloadCommand extends CConsoleCommand
             $content = $downloader->getContent("http://irecommend.ru/taxonomy/term/55/reviews?page={$i}");
             $list = array_merge($list, $this->_getIrecommendUrlList($content));
             if (in_array($lastPage, $list)) {
-                break;
+            //    break;
             }
             
             if (SourcesIrecommend::model()->checkExists('phones', $list[count($list)-1])) {
@@ -256,11 +311,11 @@ class DownloadCommand extends CConsoleCommand
             $content = $downloader->getContent("http://irecommend.ru/taxonomy/term/88/reviews?page={$i}&tid=228032");
             $list = array_merge($list, $this->_getIrecommendUrlList($content));
             if (in_array($lastPage, $list)) {
-                break;
+                //break;
             }
             
             if (SourcesIrecommend::model()->checkExists('phones', $list[count($list)-1])) {
-                break;
+                //break;
             }
             
             echo "{$i} of {$last}".PHP_EOL;
@@ -276,7 +331,7 @@ class DownloadCommand extends CConsoleCommand
             } else {
                 var_dump($source->getErrors());
                 if (!empty($source->getError("url"))) {
-                    break;
+                    //break;
                 }
             }
         }
@@ -290,7 +345,7 @@ class DownloadCommand extends CConsoleCommand
         $criteria->order = "created asc";
         $criteria->limit = "50";
         $urls = SourcesIrecommend::model()->findAll($criteria);
-        $downloader = new Downloader("http://irecommend.ru/", 50);
+        $downloader = new Downloader("http://irecommend.ru/", 100);
         foreach ($urls as $url) {
             $downloader->downloadFile($url->url, $url->getFilename());
             $url->downloaded = 1;

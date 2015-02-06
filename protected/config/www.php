@@ -49,6 +49,16 @@ return array(
             'class' => 'CFileCache',
             'cachePath' => '/inktomia/db/analogindex/cache/',
         ),
+        /**
+        'cache' => [
+            'class'=>'CMemCache',
+            'serializer'=>false,
+            'servers'=>array(
+                array('host'=>'127.0.0.1', 'port'=>11211, 'weight'=>60),
+            ),
+        ],
+         * 
+         */
         'storage' => array(
             'path' => '/inktomia/db/analogindex',
             'section' => 'newfiles',
@@ -74,7 +84,7 @@ return array(
                 array( // -- CProfileLogRoute -----------------------
                     'class'=>'CProfileLogRoute',
                     'levels'=>'profile',
-                    'enabled'=>true,
+                    'enabled'=>false ,
                 ),
             ),
         ),

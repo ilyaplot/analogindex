@@ -87,6 +87,10 @@ class Images extends CActiveRecord
         );
     }
 
+    public function getProductAllGalleryCount($product) {
+        return $this->getProductGalleryCount($product) + $this->getProductGalleryArticlesCount($product);
+    }
+
     public function getProductGalleryCount($product)
     {
         $query="select 
@@ -102,9 +106,13 @@ class Images extends CActiveRecord
                 and i.height > 299
                 and i.size6 > 0 
                 and gi.disabled = 0";
-        return $this->getDbConnection()->createCommand($query)->queryScalar([
-            'product'=>$product,
-        ]);
+        if (!$count = Yii::app()->cache->get("getProductGalleryCount_{$product}")) {
+            $count = $this->getDbConnection()->createCommand($query)->queryScalar([
+                'product'=>$product,
+            ]);
+            Yii::app()->cache->set("getProductGalleryCount_{$product}", $count);
+        }
+        return $count;
     }
     
     public function getProductGalleryArticlesCount($product)
@@ -127,10 +135,13 @@ class Images extends CActiveRecord
             )
             and ai.width > 299
             and ai.height > 299";
-        
-        return $this->getDbConnection()->createCommand($query)->queryScalar([
-            'product'=>$product,
-        ]);
+        if (!$count = Yii::app()->cache->get("getProductGalleryArticlesCount_{$product}")) {
+            $count = $this->getDbConnection()->createCommand($query)->queryScalar([
+                'product'=>$product,
+            ]);
+            Yii::app()->cache->set("getProductGalleryArticlesCount_{$product}", $count);
+        }
+        return $count;
         //and a.has_filtered = 1
     }
     

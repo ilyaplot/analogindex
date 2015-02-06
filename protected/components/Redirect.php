@@ -10,7 +10,7 @@ class Redirect extends CBaseUrlRule
     public function parseUrl($manager, $request, $pathInfo, $rawPathInfo)
     {
         
-        if ($redirect = Redirects::model()->findByAttributes(["from"=>"/".$rawPathInfo])) {
+        if ($redirect = Redirects::model()->cache(60*60)->findByAttributes(["from"=>"/".$rawPathInfo])) {
             Yii::app()->request->redirect("http://analogindex.". Language::getCurrentZone()
                 .$redirect->to, true, $redirect->code);
         }

@@ -60,8 +60,8 @@ class SiteController extends Controller
         $criteria->condition = "t.link = :link and t.brand = :brand";
         $criteria->params = array("link" => $link, "brand" => $brand->id);
         $product = Goods::model()->with(array(
-                    "rating",
-                    //"images",
+                    //"rating",
+                    "images",
                     //"synonims" => array(
                     //    "on" => "synonims.visibled = 1"
                     //),

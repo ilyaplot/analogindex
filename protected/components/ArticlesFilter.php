@@ -71,8 +71,9 @@ class ArticlesFilter
                     $src = pq($a)->attr("href");
                     $img = pq($a)->find("img");
                     $alt = pq($img)->attr('alt');
-                    if (!empty($alt)) {
+                    if (!empty($src)) {
                         pq($a)->replaceWith("<img src=\"{$src}\" alt=\"{$alt}\"");
+                        continue;
                     }
                 }
             }
@@ -301,12 +302,14 @@ class ArticlesFilter
     public function _setType()
     {
         $patterns = [
-            
             "/отзыв/isu" => Articles::TYPE_OPINION,
-            
             "/review/isu" => Articles::TYPE_REVIEW,
             "/обзор/isu" => Articles::TYPE_REVIEW,
-            
+            "/how you/isu" => Articles::TYPE_HOWTO,
+            "/lern now/isu" => Articles::TYPE_HOWTO,
+            "/enabl(ing|e) (hidden )?features/isu" => Articles::TYPE_HOWTO,
+            "/джейлбрейк/isu" => Articles::TYPE_HOWTO,
+            "/jailbreak/isu"=>  Articles::TYPE_HOWTO,
             "/FAQ/isu" => Articles::TYPE_HOWTO,
             "/how ?to/isu" => Articles::TYPE_HOWTO,
             "/recovery/isu" => Articles::TYPE_HOWTO,
@@ -332,8 +335,8 @@ class ArticlesFilter
             "/improve/isu" => Articles::TYPE_HOWTO,
             "/tweak/isu" => Articles::TYPE_HOWTO,
             "/customize/isu" => Articles::TYPE_HOWTO,
-            "/установ[ка|ить]+/isu" => Articles::TYPE_HOWTO,
-            "/настро[ить|йка]+/isu" => Articles::TYPE_HOWTO,
+            "/установ(ка|ить)+/isu" => Articles::TYPE_HOWTO,
+            "/настро(ить|йка)+/isu" => Articles::TYPE_HOWTO,
         ];
         
         foreach ($patterns as $pattern=>$type) {
@@ -353,6 +356,11 @@ class ArticlesFilter
                 'function'=>function($html) 
                 {
                     $html->find("script")->remove();
+                    $html->find("style")->remove();
+                    $html->find("iframe")->remove();
+                    $html->find("#articleHeader")->remove();
+                    
+                    
                     return $html;
                 }
             ],
@@ -370,7 +378,9 @@ class ArticlesFilter
             [   // Удаляет ссылки
                 'function'=>function($html)
                 {
-                    $source_domain = preg_replace("/(https?:\/\/[^\/]+\/).*/isu", "$1", $this->_model->source_url);
+                    $source_domain = preg_replace("/https?:\/\/([^\/]+\/).*/isu", "$1", $this->_model->source_url);
+                    $source_domain = preg_replace("/www\./isu", '', $source_domain);
+                    
                     $blacklist = [
                         "/^http:\/\/dic.academic.ru\/.*/isu",
                         "/^\/.*/isu",
@@ -378,22 +388,26 @@ class ArticlesFilter
                         "/^http:\/\/\w+\.academic\.ru\/\w+\/[\w\%]+/isu",
                     ];
         
-                    //if (!empty($source_domain))
-                    //    $blacklist[] = "/".preg_quote ($source_domain, '/').".*/isu";
-                    
+                    if (!empty($source_domain))
+                        $blacklist[] = "/".preg_quote ($source_domain, '/').".*/isu";
+
                     foreach ($html->find("a") as $a) {
                         foreach ($blacklist as $rule) {
                             if (preg_match($rule, pq($a)->attr("href"))) {
+                                if (empty(pq($a)->html())) {
+                                    pq($a)->remove();
+                                    continue;
+                                }
+                                
                                 try {
-                                    pq($a)->replaceWith(pq($a)->html());
+                                    $ah = pq($a)->html();
+                                    pq($a)->replaceWith($ah);
+ 
+                                    echo "Replaced: {$rule} : {$ah}".PHP_EOL;
                                 } catch (Exception $e) {
-                                    
+                                    echo $e->getMessage().PHP_EOL;
                                 }
                             }
-                        }
-                        
-                        if (empty(pq($a)->html())) {
-                            pq($a)->remove();
                         }
                     }
                     return $html;
@@ -418,6 +432,12 @@ class ArticlesFilter
                     return preg_replace("/[^\"](&amp;{$link}#\d+;)[^\"]/isu", '', (string) $html);
                 }
             ],
+            [
+                'function'=>function($html)
+                {
+                    return preg_replace("/".preg_quote("(adsbygoogle = window.adsbygoogle || []).push({});")."/isu", '', $html);
+                }
+            ],
             [   // Ссылка на оригинал открытым текстом - удаляем
                 'function'=>function($html)
                 {
@@ -426,6 +446,22 @@ class ArticlesFilter
                     $link2 = preg_replace("~\\\/$~isu" ,"[\/|p\>]", $link2);
                     $html =  preg_replace("/[^\"]({$link})[^\"]/isu", '', (string) $html);
                     return preg_replace("/[^\"]({$link2})[^\"]/isu", '', (string) $html);
+                }
+            ],
+            [ // Удаляет параметры style, class и id
+                'function'=>function($html) {
+                    foreach(pq($html)->find('*') as $tag) {
+                        pq($tag)->removeAttr('style');
+                        pq($tag)->removeAttr('class');
+                        pq($tag)->removeAttr('id');
+                        pq($tag)->removeAttr('itemprop');
+                        pq($tag)->removeAttr('itemscope');
+                        pq($tag)->removeAttr('itemtype');
+                        pq($tag)->removeAttr('width');
+                        pq($tag)->removeAttr('height');
+                        pq($tag)->removeAttr('border');
+                    }
+                    return (string) $html;
                 }
             ],
         ];

@@ -6,7 +6,7 @@ class ArticlesController extends Controller
     {
         
         if (!$debug) {
-            $article = Articles::model()->cache(60*60)->with(['tags'])->findByAttributes(['link'=>$link, 'id'=>$id, 'lang'=>Yii::app()->language]);
+            $article = Articles::model()->with(['tags'])->findByAttributes(['id'=>$id,'link'=>$link, 'lang'=>Yii::app()->language]);
         } else {
             $article = Articles::model()->with(['tags'])->findByAttributes(['id'=>$id]);
         }

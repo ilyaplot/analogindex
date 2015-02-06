@@ -87,7 +87,9 @@ $(function(){
             wpcontent = $('.wp_col_fix'),
             op3 = offsetPosition(wpcontent),
             menu = $('.wpcontent_leftMenu');
-
+          if (typeof(bl0) == 'undefined') {
+              bl0 = $('.infoReviewItem-title');
+          }
           window.onscroll = function() {
             /*
             останавливаем плавающий блок, если тот

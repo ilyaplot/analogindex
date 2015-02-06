@@ -13,7 +13,8 @@ class TestCommand extends CConsoleCommand
         $criteria = new CDbCriteria();
         $criteria->order = "id desc";
         $criteria->condition = "has_filtered = 0";
-        //$criteria->condition = 'id = 135812';
+        $criteria->limit = 15;
+        $criteria->condition = 'id = 147985';
         $articles = Articles::model()->findAll($criteria);
         $filter = new ArticlesFilter();
         

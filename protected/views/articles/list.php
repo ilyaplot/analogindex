@@ -1,4 +1,4 @@
- <?php 
+<?php 
 $types = (object)[
     (object)[
         'link'=>'news',
@@ -114,6 +114,7 @@ $types = (object)[
                 </small>
                 <div class="mnf-catLiks clr">
                     <?php foreach ($types as $type):?>
+                        <?php if ($count = GoodsArticles::model()->getCount($product->id, $type->link)): ?>
                         <a <?php if ($type->link == $type_selected) :?>
                             class="active"
                             <?php endif; ?>
@@ -123,6 +124,7 @@ $types = (object)[
                             "brand"=>$brand->link,
                             "language"=>Language::getCurrentZone(),
                         ))?>"><?php echo $type->name?></a>
+                        <?php endif;?>
                     <?php endforeach;?>
                 </div>
             </div>

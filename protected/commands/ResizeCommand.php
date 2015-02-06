@@ -52,20 +52,4 @@ class ResizeCommand extends CConsoleCommand
         ArticlesImages::model()->createPreviews();
     }
 
-    public function actionCount()
-    {
-        $sizes = Images::$sizes;
-        $criteria = new CDbCriteria();
-
-        foreach ($sizes as $size => $params) {
-            $criteria->condition = "t.id not in (select image from {{images_resized}} where size = {$size}) and t.size = 1";
-            $images = Images::model()->with(array(
-                        "file_data" => array(
-                            "joinType" => "INNER JOIN",
-                        ),
-                    ))->count($criteria);
-            echo $images . " " . $size . PHP_EOL;
-        }
-    }
-
 }

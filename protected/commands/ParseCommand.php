@@ -36,13 +36,35 @@ class ParseCommand extends CConsoleCommand
                 echo $category.PHP_EOL;
                 echo $categoryDescription.PHP_EOL;
                 echo PHP_EOL;
-                echo $table->html().PHP_EOL;
+                $rows = $table->find("tr");
+                foreach ($rows as $row) {
+                    $subCategory = pq($row)->find("td:eq(0)");
+                    $subCategoryDescription = pq($subCategory)->find("p")->text();
+                    pq($subCategory)->find("p")->remove();
+                    $subCategory = pq($subCategory)->text();
+                    echo "\t".$subCategory.PHP_EOL;
+                    echo "\t\t".$subCategoryDescription.PHP_EOL;
+                    $values = pq($row)->find("td:eq(1)")->html();
+                    $values = trim($values);
+                    if (preg_match("/\<span class=\"(arrow|approximation)\-bullet\"\>\<\/span\>/isu", $values)) {
+                        $values = preg_split("/(\<br\>)?\<span class=\"(approximation\-bullet|arrow\-bullet)\"\>\<\/span\>/isu", $values);
+                        unset($values[0]);
+                        if (is_array($values) && count($values) == 1) {
+                            $values = $values[1];
+                        }
+                    }
+                    
+                    var_dump($values);
+                    
+                    
+                }
+                
 
                 $header->remove();
                 $table->remove();
             
             } while (true);
-            
+            echo $task->url.PHP_EOL;
             exit();
             phpQuery::unloadDocuments();
         }

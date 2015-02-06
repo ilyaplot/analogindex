@@ -619,6 +619,29 @@ h2.search_result-nameItem a:hover { color: #c1501e;}
     padding: 20px 0 16px 16px;
 }
 
+.infoReviewItem-title-2 {
+    border-top: 1px solid #a3a3a3;
+    border-bottom: 1px solid #a3a3a3;
+    border-right: 1px solid #bcbcbc;
+    border-left: 1px solid #bcbcbc;
+    height: 238px;
+    line-height: 38px;
+    width: 679px;
+    border-top:none;
+    -webkit-box-shadow: 0 3px 3px rgba(0,0,0,0.15);
+    -moz-box-shadow: 0 3px 3px rgba(0,0,0,0.15);
+    box-shadow: 0 3px 3px rgba(0,0,0,0.15);
+    position: relative;
+    z-index: 5;
+    padding: 13px;
+}
+
+.infoReviewItem-title-2 span.date {
+    color: #282828;
+    font-size: 14px;
+    font-style: italic;
+}
+
 .infoGoodItem-title-2 {
     border-top: 1px solid #a3a3a3;
     border-bottom: 1px solid #a3a3a3;
@@ -1095,6 +1118,24 @@ span.icon-like {
     background: #FFF;
     z-index: 205;
 }
+
+.infoReviewItem-title {
+    position: relative;
+    top: 0;
+    width: 705px;
+    background: #FFF;
+    z-index: 205;
+}
+
+.infoReviewItem-title.prilip {
+    position: fixed !important;
+}
+
+.infoReviewItem-title.stop {
+    background: #FFF;
+    z-index: 99999;
+}
+
 .infoGoodItem-title.prilip {
     position: fixed !important;
 }
@@ -1755,6 +1796,10 @@ a.lang-select {
     padding: 5px;
 }
 
+.news-content p {
+    margin: 0 0 10px 0;
+}
+
 .news-preview {
     width: 130px;
     max-height: 130px;
@@ -1806,4 +1851,22 @@ ul.tags > li > a:visited {
     padding-bottom: 20px;
     width: 922px;
     min-height: 400px;
+}
+
+.related-products-list {
+    z-index: 6;
+}
+
+.related-products-list > li{
+    float: left;
+    line-height: 13px;
+    padding-left: 7px;
+}
+
+.related-products-list > li a{
+    font-size: 13px;
+}
+
+.related-products-list > li a.title{
+    font-size: 17px;
 }
