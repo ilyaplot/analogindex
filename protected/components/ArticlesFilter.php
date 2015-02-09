@@ -355,12 +355,10 @@ class ArticlesFilter
             [   // Удаляет скрипты
                 'function'=>function($html) 
                 {
-                    $html->find("script")->remove();
+                    $html->find("script, noscript")->remove();
                     $html->find("style")->remove();
-                    $html->find("iframe")->remove();
                     $html->find("#articleHeader")->remove();
-                    
-                    
+                    $html->find("p.jetpack-slideshow-noscript")->remove();
                     return $html;
                 }
             ],
@@ -378,6 +376,7 @@ class ArticlesFilter
             [   // Удаляет ссылки
                 'function'=>function($html)
                 {
+                
                     $source_domain = preg_replace("/https?:\/\/([^\/]+\/).*/isu", "$1", $this->_model->source_url);
                     $source_domain = preg_replace("/www\./isu", '', $source_domain);
                     
@@ -450,6 +449,7 @@ class ArticlesFilter
             ],
             [ // Удаляет параметры style, class и id
                 'function'=>function($html) {
+                    $html = phpQuery::newDocumentHTML($html);
                     foreach(pq($html)->find('*') as $tag) {
                         pq($tag)->removeAttr('style');
                         pq($tag)->removeAttr('class');
@@ -460,10 +460,35 @@ class ArticlesFilter
                         pq($tag)->removeAttr('width');
                         pq($tag)->removeAttr('height');
                         pq($tag)->removeAttr('border');
+                        pq($tag)->removeAttr('data-gallery');
                     }
                     return (string) $html;
                 }
             ],
+            [
+                'function'=>function($html) {
+                $html = phpQuery::newDocumentHTML($html);
+                //<embed src="http://www.youtube.com/v/PfeNlhiBXtw?version=3&amp;hl=en_US" width="560" height="340" class="yp" type="application/x-shockwave-flash" wmode="transparent" allowscriptaccess="always"><span style="display:block;margin-top:15px;">
+                    foreach (pq($html)->find('embed, iframe') as $embed) {
+                        $src = pq($embed)->attr("src");
+                        if (preg_match("/youtube\./isu", $src)) {
+                            echo $src.PHP_EOL;
+                            pq($embed)->replaceWith('<iframe width="540" height="315" src="'.$src.'" frameborder="0" allowfullscreen></iframe>');
+                        } else {
+                            pq($embed)->remove();
+                        }
+                    }
+                    //$html->find("iframe")->remove();
+                    
+                    foreach(pq($html)->find('img') as $img) {
+                        pq($img)->replaceWith((string) pq($img)."<br>");
+                    }
+
+                    $pattern = "/\/\*=999999\).+?\.push\(..\);/isu";
+                    
+                    return preg_replace($pattern, '' ,(string) $html);
+                }
+            ]
         ];
     }
     

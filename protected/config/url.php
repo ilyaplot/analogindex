@@ -69,6 +69,13 @@ return array(
         'http://analogindex.<language:\w+>/review/<goods:[\d\w\-_]*>/<link:[\d\w\-_]+>_<id:\d+>' =>
         array('reviews/index', 'urlSuffix' => '.html'),
         
+        'http://analogindex.<language:\w+>/image/<id:\d+>/<size:(\d+x\d+|\w+)>/<name:[\w\.\-_]+>' =>
+        array('files/newimage', 'urlSuffix' => ''),
+        
+        
+        /**
+         * @todo удалить
+         */
         'http://analogindex.<language:\w+>/_image/id<id:\d+>/<name:.*>' =>
         array('files/image', 'urlSuffix' => ''),
         

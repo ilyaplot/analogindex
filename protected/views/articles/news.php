@@ -25,8 +25,9 @@
 
                         <?php if (!empty($tags)): ?>
                             <?php $export->productsfull($tags, Yii::app()->language); ?>
+                        
                         <?php endif; ?>
-
+                        
                     </div>
                     <div class="flRight">
                         <script type="text/javascript">

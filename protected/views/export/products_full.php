@@ -22,15 +22,15 @@ $types = (object) [
 <ul class="related-products-list">
     <?php foreach ($goods as $product): ?>
         <li>
-            <a class="title" href="<?php
-            echo Yii::app()->createAbsoluteUrl("site/goods", [
-                'link' => $product->link,
-                'brand' => $product->brand_data->link,
-                'type' => $product->type_data->link,
-                'language' => Language::getCurrentZone(),
-            ])
-            ?>">
-                   <?php if (isset($product->primary_image->image_data->size3_data->id)): ?>
+            <?php if (isset($product->primary_image->image_data->size3_data->id)): ?>
+                <a class="title" href="<?php
+                   echo Yii::app()->createAbsoluteUrl("site/goods", [
+                       'link' => $product->link,
+                       'brand' => $product->brand_data->link,
+                       'type' => $product->type_data->link,
+                       'language' => Language::getCurrentZone(),
+                   ])
+                   ?>">
                     <img src="<?php
                     echo Yii::app()->createAbsoluteUrl("files/image", array(
                         'id' => $product->primary_image->image_data->size3_data->id,
@@ -39,7 +39,16 @@ $types = (object) [
                     ));
                     ?>" alt="<?php echo $product->brand_data->name . " " . $product->name ?>" 
                          title="<?php echo $product->brand_data->name . " " . $product->name ?>" />
-                     <?php endif; ?>
+                </a>
+            <?php endif; ?>
+            <a href="<?php
+            echo Yii::app()->createAbsoluteUrl("site/goods", [
+                'link' => $product->link,
+                'brand' => $product->brand_data->link,
+                'type' => $product->type_data->link,
+                'language' => Language::getCurrentZone(),
+            ])
+            ?>">
                 <div><?php echo $product->brand_data->name ?> <?php echo $product->name ?></div>
             </a>
             <div>
@@ -55,7 +64,7 @@ $types = (object) [
             </div>
             <ul>
                 <?php foreach ($types as $type): ?>
-                    <?php if ($count = GoodsArticles::model()->cache(60*60)->getCount($product->id, $type->link)): ?>
+                    <?php if ($count = GoodsArticles::model()->cache(60 * 60)->getCount($product->id, $type->link)): ?>
                         <li>
                             <a itemprop="url"
                                href="<?php
@@ -67,10 +76,11 @@ $types = (object) [
                                ))
                                ?>"><?php echo $type->name ?></a>
                         </li>
-        <?php endif; ?>
-    <?php endforeach; ?>
+                    <?php endif; ?>
+                <?php endforeach; ?>
             </ul>
         </li>
 
-<?php endforeach; ?>
+    <?php endforeach; ?>
 </ul>
+<div style="clear: both;"></div>

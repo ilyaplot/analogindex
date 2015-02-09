@@ -19,7 +19,7 @@
             <h1 itemprop="name"><?php echo $article->title ?></h1>
             <?php if(!empty($tags)):?>
             <div>
-                <?php $export->products($tags, Yii::app()->language); ?>
+                <?php $export->productsfull($tags, Yii::app()->language); ?>
             </div>
             <hr />
             <?php endif;?>

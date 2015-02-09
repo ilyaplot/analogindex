@@ -26,7 +26,7 @@ class Articles extends CActiveRecord
             ['title', 'length', 'min'=>5, 'allowEmpty'=>false],
             ['source_url, type, lang', 'required'],
             ['source_url', 'unique', 'allowEmpty'=>false],
-            ['content', 'filter', 'filter'=>[$obj=new CHtmlPurifier(), 'purify']],
+            //['content', 'filter', 'filter'=>[$obj=new CHtmlPurifier(), 'purify']],
         ];
     }
     

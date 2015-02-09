@@ -1,9 +1,21 @@
 <?php
 class FilesController extends Controller
 {
+    public function actionNewImage($id, $size, $name)
+    {
+        
+        $size = (!empty(NImages::$sizes[$size])) ? $size : null;
+        
+        if ($size == null || !NImages::AccelRedirect($id, $size))
+        {
+            throw new CHttpException(404, Yii::t("errors", "Файл не найден"));
+        }
+        exit();
+    }
     
     public function actionImage($id, $name)
     {
+        
         $id = intval(isset($_GET['id'])? $_GET['id'] : 0 );
         $image = Files::model()->findByPk($id);
         if (!$image || !$image->fileExists())
@@ -12,6 +24,7 @@ class FilesController extends Controller
             exit();
         }
         $src = "/storage/".$image->getSubdirectory()."/".md5($image->getPrimaryKey()).".file";
+
         header("Content-Type: ".$image->mime_type);
         header("Content-Length: ".$image->filesize);
         header("Content-Disposition: inline; filename=\"{$image->name}\""); 
