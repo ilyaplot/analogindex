@@ -345,7 +345,7 @@ class DownloadCommand extends CConsoleCommand
         $criteria->order = "created asc";
         $criteria->limit = "50";
         $urls = SourcesIrecommend::model()->findAll($criteria);
-        $downloader = new Downloader("http://irecommend.ru/", 1);
+        $downloader = new Downloader("http://irecommend.ru/", 10);
         foreach ($urls as $url) {
             echo $url->url.PHP_EOL;
             $downloader->downloadFile($url->url, $url->getFilename());

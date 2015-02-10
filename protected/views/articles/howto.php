@@ -25,6 +25,8 @@
             <?php endif;?>
             <div class="news-content" itemprop="articleBody"><?php echo $article->content ?></div>
             <div style="clear: both;"></div>
+            <?php  echo $this->renderPartial("_comments")?>
+            <br />
             <?php if(!empty($tags)):?>
             <hr />
             <div>
@@ -67,7 +69,7 @@
             </span><br />
             <?php echo Yii::t("main", "Источник")?>: <a target="_blank" href="<?php echo $article->source_url?>"><?php echo $article->source_url?></a>
             <br />
-            <?php  echo $this->renderPartial("_comments")?>
+            
         </div>
     </div>
 

@@ -1,7 +1,7 @@
 <?php
 
 return array(
-    'connectionString' => 'mysql:host=teta.academic.ru;dbname=gosts_v2',
+    'connectionString' => 'mysql:host=hwteta2.local;dbname=gosts_v2',
     'emulatePrepare' => true,
     'username' => 'complexdoc',
     'password' => 'qqq123457',

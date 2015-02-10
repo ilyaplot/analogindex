@@ -78,6 +78,9 @@ class TestCommand extends CConsoleCommand
         foreach ($images as $image) {
             $model = new NImages();
             $image = (object) $image;
+            if (!file_exists($image->filename)){
+                continue;
+            }
             copy($image->filename, "/tmp/_move_{$image->name}");
             if ($model->create("/tmp/_move_{$image->name}", 'goods', "{$image->brand}_{$image->product}.jpeg", $image->source_url)) {
                 $gi = new GoodsImagesCopy();
