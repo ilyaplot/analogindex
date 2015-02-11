@@ -22,7 +22,7 @@ $types = (object) [
 <ul class="related-products-list">
     <?php foreach ($goods as $product): ?>
         <li>
-            <?php if (isset($product->primary_image->image_data->size3_data->id)): ?>
+            <?php if (isset($product->primary_image)): ?>
                 <a class="title" href="<?php
                    echo Yii::app()->createAbsoluteUrl("site/goods", [
                        'link' => $product->link,
@@ -31,14 +31,7 @@ $types = (object) [
                        'language' => Language::getCurrentZone(),
                    ])
                    ?>">
-                    <img src="<?php
-                    echo Yii::app()->createAbsoluteUrl("files/image", array(
-                        'id' => $product->primary_image->image_data->size3_data->id,
-                        'name' => $product->primary_image->image_data->size3_data->name,
-                        'language' => Language::getCurrentZone(),
-                    ));
-                    ?>" alt="<?php echo $product->brand_data->name . " " . $product->name ?>" 
-                         title="<?php echo $product->brand_data->name . " " . $product->name ?>" />
+                    <?php echo $product->primary_image->image_data->getHtml(NImages::SIZE_PRODUCT_LIST);?>
                 </a>
             <?php endif; ?>
             <a href="<?php

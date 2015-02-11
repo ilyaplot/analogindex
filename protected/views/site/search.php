@@ -15,12 +15,8 @@
                             <div class="search_result-id"><?php echo $key+1+$pages->getCurrentPage()*10?>.</div>
                             <div class="search_result-photo">
                                 <a href="<?php echo Yii::app()->createUrl("site/goods", array('link'=>$product->link, 'brand'=>$product->brand_data->link, 'type'=>$product->type_data->link, 'language'=>Language::getCurrentZone()))?>">
-                                    <?php if (isset($product->primary_image->image_data->size3_data->id)):?>
-                                        <img src="<?php echo Yii::app()->createUrl("files/image", array(
-                                            'id'=>$product->primary_image->image_data->size3_data->id,
-                                            'name'=>$product->primary_image->image_data->size3_data->name,
-                                            'language'=>Language::getCurrentZone(),
-                                            )); ?>" alt="<?php echo $product->brand_data->name." ".$product->name ?>" />
+                                    <?php if ($product->primary_image):?>
+                                        <?php echo $product->primary_image->image_data->getHtml(NImages::SIZE_PRODUCT_SEARCH);?>
                                     <?php else :?>
                                         <img src="/assets/img/photo/informers/1.png" alt="<?php echo $product->brand_data->name." ".$product->name ?>" />
                                     <?php endif;?>

@@ -3,7 +3,7 @@
 /**
  * Изображения товаров
  */
-class GoodsImagesCopy extends CActiveRecord
+class ArticlesImagesCopy extends CActiveRecord
 {
 
     public static function model($className = __CLASS__)
@@ -13,13 +13,13 @@ class GoodsImagesCopy extends CActiveRecord
 
     public function tableName()
     {
-        return "{{goods_images_copy}}";
+        return "new_articles_images";
     }
 
     public function relations()
     {
         return array(
-            "image_data" => array(self::BELONGS_TO, "NImages", "image"),
+            "image_data" => array(self::BELONGS_TO, "Images", "image"),
         );
     }
 
@@ -36,7 +36,7 @@ class GoodsImagesCopy extends CActiveRecord
     public function rules()
     {
         return [
-            ['goods', 'unique', 'allowEmpty'=>false,
+            ['article', 'unique', 'allowEmpty'=>false,
                 'criteria'=>['condition'=>'image = :image','params'=>['image'=>  $this->image]]
             ]
         ];

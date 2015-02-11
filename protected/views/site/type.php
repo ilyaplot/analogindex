@@ -1,93 +1,93 @@
 <link rel="stylesheet" href="/assets/css/filter.css" />
 <script type="text/javascript" src="/assets/js/filter.js"></script>
-
+<!--
 <div id="filter">
     <form action="" method="post">
-        <?php
-        echo $this->renderPartial("_filter_select_item", array(
-            "id" => "brands",
-            "title" => "Производители",
-            "name" => "brands[]",
-            "items" => $brands,
-            "itemsSelected" => $brandsSelected,
-        ));
-        ?>
+<?php
+echo $this->renderPartial("_filter_select_item", array(
+    "id" => "brands",
+    "title" => "Производители",
+    "name" => "brands[]",
+    "items" => $brands,
+    "itemsSelected" => $brandsSelected,
+));
+?>
 
-        <?php
-        echo $this->renderPartial("_filter_select_item", array(
-            "id" => "os",
-            "title" => "Операционные системы",
-            "name" => "os[]",
-            "items" => $os,
-            "itemsSelected" => $osSelected,
-        ));
-        ?>
+<?php
+echo $this->renderPartial("_filter_select_item", array(
+    "id" => "os",
+    "title" => "Операционные системы",
+    "name" => "os[]",
+    "items" => $os,
+    "itemsSelected" => $osSelected,
+));
+?>
 
-        <?php
-        echo $this->renderPartial("_filter_select_item", array(
-            "id" => "screensizes",
-            "title" => "Диагональ экрана",
-            "name" => "screensizes[]",
-            "items" => $screenSizes,
-            "itemsSelected" => $screenSizesSelected,
-        ));
-        ?>
+<?php
+echo $this->renderPartial("_filter_select_item", array(
+    "id" => "screensizes",
+    "title" => "Диагональ экрана",
+    "name" => "screensizes[]",
+    "items" => $screenSizes,
+    "itemsSelected" => $screenSizesSelected,
+));
+?>
 
-        <?php
-        echo $this->renderPartial("_filter_select_item", array(
-            "id" => "cores",
-            "title" => "Количество ядер процессора",
-            "name" => "cores[]",
-            "items" => $cores,
-            "itemsSelected" => $coresSelected,
-        ));
-        ?>
+<?php
+echo $this->renderPartial("_filter_select_item", array(
+    "id" => "cores",
+    "title" => "Количество ядер процессора",
+    "name" => "cores[]",
+    "items" => $cores,
+    "itemsSelected" => $coresSelected,
+));
+?>
 
-        <?php
-        echo $this->renderPartial("_filter_select_item", array(
-            "id" => "cpufreq",
-            "title" => "Частота процессора",
-            "name" => "cpufreq[]",
-            "items" => $cpufreq,
-            "itemsSelected" => $cpuFreqSelected,
-        ));
-        ?>
+<?php
+echo $this->renderPartial("_filter_select_item", array(
+    "id" => "cpufreq",
+    "title" => "Частота процессора",
+    "name" => "cpufreq[]",
+    "items" => $cpufreq,
+    "itemsSelected" => $cpuFreqSelected,
+));
+?>
 
-        <?php
-        echo $this->renderPartial("_filter_select_item", array(
-            "id" => "processor",
-            "title" => "Модель процессора",
-            "name" => "processor[]",
-            "items" => $processor,
-            "itemsSelected" => $processorSelected,
-        ));
-        ?>
+<?php
+echo $this->renderPartial("_filter_select_item", array(
+    "id" => "processor",
+    "title" => "Модель процессора",
+    "name" => "processor[]",
+    "items" => $processor,
+    "itemsSelected" => $processorSelected,
+));
+?>
         
-        <?php
-        echo $this->renderPartial("_filter_select_item", array(
-            "id" => "gpu",
-            "title" => "Модель видеопроцессора",
-            "name" => "gpu[]",
-            "items" => $gpu,
-            "itemsSelected" => $gpuSelected,
-        ));
-        ?>
+<?php
+echo $this->renderPartial("_filter_select_item", array(
+    "id" => "gpu",
+    "title" => "Модель видеопроцессора",
+    "name" => "gpu[]",
+    "items" => $gpu,
+    "itemsSelected" => $gpuSelected,
+));
+?>
 
-        <?php
-        echo $this->renderPartial("_filter_select_item", array(
-            "id" => "ram",
-            "title" => "Размер оперативной памяти (RAM)",
-            "name" => "ram[]",
-            "items" => $ram,
-            "itemsSelected" => $ramSelected,
-        ));
-        ?>
+<?php
+echo $this->renderPartial("_filter_select_item", array(
+    "id" => "ram",
+    "title" => "Размер оперативной памяти (RAM)",
+    "name" => "ram[]",
+    "items" => $ram,
+    "itemsSelected" => $ramSelected,
+));
+?>
 
 
         <input type="submit" value="Отправить" />
     </form>
 </div>
-
+-->
 <ul class="search_result-bl clr">
     <?php foreach ($goods as $key => $product): ?>
         <li>
@@ -95,15 +95,9 @@
                 <div class="search_result-id"><?php echo $key + 1 + $pages->getCurrentPage() * 10 ?>.</div>
                 <div class="search_result-photo">
                     <a href="<?php echo Yii::app()->createUrl("site/goods", array('link' => $product->link, 'brand' => $product->brand_data->link, 'type' => $product->type_data->link, 'language' => Language::getCurrentZone())) ?>">
-                        <?php if (isset($product->primary_image->image_data->size3_data->id)): ?>
-                            <img src="<?php
-                            echo Yii::app()->createUrl("files/image", array(
-                                'id' => $product->primary_image->image_data->size3_data->id,
-                                'name' => $product->primary_image->image_data->size3_data->name,
-                                'language' => Language::getCurrentZone(),
-                            ));
-                            ?>" alt="<?php echo $product->brand_data->name . " " . $product->name ?>" />
-                             <?php else : ?>
+                        <?php if ($product->primary_image): ?>
+                            <?php echo $product->primary_image->image_data->getHtml(NImages::SIZE_PRODUCT_LIST); ?>
+                        <?php else : ?>
                             <img src="/assets/img/photo/informers/1.png" alt="<?php echo $product->brand_data->name . " " . $product->name ?>" />
                         <?php endif; ?>
 

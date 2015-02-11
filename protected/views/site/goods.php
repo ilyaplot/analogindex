@@ -121,23 +121,21 @@ $this->widget('application.widgets.BreadcrumbsWidget.BreadcrumbsWidget',['items'
                 </div>
                 <div class="wpcontent">
                     <div class="infoGoodItem-wp-photos" id="item1">
-                        <?php if (empty($product->images)) : ?>
+                        <?php if (!$product->gallery_count) : ?>
                             <div class="infoGoodItem-wp-photos_main">
                                 <img style="width: 450px; height: auto;" src="/assets/img/no_photo.png">
                             </div>
-                        <?php elseif (count($product->images) == 2): ?>
-                            <?php echo $this->renderPartial("_goods_one_image", array("product" => $product, "brand" => $brand)) ?>
                         <?php else: ?>
                             <?php $this->renderPartial("_goods_many_images", array("product" => $product, "brand" => $brand)) ?>
                         <?php endif; ?>
                         <div class="clear"></div>
                         <br />
-                        <?php if((Images::model()->getProductGalleryArticlesCount($product->id) + Images::model()->getProductGalleryCount($product->id)) > 1):?>
+                        <?php if($product->gallery_count > 0):?>
                          <a href="<?php echo Yii::app()->createAbsoluteUrl("gallery/product",[
                             'product'=>$product->link,
                             'brand'=>$product->brand_data->link,
                             'language'=>Language::getCurrentZone(),
-                        ])?>"><?php echo Yii::t("main", 'Фотогалерея');?> (<?php echo (Images::model()->getProductGalleryArticlesCount($product->id) + Images::model()->getProductGalleryCount($product->id)) ?>)</a>
+                        ])?>"><?php echo Yii::t("main", 'Фотогалерея');?> (<?php echo $product->gallery_count ?>)</a>
                         <?php endif;?>
                        
                     </div>

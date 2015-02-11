@@ -39,12 +39,8 @@
                         'type'=>$goods->type_data->link, 
                         'language'=>Language::getCurrentZone(),
                     ));?>">
-                        <?php if (isset($goods->primary_image->image_data->size4_data->id)):?>
-                            <img src="<?php echo Yii::app()->createAbsoluteUrl("files/image", array(
-                                'id'=>$goods->primary_image->image_data->size4_data->id,
-                                'name'=>$goods->primary_image->image_data->size4_data->name,
-                                'language'=>Language::getCurrentZone(),
-                                )); ?>" alt="<?php echo $goods->brand_data->name." ".$goods->name ?>" />
+                        <?php if (!empty($goods->primary_image->image_data)):?>
+                            <?php echo $goods->primary_image->image_data->getHtml(NImages::SIZE_PRODUCT_WIDGET); ?>
                         <?php else :?>
                             <img src="/assets/img/photo/informers/1.png" style="height:37px; width: 30px;" alt="<?php echo $goods->brand_data->name." ".$goods->name ?>" />
                         <?php endif;?>

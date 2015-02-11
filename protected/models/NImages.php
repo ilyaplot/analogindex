@@ -4,13 +4,17 @@
  */
 class NImages extends CActiveRecord
 {
-    
+    public $copyExist = false;
     /**
      * Папка для хранения файлов
      * @var string
      */
     public $path = "/inktomia/db/analogindex/images";
     
+    /**
+     * Картинки для новостей
+     */
+    const SIZE_ARTICLE_BIG = '1024x1024';
     /**
      * Картинка для лайтбокса
      */
@@ -34,7 +38,8 @@ class NImages extends CActiveRecord
     /**
      * Превью на страницах брендов
      */
-    const SIZE_PRODUCT_BRAND = '131x131';
+    const SIZE_PRODUCT_BRAND = '130x130';
+
     
     const DEFAULT_FORMAT = 'png';
     
@@ -100,7 +105,12 @@ class NImages extends CActiveRecord
             // on create
         ];
     }
-
+    
+    /**
+     * Возвращает параметры размера
+     * @param type $size
+     * @return boolean
+     */
     public function getSizeOptions($size)
     {
         if (!$size) {
@@ -142,6 +152,11 @@ class NImages extends CActiveRecord
         return false;
     }
     
+    /**
+     * Возвращает путь к папке хранилища
+     * @param type $size
+     * @return boolean
+     */
     public function getStoragePath($size = null)
     {
         // Нет записи в бд - нет папки
@@ -162,7 +177,7 @@ class NImages extends CActiveRecord
         $path = "{$this->path}/{$size}/{$folder}/";
         
         if (!file_exists("{$this->path}/{$size}/{$folder}/")) {
-            mkdir($path, 0777, true);
+            @mkdir($path, 0777, true);
         }
         
         return "{$this->path}/{$size}/{$folder}/";
@@ -179,7 +194,7 @@ class NImages extends CActiveRecord
         if (!$this->isNewRecord && $size != null) {
             if ($size != 'source') {
                 $options = $this->getSizeOptions($size);
-                return $options->format;
+                return isset($options->format) ? $options->format : $this->extension;
             } else {
                 return $this->extension;
             }
@@ -190,6 +205,11 @@ class NImages extends CActiveRecord
     }
 
 
+    /**
+     * Возвращает extension файла
+     * @param type $filename
+     * @return boolean
+     */
     public function getFileExtension($filename)
     {
         $mime_type = mime_content_type($filename);
@@ -201,17 +221,31 @@ class NImages extends CActiveRecord
         return false;
     }
 
+    /**
+     * Возвращает полный путь к файлу, учитывая размер
+     * @param type $size
+     * @return type
+     */
     public function getFilename($size = null)
     {
 
         return $this->getStoragePath($size).$this->getPrimaryKey().".".$this->getExtension($size);
     }
     
+    /**
+     * аналог getFilename, но для новых файлов
+     * @param type $filename
+     * @return type
+     */
     public function getNewFilename($filename)
     {
         return $this->getStoragePath().$this->getPrimaryKey().".".$this->getFileExtension($filename);
     }
     
+    /**
+     * Ресайзер
+     * @return boolean
+     */
     public function createSizes()
     {
         include_once 'WideImage/WideImage.php';
@@ -238,6 +272,11 @@ class NImages extends CActiveRecord
         return true;
     }
     
+    /**
+     * Определяет, является ли файл картинкой
+     * @param type $filename
+     * @return boolean
+     */
     public function isImage($filename)
     {
         $mime_type = mime_content_type($filename);
@@ -255,13 +294,24 @@ class NImages extends CActiveRecord
      * @param string $type
      * @param string $name
      * @param string $source_url
+     * @param string $alt
      * @return boolean
      * @throws Exception
      * 
      * @todo Добавить нормальную обработку ошибок
      */
-    public function create($filename, $type, $name, $source_url=null)
+    public function create($filename, $type, $name, $source_url=null, $alt = '')
     {
+        $this->copyExist = false;
+        $hash = md5_file($filename);
+
+        if ($model = self::model()->findByAttributes(['body_hash'=>$hash, 'type'=>$type])) {
+            echo "Image extists".PHP_EOL;
+            echo $model->getHtml(self::SIZE_PRODUCT_BIG).PHP_EOL;
+            $this->copyExist = true;
+            return $model->id;
+        }
+
         $transaction = $this->getDbConnection()->beginTransaction();
        
         try {
@@ -275,6 +325,8 @@ class NImages extends CActiveRecord
             
             $this->name = preg_replace("/(\.\w+)?$/isu",'',$name);
             $this->name = Yii::app()->urlManager->translitUrl($this->name);
+            $this->alt = $alt;
+            $this->title = $alt;
             $this->type = $type;
             $this->extension = $this->getFileExtension($filename);
             $this->source_url = $source_url;
@@ -310,6 +362,36 @@ class NImages extends CActiveRecord
         return false;
     }
     
+    /**
+     * Возвращает абсолютный url для картинки, учитывая размер
+     * @param type $lang
+     * @return type
+     * 
+     * @todo Изменить путь к url
+     */
+    
+    public function createUrl($size, $lang = null)
+    {
+        if (empty($lang)) {
+            $lang = Yii::app()->language;
+        }
+        
+        return  Yii::app()->createAbsoluteUrl("files/newimage", [
+            'language' => Language::getZoneForLang($lang),
+            'id' =>  $this->id,
+            'size' => $size,
+            'name' => $this->name.".".$this->getExtension($size),
+        ]);
+    }
+
+    /**
+     * Отдает файл через x-accel-redirect
+     * @param type $id
+     * @param type $size
+     * @return boolean
+     * 
+     * @todo добавить проверку filename
+     */
     public static function AccelRedirect($id, $size) 
     {
 
@@ -323,25 +405,41 @@ class NImages extends CActiveRecord
 
         if (preg_match("/(?P<width>\d+)x(?P<height>\d+)/isu", $size ,$matches)) {
             $size = $matches['width']."x".$matches['height'];
+
             $options = $model->getSizeOptions($size);
             $options->format = "image/".$options->format;
-            if ($model->width < $matches['width'] && $model->height < $matches['height']) {
+            
+            if ((isset($options->notResize) && $options->notResize == true) 
+                    || ($model->width <= $matches['width'] && $model->height <= $matches['height'])) {
                 $size = 'source';
                 $options->format = $model->mime_type;
             }
         }
-       
+
         $filename = $model->getFilename($size);
-        
+
         $filesize = ($size == 'source') ? $model->filesize : filesize($filename);
+        $extension = $model->getExtension($size);
         $filename = str_replace("/inktomia/db/analogindex", '', $filename);
         
         header("Content-Type: {$options->format}");
         header("Content-Length: ".$filesize);
-        header("Content-Disposition: inline; filename=\"{$filename}\""); 
+        header("Content-Disposition: inline; filename=\"{$model->name}.{$extension}\""); 
         header('Content-Transfer-Encoding: binary');
         header("X-Accel-Redirect: {$filename}");
         return true;
     }
     
+    /**
+     * Возвращает html тэг изображения
+     * @param type $size
+     * @param type $lang
+     * @param type $htmlOptions
+     * @return type
+     */
+    public function getHtml($size, $lang = null, $htmlOptions = [])
+    {
+       return CHtml::image($this->createUrl($size, $lang), $this->alt, 
+               array_merge(['title'=>$this->title], $htmlOptions));
+    }
 }

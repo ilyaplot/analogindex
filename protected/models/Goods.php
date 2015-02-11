@@ -6,6 +6,8 @@
 class Goods extends CActiveRecord
 {
 
+    const IMAGES_LIMIT = 15;
+    
     public $generalCharacteristics = array(5, 6, 7, 8, 9, 11, 13, 14, 18, 22);
     public $appendVideos = 3;
     public $videos = [];
@@ -30,14 +32,16 @@ class Goods extends CActiveRecord
         return array(
             "type_data" => array(self::BELONGS_TO, "GoodsTypes", "type"),
             "brand_data" => array(self::BELONGS_TO, "Brands", "brand"),
-            "images" => array(self::HAS_MANY, "GoodsImages", "goods",
-                "order" => "images.priority asc, images.id asc",
+            "images" => [self::HAS_MANY, "GoodsImagesCopy", "goods",
                 "on" => "images.disabled = 0",
-            ),
+            ],
+            "gallery" => [self::HAS_MANY, "Gallery", "goods"],
+            "gallery_count" => [self::STAT, "Gallery", "goods"],
             'images_count' => [self::STAT, 'GoodsImages', 'goods'],
-            "primary_image" => array(self::HAS_ONE, "GoodsImages", "goods",
+            "primary_image" => array(self::HAS_ONE, "GoodsImagesCopy", "goods",
                 "order" => "primary_image.priority desc, primary_image.id asc",
             ),
+            
             "reviews" => array(self::HAS_MANY, "Reviews", "goods",
                 "order" => "reviews.priority desc",
                 "on" => "reviews.lang = '" . Yii::app()->language . "'",

@@ -25,13 +25,9 @@
                         'type'=>$product['model']->type_data->link, 
                         'language'=>Language::getCurrentZone(),
                     ])?>">
-                        <?php if (isset($product['model']->primary_image->image_data->size3_data)): ?>
-                            <img src="<?php echo Yii::app()->createAbsoluteUrl("files/image", array(
-                            'id'=>$product['model']->primary_image->image_data->size3_data->id,
-                            'name'=>$product['model']->primary_image->image_data->size3_data->name,
-                            'language'=>Language::getCurrentZone(),
-                            )); ?>" alt="<?php echo $product['name'] ?>" 
-                            title="<?php echo $product['name'] ?>" /><br />
+                        <?php if (isset($product['model']->primary_image)): ?>
+                            <?php echo $product['model']->primary_image->image_data->getHtml(NImages::SIZE_PRODUCT_LIST);?>
+                        <br />
                         <?php endif; ?>
                         <?=$product['name']?>
                     </a>

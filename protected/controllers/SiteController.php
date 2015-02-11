@@ -49,7 +49,7 @@ class SiteController extends Controller
     public function actionGoods($language, $type, $brand, $link)
     {
         $type = GoodsTypes::model()->findByAttributes(array("link" => $type));
-        if (!$type) 
+        if (!$type)
             throw new CHttpException(404, Yii::t("errors", "Страница не найдена"));
 
         $brand = Brands::model()->findByAttributes(array("link" => $brand));
@@ -59,74 +59,67 @@ class SiteController extends Controller
         $criteria = new CDbCriteria();
         $criteria->condition = "t.link = :link and t.brand = :brand";
         $criteria->params = array("link" => $link, "brand" => $brand->id);
-        $product = Goods::model()->with(array(
-                    //"rating",
-                    "images",
-                    //"synonims" => array(
-                    //    "on" => "synonims.visibled = 1"
-                    //),
-                    "primary_image",
-                ))->find($criteria);
+
+        $product = Goods::model()->cache(60 * 60)->with(['gallery_count'])->find($criteria);
         if (!$product) {
-            
             Yii::app()->request->redirect("/", true, 302);
             exit();
         }
-        
+
         if ($product->type !== $type->id) {
             $redirect = "/{$product->type_data->link}/{$brand->link}/{$product->link}.html";
-            Redirects::model()->deleteAllByAttributes(['from'=>$redirect]);
+            Redirects::model()->deleteAllByAttributes(['from' => $redirect]);
             Yii::app()->request->redirect($redirect, true, 302);
         }
-        
-       
+
+
         $articlesCriteria = new CDbCriteria();
         $articlesCriteria->select = 't.id, t.description, t.created, t.title, t.link, t.type';
         $articlesCriteria->condition = 't.lang = :lang and t.type = :type and product.goods = :product';
         $articlesCriteria->params = [
-            'lang'=>Yii::app()->language,
-            'type'=>  Articles::TYPE_NEWS,
-            'product'=>$product->id,
+            'lang' => Yii::app()->language,
+            'type' => Articles::TYPE_NEWS,
+            'product' => $product->id,
         ];
-        
+
         $newsCount = Articles::model()->with(['product'])->count($articlesCriteria);
         $articlesCriteria->limit = 5;
         $articlesCriteria->order = "t.created desc";
         $news = Articles::model()->with(['product'])->findAll($articlesCriteria);
-        
+
         $articlesCriteria->params = [
-            'lang'=>Yii::app()->language,
-            'type'=>  Articles::TYPE_OPINION,
-            'product'=>$product->id,
+            'lang' => Yii::app()->language,
+            'type' => Articles::TYPE_OPINION,
+            'product' => $product->id,
         ];
-        
+
         $opinionsCount = Articles::model()->with(['product'])->count($articlesCriteria);
         $articlesCriteria->limit = 5;
         $articlesCriteria->order = "t.created desc";
         $opinions = Articles::model()->with(['product'])->findAll($articlesCriteria);
-        
+
         $articlesCriteria->params = [
-            'lang'=>Yii::app()->language,
-            'type'=>  Articles::TYPE_HOWTO,
-            'product'=>$product->id,
+            'lang' => Yii::app()->language,
+            'type' => Articles::TYPE_HOWTO,
+            'product' => $product->id,
         ];
-        
+
         $howtoCount = Articles::model()->with(['product'])->count($articlesCriteria);
         $articlesCriteria->limit = 5;
         $articlesCriteria->order = "t.created desc";
         $howto = Articles::model()->with(['product'])->findAll($articlesCriteria);
-        
+
         $articlesCriteria->params = [
-            'lang'=>Yii::app()->language,
-            'type'=>  Articles::TYPE_REVIEW,
-            'product'=>$product->id,
+            'lang' => Yii::app()->language,
+            'type' => Articles::TYPE_REVIEW,
+            'product' => $product->id,
         ];
-        
+
         $reviewsCount = Articles::model()->with(['product'])->count($articlesCriteria);
         $articlesCriteria->limit = 5;
         $articlesCriteria->order = "t.created desc";
         $reviews = Articles::model()->with(['product'])->findAll($articlesCriteria);
-        
+
         $this->setPageTitle($product->type_data->name->item_name . " " . $brand->name . " " . $product->name);
         $this->addKeywords(array($product->type_data->name->item_name, $brand->name, $product->name));
 
@@ -143,7 +136,7 @@ class SiteController extends Controller
                 !RatingsGoods::model()->countByAttributes(array("goods" => $product->id, "user" => Yii::app()->user->id))) {
             $ratingDisabled = 0;
         }
-        
+
         $this->render("goods", array(
             "type" => $type,
             "brand" => $brand,
@@ -202,9 +195,9 @@ class SiteController extends Controller
         );
         $view = isset($views[$view]) ? $views[$view] : $views[1];
         $criteria = new CDbCriteria();
-        $criteria->compare("brand", $brand->id);
+        $criteria->compare("t.brand", $brand->id);
         if (isset($type->id)) {
-            $criteria->compare("type", $type->id);
+            $criteria->compare("t.type", $type->id);
         }
         $goodsCount = Goods::model()->cache(60 * 60 * 48)->count($criteria);
         $criteria->limit = $view['limit'];
@@ -212,12 +205,15 @@ class SiteController extends Controller
         $pages = new CPagination($goodsCount);
         $pages->setPageSize($view['limit']);
         $pages->applyLimit($criteria);
-        $goods = Goods::model()->cache(60 * 60 * 24)->with(array(
-                    'type_data' => array(
+        $goods = Goods::model()->cache(60 * 60 * 2)->with([
+                    'type_data' => [
                         "joinType" => "inner join",
-                    )
-                ))->findAll($criteria);
-        $this->pageTitle = $brand->name . (isset($type->name->name) ? ': '.$type->name->name : null);
+                    ],
+                    'type_data.name',
+                    //'primary_image',
+                    //'primary_image.image_data',
+                ])->findAll($criteria);
+        $this->pageTitle = $brand->name . (isset($type->name->name) ? ': ' . $type->name->name : null);
         $this->render("brand", array(
             "brand" => $brand,
             "goods" => $goods,
@@ -261,13 +257,13 @@ class SiteController extends Controller
             $pages->setItemCount($resIterator->getTotalFound());
             $criteria = new CDbCriteria();
             $criteria->addInCondition("t.id", $resIterator->getIdList());
-            $criteria->group = "t.id, rating.value";
+            //$criteria->group = "t.id, rating.value";
             $goods = Goods::model()->with(array(
                         "brand_data" => array(
                             "joinType" => "inner join"
                         ),
                         "primary_image",
-                        "rating"
+                        //"rating"
                     ))->findAll($criteria);
         }
 
@@ -496,13 +492,13 @@ class SiteController extends Controller
         $pages = new CPagination(Goods::model()->cache(60 * 60)->count($criteria));
         $pages->pageSize = 10;
         $pages->applyLimit($criteria);
-        $criteria->group = "t.id, rating.value";
+        //$criteria->group = "t.id, rating.value";
         $goods = Goods::model()->cache(60 * 60)->with(array(
                     "brand_data" => array(
                         "joinType" => "inner join"
                     ),
-                    "primary_image",
-                    "rating"
+                    //"primary_image",
+                    //"rating"
                 ))->findAll($criteria);
 
         $this->render("type", array(
@@ -528,9 +524,10 @@ class SiteController extends Controller
             "pages" => $pages,
         ));
     }
-    
+
     public function actionTest()
     {
-        $this->widget('application.widgets.BreadcrumbsWidget.BreadcrumbsWidget',['items'=>[]]);
+        $this->widget('application.widgets.BreadcrumbsWidget.BreadcrumbsWidget', ['items' => []]);
     }
+
 }

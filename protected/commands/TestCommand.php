@@ -10,6 +10,7 @@ class TestCommand extends CConsoleCommand
     
     public function actionFilter()
     {
+        //exit(0);
         $criteria = new CDbCriteria();
         $criteria->order = "id desc";
         $criteria->condition = "has_filtered = 0";
@@ -27,28 +28,31 @@ class TestCommand extends CConsoleCommand
         echo PHP_EOL;
     }
     
-    public function actionBrandImages()
+    public function actionArticleImage()
     {
-        include_once 'WideImage/WideImage.php';
-        $list = file_get_contents("./logos.txt");
-        $list = explode(PHP_EOL, $list);
-        unset($list[count($list)-1]);
-
-        $list = array_map(function($value){
-            return explode(" ", $value);
-        }, $list);
-        $downloader = new Downloader("http://ya.ru/", 5);
-        foreach ($list as $link) {
-            if ($brand = Brands::model()->findByAttributes(['name'=>$link[0]])) {
-                echo $link[0].PHP_EOL;
-                $filename = tempnam("/tmp", '_brand');
-                $downloader->downloadFile(trim($link[1]), $filename);
-                $mime = mime_content_type($filename);
-                $newFile = $filename.".".preg_replace("~image/(.*)~isu", "$1", $mime);
-                rename($filename, $newFile);
-                $filename = $newFile;
-                WideImage::load($filename)->resize(150, 150)->saveToFile($filename);
-                $brand->setFile($filename);
+        $images = ArticlesImages::model()->findAll();
+        foreach ($images as $image) {
+            $filename = "/tmp/_move_articles_".md5($image->id).".".$image->getExt();
+            if (!file_exists($image->getFilename())) {
+                continue;
+            }
+            copy($image->getFilename(), $filename);
+            $model = new NImages();
+            
+            if ($id = $model->create($filename, 'articles', $image->name, $image->source_url, $image->alt)) {
+                if ($model->copyExist == true) {
+                    unlink($filename);
+                }
+                
+                $gi = new ArticlesImagesCopy();
+                $gi->article = $image->article;
+                $gi->image = $id;
+                
+                if ($gi->validate()) {
+                    echo "+".PHP_EOL;
+                    echo $model->getHtml('1024x1024', $this->_model->lang).PHP_EOL;
+                    $gi->save();
+                }
             }
         }
     }
@@ -67,7 +71,8 @@ class TestCommand extends CConsoleCommand
             i.size6,
             gi.goods as goods,
             g.link as product,
-            b.link as brand
+            b.link as brand,
+            concat(b.name, ' ', g.name) as alt
             from ai_images i
             inner join ai_files f on f.id = i.file
             inner join ai_goods_images gi on gi.image = i.id
@@ -81,81 +86,38 @@ class TestCommand extends CConsoleCommand
             if (!file_exists($image->filename)){
                 continue;
             }
-            copy($image->filename, "/tmp/_move_{$image->name}");
-            if ($model->create("/tmp/_move_{$image->name}", 'goods', "{$image->brand}_{$image->product}.jpeg", $image->source_url)) {
+            $ext = explode(".", $image->name);
+            $ext = end($ext);
+            $filename = "/tmp/_move_".md5($image->name).".{$ext}";
+            copy($image->filename, $filename);
+            if ($id = $model->create($filename, 'goods', "{$image->brand}_{$image->product}.jpeg", $image->source_url, $image->alt)) {
+                if ($model->copyExist == true) {
+                    unlink($filename);
+                }
+                if (!$id) {
+                    echo "NOT ID";
+                    exit();
+                }
                 $gi = new GoodsImagesCopy();
                 $gi->goods = $image->goods;
-                $gi->image = $model->id;
+                $gi->image = $id;
                 
-                if ($gi->save()) {
-                    
-                    $ext = explode(".", $image->name);
-                    $ext = end($ext);
-                    
-                    $redirect = new Redirects();
-                    $redirect->from = "/_image/id{$image->file}/{$image->name}";
-                    $redirect->to = "/image/{$model->id}/1024x1024/{$image->brand}_{$image->product}.jpeg";
-                    $redirect->save();
-                    
-                    $redirect = new Redirects();
-                    $redirect->from = "/_image/id{$image->file}/{$image->brand}_{$image->product}.{$ext}";
-                    $redirect->to = "/image/{$model->id}/1024x1024/{$image->brand}_{$image->product}.jpeg";
-                    $redirect->save();
-                    
-                    echo "/_image/id{$image->file}/{$image->brand}_{$image->product}.{$ext}".PHP_EOL;
-                    echo "/image/{$model->id}/1024x1024/{$image->brand}_{$image->product}.jpeg".PHP_EOL;
-                    echo "/_image/id{$image->size3}/{$image->brand}_{$image->product}.{$ext}".PHP_EOL;
-                    echo "/_image/id{$image->file}/{$image->name}".PHP_EOL;
-                    
-                    if (!empty($image->size2)) {
-                        $redirect = new Redirects();
-                        $redirect->from = "/_image/id{$image->size2}/{$image->brand}_{$image->product}.{$ext}";
-                        $redirect->to = "/image/{$model->id}/510x510/{$image->brand}_{$image->product}.jpeg";
-                        $redirect->save();
-                        
-                        $redirect = new Redirects();
-                        $redirect->from = "/_image/id{$image->size2}/{$image->name}";
-                        $redirect->to = "/image/{$model->id}/510x510/{$image->brand}_{$image->product}.jpeg";
-                        $redirect->save();
-                    }
-                    
-                    if (!empty($image->size3)) {
-                        $redirect = new Redirects();
-                        $redirect->from = "/_image/id{$image->size3}/{$image->brand}_{$image->product}.{$ext}";
-                        $redirect->to = "/image/{$model->id}/91x91/{$image->brand}_{$image->product}.png";
-                        $redirect->save();
-                        
-                        $redirect = new Redirects();
-                        $redirect->from = "/_image/id{$image->size3}/{$image->name}";
-                        $redirect->to = "/image/{$model->id}/91x91/{$image->brand}_{$image->product}.png";
-                        $redirect->save();
-                    }
-                    
-                    if (!empty($image->size4)) {
-                        $redirect = new Redirects();
-                        $redirect->from = "/_image/id{$image->size4}/{$image->brand}_{$image->product}.{$ext}";
-                        $redirect->to = "/image/{$model->id}/30x37/{$image->brand}_{$image->product}.gif";
-                        $redirect->save();
-                        
-                        $redirect = new Redirects();
-                        $redirect->from = "/_image/id{$image->size4}/{$image->name}";
-                        $redirect->to = "/image/{$model->id}/30x37/{$image->brand}_{$image->product}.gif";
-                        $redirect->save();
-                    }
-                    
-                    if (!empty($image->size6)) {
-                        $redirect = new Redirects();
-                        $redirect->from = "/_image/id{$image->size6}/{$image->brand}_{$image->product}.{$ext}";
-                        $redirect->to = "/image/{$model->id}/130x130/{$image->brand}_{$image->product}.png";
-                        $redirect->save();
-                        
-                        $redirect = new Redirects();
-                        $redirect->from = "/_image/id{$image->size6}/{$image->name}";
-                        $redirect->to = "/image/{$model->id}/130x130/{$image->brand}_{$image->product}.png";
-                        $redirect->save();
-                    }
+                if ($gi->validate()) {
+                    $gi->save();
                 }
             }
+        }
+    }
+    
+    public function actionGallery()
+    {
+        $criteria = new CDbCriteria();
+        $criteria->condition = 't.goods = :goods';
+        $criteria->params = ['goods'=>'4415'];
+        $criteria->order = 't.id asc';
+        $gallery = Gallery::model()->with(['image_data'])->findAll($criteria);
+        foreach ($gallery as $galleryItem) {
+            echo $galleryItem->image_data->getHtml('130x130').PHP_EOL;
         }
     }
 }

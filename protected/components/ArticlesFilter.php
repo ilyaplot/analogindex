@@ -117,10 +117,11 @@ class ArticlesFilter
                     $url = "http:".$url;
                 }
                 
-                if (!$imageModel = ArticlesImages::model()->findByAttributes(['source_url'=>$url, 'article'=>$this->_model->id])) {
-                    $imageModel = new ArticlesImages();
-                    $imageModel->source_url = $url;
+                if (!$imageModel = NImages::model()->findByAttributes(['source_url'=>$url])) {
+                    
+                    
                     $tmpfname = tempnam("/tmp", "_analogindex_tmp");
+                    @chmod($tmpfname, 0777);
                     if (!$file = fopen($tmpfname, 'w')) {
                         echo "Не могу открыть файл для записи {$tmpfname}".PHP_EOL;
                         $this->_model->broken_images = 1;
@@ -153,34 +154,37 @@ class ArticlesFilter
                         continue;
                     } 
                     curl_close($ch);
-                    $imageModel->save();
-                    if($imageModel->setFile($tmpfname)) {
-                        $imageModel->name = Yii::app()->urlManager->translitUrl($this->_model->title).".".$imageModel->getExt();
-                        $imageModel->name = str_replace("x-ms-bmp", "bmp", $imageModel->name);
-                        $imageModel->article = $this->_model->id;
-                        $imageModel->alt = htmlspecialchars(strip_tags($alt));
+                    
+              
+                    $model = new NImages();
+                    
+                    if ($id = $model->create($tmpfname, 'article', $alt, $url, $alt)) {
+                        if ($model->copyExist == true) {
+                            unlink($tmpfname);
+                        }
+
+                        $gi = new ArticlesImagesCopy();
+                        $gi->article = $this->_model->id;
+                        $gi->image = $id;
+
+                        if ($gi->validate()) {
+                            echo "+".PHP_EOL;
+                            echo $model->getHtml('1024x1024').PHP_EOL;
+                            $gi->save();
+                        }
+                        
+                        $imageModel = NImages::model()->findByPk($id);
                         $imageModel->alt_replaced = $alt_replaced;
                         $imageModel->save();
-                        echo "+";
-                        @unlink($tmpfname);
                     } else {
-                        $image->remove();
                         $this->_model->broken_images = 1;
+                        $image->remove();
                         @unlink($tmpfname);
                         continue;
                     }
-                } elseif($imageModel->alt_replaced != $alt_replaced) {
-                    $imageModel->alt_replaced = $alt_replaced;
-                    $imageModel->save();
                 }
-                
-                $url = Yii::app()->createAbsoluteUrl("files/newsimage", [
-                    'language' => Language::getZoneForLang($this->_model->lang),
-                    'id'=>$imageModel->id,
-                    'name'=>$imageModel->name,
-                ]);
-                $alt = htmlspecialchars(strip_tags($alt));
-                $image->replaceWith('<img src="'.$url.'" alt="'.$alt.'" />'); 
+                echo $this->_model->lang.PHP_EOL;
+                $image->replaceWith($imageModel->getHtml(NImages::SIZE_ARTICLE_BIG, $this->_model->lang)); 
                 
             }
         }
