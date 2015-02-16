@@ -28,34 +28,25 @@ class TestCommand extends CConsoleCommand
         echo PHP_EOL;
     }
     
-    public function actionArticleImage()
+    public function actionFilterThread()
     {
-        $images = ArticlesImages::model()->findAll();
-        foreach ($images as $image) {
-            $filename = "/tmp/_move_articles_".md5($image->id).".".$image->getExt();
-            if (!file_exists($image->getFilename())) {
-                continue;
-            }
-            copy($image->getFilename(), $filename);
-            $model = new NImages();
-            
-            if ($id = $model->create($filename, 'articles', $image->name, $image->source_url, $image->alt)) {
-                if ($model->copyExist == true) {
-                    unlink($filename);
-                }
-                
-                $gi = new ArticlesImagesCopy();
-                $gi->article = $image->article;
-                $gi->image = $id;
-                
-                if ($gi->validate()) {
-                    echo "+".PHP_EOL;
-                    echo $model->getHtml('1024x1024', $this->_model->lang).PHP_EOL;
-                    $gi->save();
-                }
-            }
+        //exit(0);
+        $criteria = new CDbCriteria();
+        $criteria->condition = "has_filtered = 0 and id > ".rand(1,145330);
+        $criteria->limit = 15;
+        //$criteria->condition = 'id = 142283';
+        $articles = Articles::model()->findAll($criteria);
+        $filter = new ArticlesFilter();
+        
+        foreach($articles as $article) {
+            echo date("Y-m-d H:i:s ").$article->id.PHP_EOL;
+            $article = $filter->filter($article);
+            $article->save();
         }
+        GoodsArticles::model()->filter();
+        echo PHP_EOL;
     }
+    
     
     public function actionImage()
     {

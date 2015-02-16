@@ -419,4 +419,28 @@ class Goods extends CActiveRecord
         return $result;
     }
     
+    public function getGalleryCount()
+    {
+        $criteria = new CDbCriteria();
+        $criteria->condition = "t.goods = :product "
+                . "and image_data.width > 299 "
+                . "and image_data.height > 299 "
+                ."and (
+                    image_data.alt like concat('%', REPLACE(:brand_name, ' ', '_'), '%')
+                    or image_data.alt like concat('%', REPLACE(:product_name, ' ', '_'), '%')
+                )";
+        
+        $criteria->params = [
+            'product' => $this->id,
+            'product_name' => $this->name,
+            'brand_name' => $this->brand_data->name,
+        ];
+        
+        // Количество найденных элементов
+        return Gallery::model()->cache(60*60)->with([
+            'image_data'=>['joinType'=>'inner join'],
+        ])->count($criteria);
+        
+    }
+    
 }

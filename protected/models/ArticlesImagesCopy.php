@@ -19,7 +19,8 @@ class ArticlesImagesCopy extends CActiveRecord
     public function relations()
     {
         return array(
-            "image_data" => array(self::BELONGS_TO, "Images", "image"),
+            "image_data" => array(self::BELONGS_TO, "NImages", "image"),
+            "article_data" => array(self::BELONGS_TO, "Articles", "article"),
         );
     }
 
@@ -40,5 +41,10 @@ class ArticlesImagesCopy extends CActiveRecord
                 'criteria'=>['condition'=>'image = :image','params'=>['image'=>  $this->image]]
             ]
         ];
+    }
+    
+    public function getPreviewUrl()
+    {
+        return isset($this->image_data) ? $this->image_data->createUrl(NImages::SIZE_ARTICLE_PREVIEW) : false;
     }
 }

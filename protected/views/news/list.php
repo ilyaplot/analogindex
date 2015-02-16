@@ -44,14 +44,8 @@
                     'language' => Language::getCurrentZone()
                 ))
                 ?>">
-                       <?php if ($product->primary_image): ?>
-                        <img src="<?php
-                        echo Yii::app()->createUrl("files/image", array(
-                            'id' => $product->primary_image->image_data->size3_data->id,
-                            'name' => $product->primary_image->image_data->size3_data->name,
-                            'language' => Language::getCurrentZone(),
-                        ));
-                        ?>" alt="<?php echo $product->brand_data->name . " " . $product->name ?>" /></a>
+                       <?php if ($product->primary_image->image_data): ?>
+                        <?php echo $product->primary_image->image_data->getHtml(NImages::SIZE_ARTICLE_PREVIEW);?></a>
                     <?php endif; ?>
             </div>
             <div class="mnf_clr">

@@ -64,24 +64,24 @@ $types = (object) [
                            "language" => Language::getCurrentZone(),
                        ))
                        ?>"><?php echo $type->name ?></a>
-    <?php endif; ?>
-<?php endforeach; ?>
+                   <?php endif; ?>
+               <?php endforeach; ?>
         </span>
     </li>
 </ul>
 <div class="manufacture-categories clr">
     <div class="mnf_logo">
-        <?php if ($product->primary_image): ?>Ï
-        <a href="<?php
-        echo Yii::app()->createUrl("site/goods", array(
-            'link' => $product->link,
-            'brand' => $product->brand_data->link,
-            'type' => $product->type_data->link,
-            'language' => Language::getCurrentZone()
-        ))
-        ?>">
-        
-            <?php echo $product->primary_image->image_data->getHtml(NImages::SIZE_PRODUCT_LIST); ?>
+        <?php if ($product->primary_image): ?>
+            <a href="<?php
+            echo Yii::app()->createUrl("site/goods", array(
+                'link' => $product->link,
+                'brand' => $product->brand_data->link,
+                'type' => $product->type_data->link,
+                'language' => Language::getCurrentZone()
+            ))
+            ?>">
+
+                <?php echo $product->primary_image->image_data->getHtml(NImages::SIZE_PRODUCT_LIST); ?>
             </a>
         <?php endif; ?>
     </div>
@@ -107,12 +107,12 @@ $types = (object) [
             <?php foreach ($characteristics as $catalog): ?>
                 <?php foreach ($catalog as $characteristic): ?>
                     <?php echo $characteristic['characteristic_name'] . ": " . $characteristic['value'] . PHP_EOL; ?><br />
-    <?php endforeach; ?>
+                <?php endforeach; ?>
             <?php endforeach; ?>
         </small>
         <div class="mnf-catLiks clr">
-<?php foreach ($types as $type): ?>
-                    <?php if ($count = GoodsArticles::model()->getCount($product->id, $type->link)): ?>
+            <?php foreach ($types as $type): ?>
+                <?php if ($count = GoodsArticles::model()->getCount($product->id, $type->link)): ?>
                     <a <?php if ($type->link == $type_selected) : ?>
                             class="active"
                         <?php endif; ?>
@@ -124,8 +124,8 @@ $types = (object) [
                             "language" => Language::getCurrentZone(),
                         ))
                         ?>"><?php echo $type->name ?></a>
-    <?php endif; ?>
-<?php endforeach; ?>
+                    <?php endif; ?>
+                <?php endforeach; ?>
         </div>
     </div>
 </div>
@@ -144,7 +144,7 @@ $this->widget('LinkPager', array(
 ));
 ?>
 <div class="news">
-<?php foreach ($news as $item): ?>
+    <?php foreach ($news as $item): ?>
         <div class="view_bl" itemscope itemtype="http://schema.org/NewsArticle">
             <div class="view_bl-head clr">
                 <div class="view_bl-head-l flRight">
@@ -154,21 +154,20 @@ $this->widget('LinkPager', array(
             </div>
             <div class="view_bl-textView">
                 <h2 itemprop="name"><?php echo $item->title ?></h2>
-                <?php if (!empty($item->preview_image)) : ?>
+                <?php if (!empty($item->preview_image->image_data)) : ?>
                     <a class="news-preview" href="<?php echo Yii::app()->createAbsoluteUrl("articles/index", ['type' => $item->type, 'link' => $item->link, 'id' => $item->id, 'language' => Language::getCurrentZone()]); ?>">
-                        <img itemprop="image" src="<?php echo $item->preview_image->getPreviewUrl() ?>" class="news_preview" 
-                             alt="<?php echo $item->preview_image->alt ?>"/>
+                        <?php echo $item->preview_image->image_data->getHtml(NImages::SIZE_ARTICLE_PREVIEW, null, ['itemprop' => "image", 'class' => "news_preview"]); ?>
                     </a>
                 <?php endif; ?>
                 <span itemprop="description"><?php echo $item->description ?></span>...
-    <?php if (!empty($item->preview_image)) : ?>
+                <?php if (!empty($item->preview_image->image_data)) : ?>
                     <div style="clear: both;"></div>
-        <?php endif; ?>
+                <?php endif; ?>
             </div>
             <div class="view_bl-replyLink"><?php echo Yii::t("main", 'Читать полностью') ?> : <a itemprop="url" href="<?php echo Yii::app()->createAbsoluteUrl("articles/index", ['type' => $item->type, 'link' => $item->link, 'id' => $item->id, 'language' => Language::getCurrentZone()]); ?>"><?php echo $item->title ?></a></div>
 
         </div>
-<?php endforeach; ?>
+    <?php endforeach; ?>
 </div>
 <?php
 $this->widget('LinkPager', array(

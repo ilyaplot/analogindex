@@ -1,6 +1,10 @@
 <ul class="breadcrumbs breadcrumb">
     <li itemscope itemtype="http://data-vocabulary.org/Breadcrumb" itemref="breadcrumb-1">
-        <span itemprop="title"><a itemprop="url" href="http://analogindex.<?php echo Language::getCurrentZone() ?>/"><?php echo Yii::t('main', 'Главная') ?></a></span>
+        <span itemprop="title">
+            <a itemprop="url" href="http://analogindex.<?php echo Language::getCurrentZone() ?>/">
+                <?php echo Yii::t('main', 'Главная') ?>
+            </a>
+        </span>
         <span class="divider">/</span>
     </li>
     <li itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-1" itemref="breadcrumb-2">
@@ -14,19 +18,19 @@
                 "language" => Language::getCurrentZone(),
                 "type" => $product->type_data->link,
             ));
-            ?>"><?php echo $brand->name ?></a></span>
+            ?>"><?php echo $product->brand_data->name ?></a></span>
         <span class="divider">/</span>
     </li>
     <li itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-3" itemref="breadcrumb-4">
         <span itemprop="title"><a itemprop="url" href="<?php
             echo Yii::app()->createUrl("site/goods", array(
                 'link' => $product->link,
-                'brand' => $brand->link,
+                'brand' => $product->brand_data->link,
                 'type' => $product->type_data->link,
                 'language' => Language::getCurrentZone(),
             ));
             ?>">
-                <?php echo $brand->name ?> <?php echo $product->name ?>
+                                      <?php echo $product->brand_data->name ?> <?php echo $product->name ?>
             </a></span>
         <span class="divider">/</span>
     </li>
@@ -200,10 +204,20 @@
             min-height: 32px !important;
         }
 
+        .gallery-pager {
+            padding-top: 7px;
+            padding-bottom: 7px;
+            width: 790px;
+            margin: auto;
+        }
+
+        .gallery-pager .pagination {
+            margin: auto;
+        }
     </style>
     <script type="text/javascript">
         function imageLoaded() {
-            document = document;
+            //document = document;
             var elem = document.getElementById('loader');
             elem.setAttribute('display', 'none');
             elem.remove();
@@ -214,33 +228,77 @@
             <div id="loader">
                 <img onload="imageLoaded();" src="/assets/img/loading.gif" /> <?php echo Yii::t("gallery", 'Подождите, фотография загружается') ?>... 
             </div>
-            <span itemprop="name" style="display: none"><?php echo $image->alt ?></span>
-            <img itemprop="image" src="<?php echo $image->src ?>" alt="<?php echo $image->alt ?>" title="<?php echo $image->alt ?>"/>
-            <?php if ($image->prev_url != null): ?>
-                <a title="<?php echo Yii::t("gallery", 'Предыдущее фото') ?>" href="<?php echo $image->prev_url ?>#gallery" class="button_prev"></a>
+
+            <span itemprop="name" style="display: none"><?php echo $currentImage->image_data->title ?></span>
+            <?php echo $currentImage->image_data->getHtml(NImages::SIZE_PRODUCT_BIG, null, ["itemprop" => "image"]); ?>
+            <?php if ($currentImage->prev_url != null): ?>
+                <a title="<?php echo Yii::t("gallery", 'Предыдущее фото') ?>" href="<?php echo $currentImage->prev_url ?>#gallery" class="button_prev"></a>
             <?php endif; ?>
-            <?php if ($image->next_url != null): ?>
-                <a title="<?php echo Yii::t("gallery", 'Предыдущее фото') ?>" href="<?php echo $image->next_url ?>#gallery" class="button_next"></a>
+            <?php if ($currentImage->next_url != null): ?>
+                <a title="<?php echo Yii::t("gallery", 'Следующее фото') ?>" href="<?php echo $currentImage->next_url ?>#gallery" class="button_next"></a>
             <?php endif; ?>
-            <?php if (!empty($image->article)): ?>
+            <?php if (!empty($currentImage->image_data->article) && !empty($currentImage->image_data->article->article_data(['cache' => 60 * 60, 'select' => 'title, description, link, id']))): ?>
                 <div class="article">
-                    <?php echo Yii::t("gallery", 'Фотография из') ?> <?php echo Yii::t("gallery", $image->article->type_name) ?>: <a itemprop="associatedArticle" href="<?php echo $image->article->url ?>"><?php echo $image->article->title ?></a>
-                    <p itemprop="description"><?php echo $image->article->description ?></p>
+                    <?php echo Yii::t("gallery", 'Фотография из') ?>
+                    <?php Yii::app()->sourceLanguage = 'en';?>
+                    <?php echo Yii::t("gallery", $currentImage->image_data->article->article_data->type) ?>: 
+                    <?php Yii::app()->sourceLanguage = 'ru';?>
+                    <a itemprop="associatedArticle" href="<?php echo $currentImage->image_data->article->article_data->url ?>">
+                        <?php echo $currentImage->image_data->article->article_data->title ?>
+                    </a>
+                    <p itemprop="description"><?php echo $currentImage->image_data->article->article_data->description ?></p>
                 </div>
             <?php endif; ?>
+
+        </div>
+        <div class="gallery-pager">
+            <center>
+                <?php
+                $this->widget('LinkPager', array(
+                    'currentPage' => $pages->getCurrentPage(),
+                    'itemCount' => $pages->getItemCount(),
+                    'pageSize' => Gallery::GALLERY_SIZE,
+                    'maxButtonCount' => 8,
+                    'header' => '',
+                    'htmlOptions' => array('class' => 'pagination'),
+                    'firstPageLabel' => Yii::t("main", "Первая"),
+                    'lastPageLabel' => Yii::t("main", "Последняя") . " (" . ceil($pages->getItemCount() / Gallery::GALLERY_SIZE) . ")",
+                    'nextPageLabel' => Yii::t("main", "Следующая"),
+                    'prevPageLabel' => Yii::t("main", "Предыдущая"),
+                ));
+                ?>
+            </center>
         </div>
         <table class="list">
             <?php foreach ($gallery as $list): ?>
                 <tr>
                     <?php foreach ($list as $item): ?>
                         <td itemscope itemtype="http://schema.org/ImageObject">
-                            <a itemtype="contentUrl" href="<?php echo $item->link ?>#gallery">
-                                <img itemtype="thumbnail" src="<?php echo $item->preview_src ?>" alt="<?php echo $item->alt ?>" title="<?php echo $item->alt ?>" />
+                            <a itemtype="contentUrl" href="<?php echo $item->self_url ?>#gallery">
+                                <?php echo $item->image_data->getHtml(NImages::SIZE_PRODUCT_GALLERY, null, ["itemtype" => "thumbnail"]); ?>
                             </a>
                         </td>
                     <?php endforeach; ?>
                 </tr>
             <?php endforeach; ?>
         </table>
+        <div class="gallery-pager">
+            <center>
+                <?php
+                $this->widget('LinkPager', array(
+                    'currentPage' => $pages->getCurrentPage(),
+                    'itemCount' => $pages->getItemCount(),
+                    'pageSize' => Gallery::GALLERY_SIZE,
+                    'maxButtonCount' => 8,
+                    'header' => '',
+                    'htmlOptions' => array('class' => 'pagination'),
+                    'firstPageLabel' => Yii::t("main", "Первая"),
+                    'lastPageLabel' => Yii::t("main", "Последняя") . " (" . ceil($pages->getItemCount() / Gallery::GALLERY_SIZE) . ")",
+                    'nextPageLabel' => Yii::t("main", "Следующая"),
+                    'prevPageLabel' => Yii::t("main", "Предыдущая"),
+                ));
+                ?>
+            </center>
+        </div>
     </div>
 </div>

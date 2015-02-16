@@ -21,6 +21,7 @@ class ListGoodsWidget extends CWidget
     {
         $criteria = new CDbCriteria();
         $criteria->order = "brand_data.name asc, t.name asc";
+
         $criteria->limit = $this->limit;
         if (!empty($this->type)) {
             $type = GoodsTypes::model()->cache(60 * 60)->findByAttributes(array("link" => $this->type));
@@ -34,11 +35,12 @@ class ListGoodsWidget extends CWidget
             $criteria->addInCondition('t.id', $this->in);
         }
         
+        
         $criteria->group = "t.id, rating.value";
-        //$criteria->order = "t.updated desc";
+        $criteria->order = "t.updated desc";
         
         
-        $data = Goods::model()->cache(60 * 60)->with([
+        $data = Goods::model()->cache(60 * 60 * 2)->with([
                     "brand_data" => [
                         "joinType" => "inner join"
                     ],

@@ -29,9 +29,9 @@ $type = empty($type) ? 'news' : $type;
             <small>
                 <?php echo Yii::app()->dateFormatter->formatDateTime($news->created, 'long'); ?>
             </small>
-            <?php if (!empty($news->preview_image)) :?>
+            <?php if (!empty($news->preview_image->image_data)) :?>
             <a style="width: 130px; max-height: 130px; margin: 7px; text-align: center; display: table-cell; vertical-align: middle; float: left;" href="<?php echo Yii::app()->createAbsoluteUrl("articles/index", ['type'=>$news->type,'link'=>$news->link, 'id'=>$news->id, 'language'=>  Language::getCurrentZone()]); ?>">
-                <img style="padding: 0px; margin: 0px;" itemprop="image" src="<?php echo $news->preview_image->getPreviewUrl()?>" alt="<?php echo $news->preview_image->alt?>"/>
+                <?php echo $news->preview_image->image_data->getHtml(NImages::SIZE_ARTICLE_PREVIEW);?>
             </a>
             <?php endif; ?>
             <p itemprop="description"><?php echo $news->description ?>...</p>

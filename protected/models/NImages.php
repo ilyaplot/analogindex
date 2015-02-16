@@ -16,6 +16,11 @@ class NImages extends CActiveRecord
      */
     const SIZE_ARTICLE_BIG = '1024x1024';
     /**
+     * Превьюшки новостей
+     */
+    const SIZE_ARTICLE_PREVIEW = '130x130';
+    
+    /**
      * Картинка для лайтбокса
      */
     const SIZE_PRODUCT_BIG = '1024x1024';
@@ -39,6 +44,10 @@ class NImages extends CActiveRecord
      * Превью на страницах брендов
      */
     const SIZE_PRODUCT_BRAND = '130x130';
+    /**
+     * Превьюшки в галерее
+     */
+    const SIZE_PRODUCT_GALLERY = '130x130';
 
     
     const DEFAULT_FORMAT = 'png';
@@ -106,6 +115,14 @@ class NImages extends CActiveRecord
         ];
     }
     
+    public function relations()
+    {
+        return [
+            'article'=>[self::HAS_ONE, 'ArticlesImagesCopy', 'image'],
+        ];
+    }
+
+
     /**
      * Возвращает параметры размера
      * @param type $size
@@ -395,7 +412,7 @@ class NImages extends CActiveRecord
     public static function AccelRedirect($id, $size) 
     {
 
-        $model = self::model()->findByPk($id);
+        $model = self::model()->cache(60*60*24)->findByPk($id);
         
         if (!$model)
             return false;

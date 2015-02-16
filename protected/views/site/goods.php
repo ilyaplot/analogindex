@@ -135,7 +135,7 @@ $this->widget('application.widgets.BreadcrumbsWidget.BreadcrumbsWidget',['items'
                             'product'=>$product->link,
                             'brand'=>$product->brand_data->link,
                             'language'=>Language::getCurrentZone(),
-                        ])?>"><?php echo Yii::t("main", 'Фотогалерея');?> (<?php echo $product->gallery_count ?>)</a>
+                        ])?>"><?php echo Yii::t("main", 'Фотогалерея');?> (<?php echo $product->getGalleryCount() ?>)</a>
                         <?php endif;?>
                        
                     </div>

@@ -32,7 +32,8 @@ class SitemapCommand extends ConsoleCommand
 
         $products = Goods::model()->with([
             "brand_data", 
-            "type_data"
+            "type_data",
+            "gallery_count",
         ])->findAll($criteria);
         
         $criteria = new CDbCriteria();
@@ -55,13 +56,12 @@ class SitemapCommand extends ConsoleCommand
                     'lastmod'=>date("Y-m-d\TH:i:s+00:00", strtotime($product->updated)),
                 ];
                     
-                list($countImages, $gallery, $image) = Images::model()->getProductGallery($product->id);
-                
-                foreach ($gallery as $item) {
+                if ($product->gallery_count > 0) {
                     $urls[] = [
-                        'url'=>str_replace("+", "%2B", $item->link),
+                        'url'=>str_replace("+", "%2B", "http://analogindex.{$domain}/gallery/{$product->brand_data->link}_{$product->link}.html"),
                     ];
                 }
+                
             }
             
             foreach($brands as $brand) {

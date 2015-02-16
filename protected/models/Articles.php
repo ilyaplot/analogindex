@@ -116,7 +116,14 @@ class Articles extends CActiveRecord
     
     public function getUrl()
     {
-        return "/".$this->type."/".$this->link."_".$this->id.".html";
+
+        return Yii::app()->createAbsoluteUrl("articles/index", [
+            'type'=>  $this->type, 
+            'link'=>  $this->link,
+            'id'=>  $this->id,
+            'language'=>  Language::getZoneForLang($this->lang),
+        ]);
+
     }
 
 
@@ -160,8 +167,8 @@ class Articles extends CActiveRecord
                 'joinType'=>'inner join',
                 'condition'=>'product.disabled = 0',
             ],
-            "preview_image"=>[self::HAS_ONE, "ArticlesImages", "article", 
-                'condition'=>'preview_image.has_preview = 1',
+            "preview_image"=>[self::HAS_ONE, "ArticlesImagesCopy", "article", 
+                //'condition'=>'preview_image.has_preview = 1',
             ],
             'tags'=>[self::HAS_MANY, 'ArticlesTags', 'article'],
         ];
