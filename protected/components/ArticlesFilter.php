@@ -139,6 +139,7 @@ class ArticlesFilter
                     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
                     curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
                     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+                    //curl_setopt($ch, CURLOPT_SSLVERSION, 3);
                     curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
                     curl_setopt($ch, CURLOPT_TIMEOUT, 100);
                     curl_setopt($ch, CURLOPT_FILE, $file);

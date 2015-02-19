@@ -82,7 +82,7 @@ class SourcesDevspec extends CActiveRecord
         if ($this->isNewRecord) {
             $this->created = new CDbExpression("NOW()");
         } else {
-            $this->size = filesize($this->getFilename());
+            $this->size = @filesize($this->getFilename());
         }
         return parent::beforeSave();
     }

@@ -189,7 +189,7 @@ class Downloader
      * @param type $filename
      * @return boolean
      */
-    public function downloadFile($url, $filename)
+    public function downloadFile($url, $filename, $skipCode=null)
     {
         if (!$fh = fopen($filename, "w")) {
             echo "Невозможно открыть файл для записи {$filename}".PHP_EOL;
@@ -225,9 +225,15 @@ class Downloader
             return $this->downloadFile($url, $filename);
         } else {
             $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            
+            if (is_array($skipCode) && in_array($code, $skipCode)) {
+                echo "Http code {$code} {$url}.".PHP_EOL;
+                return false;
+            }
+            
             if ($code != 200 && $code != 203) {
                 $this->deleteProxy($proxy);
-                echo "Http code {$code}.".PHP_EOL;
+                echo "Http code {$code} {$url}.".PHP_EOL;
                 @unlink($filename);
                 return $this->downloadFile($url, $filename);
             }

@@ -97,7 +97,7 @@
             (function (d, w, c) {
                 (w[c] = w[c] || []).push(function() {
                     try {
-                        w.yaCounter25369559 = new Ya.Metrika({id:25369559,
+                        w.yaCounter<?php echo (Yii::app()->language == 'ru') ? 25369559 : 28579576?> = new Ya.Metrika({id:<?php echo (Yii::app()->language == 'ru') ? 25369559 : 28579576?>,
                                 webvisor:true,
                                 clickmap:true,
                                 trackLinks:true,
@@ -117,7 +117,7 @@
                 } else { f(); }
             })(document, window, "yandex_metrika_callbacks");
             </script>
-            <noscript><div><img src="//mc.yandex.ru/watch/25369559" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+            <noscript><div><img src="//mc.yandex.ru/watch/<?php echo (Yii::app()->language == 'ru') ? 25369559 : 28579576?>" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
             <!-- /Yandex.Metrika counter -->
         </footer>
     </div>

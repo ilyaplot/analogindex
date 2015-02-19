@@ -82,7 +82,7 @@ return array(
                 array( // -- CProfileLogRoute -----------------------
                     'class'=>'CProfileLogRoute',
                     'levels'=>'profile',
-                    'enabled'=>false ,
+                    'enabled'=>false,
                 ),
             ),
         ),

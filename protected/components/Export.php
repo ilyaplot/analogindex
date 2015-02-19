@@ -9,7 +9,7 @@ class Export
             $criteria = new CDbCriteria();
             $criteria->addInCondition('name', $tags);
             $criteria->select = "id";
-            $tags = Tags::model()->findAll($criteria);
+            $tags = Tags::model()->cache(60*60)->findAll($criteria);
             $in = [];
             foreach($tags as $tag) {
                 $in[] = $tag->id;
@@ -21,7 +21,7 @@ class Export
                 $criteria->order = "field(tag_data.type, 'product', 'brand', 'os', 'word'), articles_data.created desc";
                 $criteria->limit = $limit;
                 $criteria->group = "articles_data.id";
-                $newsTags = ArticlesTags::model()->cache(60)->with(['articles_data', 'tag_data'])->findAll($criteria);
+                $newsTags = ArticlesTags::model()->cache(60*60)->with(['articles_data', 'tag_data'])->findAll($criteria);
                 
                 ob_start();
                 extract(['newsTags'=>$newsTags]);
@@ -43,7 +43,7 @@ class Export
             $criteria = new CDbCriteria();
             $criteria->addInCondition('name', $tags);
             $criteria->select = "id";
-            $tags = Tags::model()->findAll($criteria);
+            $tags = Tags::model()->cache(60*60)->findAll($criteria);
             $in = [];
             foreach($tags as $tag) {
                 $in[] = $tag->id;
@@ -57,7 +57,7 @@ class Export
                 $criteria->order = "field(tag_data.type, 'product', 'brand', 'os', 'word'), articles_data.created desc";
                 $criteria->limit = $limit;
                 $criteria->group = "articles_data.id";
-                $newsTags = ArticlesTags::model()->cache(60)->with(['articles_data', 'tag_data'])->findAll($criteria);
+                $newsTags = ArticlesTags::model()->cache(60*60)->with(['articles_data', 'tag_data'])->findAll($criteria);
                 if (!empty($newsTags)) {
                     ob_start();
                     extract(['newsTags'=>$newsTags, 'type'=>$type]);
@@ -79,7 +79,7 @@ class Export
             $criteria->addCondition("type = 'product'");
             $criteria->addCondition("disabled = 0");
             $criteria->select = "id, name";
-            $tags = Tags::model()->cache(60)->with(['goods'=>['joinType'=>'inner join']])->findAll($criteria);
+            $tags = Tags::model()->cache(60*60)->with(['goods'=>['joinType'=>'inner join']])->findAll($criteria);
             $in = [];
             foreach($tags as $tag) {
                 if (empty($tag->goods)) {
@@ -95,7 +95,7 @@ class Export
                 $criteria->limit = count($in);
                 $criteria->order = "t.priority";
                 $criteria->group = 't.goods, t.lang';
-                $videos = Videos::model()->findAll($criteria);
+                $videos = Videos::model()->cache(60*60)->findAll($criteria);
                 if (!empty($videos)) {
                     echo "<ul>".PHP_EOL;
                     foreach ($videos as $video) {
@@ -124,7 +124,7 @@ class Export
             $criteria->compare("disabled", 0);
             $criteria->select = "id, name";
             $criteria->limit = $limit;
-            $tags = Tags::model()->cache(60)->with(['goods'=>['joinType'=>'inner join']])->findAll($criteria);
+            $tags = Tags::model()->cache(60*60)->with(['goods'=>['joinType'=>'inner join']])->findAll($criteria);
             $in = [];
             foreach($tags as $tag) {
                 if (empty($tag->goods)) {
@@ -139,13 +139,13 @@ class Export
                 $criteria->condition = 't.id in ('.implode(", ", $in).')';
                 $criteria->group = 't.id';
                 $criteria->order = 't.updated desc';
-                $goods = Goods::model()->findAll($criteria);
+                $goods = Goods::model()->cache(60*60)->findAll($criteria);
             }
         }
         
         $data = [];
         if (!empty($goods)) {
-            $chList = Goods::model()->cache(60)->with('brand_data')->getCharacteristicsList();
+            $chList = Goods::model()->cache(60*60)->with('brand_data')->getCharacteristicsList();
             $chCompare = [];
             $goodsNames = [];
             $index = 0;
@@ -219,7 +219,7 @@ class Export
             $criteria->compare("disabled", 0);
             $criteria->select = "id, name";
             $criteria->limit = $limit;
-            $tags = Tags::model()->cache(60)->with(['goods'=>['joinType'=>'inner join']])->findAll($criteria);
+            $tags = Tags::model()->cache(60*60)->with(['goods'=>['joinType'=>'inner join']])->findAll($criteria);
             $in = [];
             foreach($tags as $tag) {
                 if (empty($tag->goods)) {
@@ -234,7 +234,7 @@ class Export
                 $criteria->condition = 't.id in ('.implode(", ", $in).')';
                 $criteria->group = 't.id';
                 $criteria->order = "t.updated desc";
-                $goods = Goods::model()->cache(60)->with(["brand_data", 'type_data'])->findAll($criteria);
+                $goods = Goods::model()->cache(60*60)->with(["brand_data", 'type_data'])->findAll($criteria);
             }
         }
         
@@ -257,7 +257,7 @@ class Export
             $criteria->compare("disabled", 0);
             $criteria->select = "id, name";
             $criteria->limit = $limit;
-            $tags = Tags::model()->cache(60)->with(['goods'=>['joinType'=>'inner join']])->findAll($criteria);
+            $tags = Tags::model()->cache(60*60)->with(['goods'=>['joinType'=>'inner join']])->findAll($criteria);
             $in = [];
             foreach($tags as $tag) {
                 if (empty($tag->goods)) {
@@ -272,7 +272,7 @@ class Export
                 $criteria->condition = 't.id in ('.implode(", ", $in).')';
                 $criteria->group = 't.id';
                 $criteria->order = "t.updated desc";
-                $goods = Goods::model()->cache(60)->with(["brand_data", 'type_data'])->findAll($criteria);
+                $goods = Goods::model()->cache(60*60)->with(["brand_data", 'type_data'])->findAll($criteria);
             }
         }
         
@@ -295,7 +295,7 @@ class Export
             $criteria->compare("disabled", 0);
             $criteria->select = "id, name";
             $criteria->limit = $limit;
-            $tags = Tags::model()->cache(60)->with(['goods'=>['joinType'=>'inner join']])->findAll($criteria);
+            $tags = Tags::model()->cache(60*60)->with(['goods'=>['joinType'=>'inner join']])->findAll($criteria);
             $in = [];
             foreach($tags as $tag) {
                 if (empty($tag->goods)) {
@@ -311,7 +311,7 @@ class Export
                 $criteria->group = 't.id';
                 
                 $criteria->order = "t.updated desc";
-                $goods = Goods::model()->cache(60)->with(["brand_data"])->findAll($criteria);
+                $goods = Goods::model()->cache(60*60)->with(["brand_data"])->findAll($criteria);
                 $goodsList = [];
                 foreach ($goods as $product) {
                     $goodsList[] = urlencode($product->brand_data->name." ".$product->name);
@@ -338,7 +338,7 @@ class Export
             $criteria->compare("t.disabled", 0);
             $criteria->select = "id, name";
             $criteria->limit = $limit;
-            $tags = Tags::model()->cache(60)->with(['goods'=>['joinType'=>'inner join']])->findAll($criteria);
+            $tags = Tags::model()->cache(60*60)->with(['goods'=>['joinType'=>'inner join']])->findAll($criteria);
             $in = [];
             foreach($tags as $tag) {
                 if (empty($tag->goods)) {
@@ -354,7 +354,7 @@ class Export
                 $criteria->group = 't.id';
                 
                 $criteria->order = "t.updated desc";
-                $goods = Goods::model()->cache(60)->with(["brand_data"])->findAll($criteria);
+                $goods = Goods::model()->cache(60*60)->with(["brand_data"])->findAll($criteria);
                 $goodsList = [];
                 foreach ($goods as $product) {
                     $goodsList[] = urlencode($product->brand_data->name." ".$product->name);

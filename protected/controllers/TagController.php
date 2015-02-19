@@ -36,7 +36,7 @@ class TagController extends Controller
             exit();
         }
         $criteria = new CDbCriteria();
-        $criteria->condition = "t.tag = :tag and articles_data.lang = :lang and articles_data.type = 'news'";
+        $criteria->condition = "t.tag = :tag and articles_data.lang = :lang and articles_data.type = 'opinion'";
         $criteria->params = ['tag'=>$tag->id, 'lang'=>Yii::app()->language];
         $criteria->group = 't.article';
         $criteria->order = "articles_data.created desc";
@@ -82,7 +82,7 @@ class TagController extends Controller
             exit();
         }
         $criteria = new CDbCriteria();
-        $criteria->condition = "t.tag = :tag and articles_data.lang = :lang and articles_data.type = 'news'";
+        $criteria->condition = "t.tag = :tag and articles_data.lang = :lang and articles_data.type = 'review'";
         $criteria->params = ['tag'=>$tag->id, 'lang'=>Yii::app()->language];
         $criteria->group = 't.article';
         $criteria->order = "articles_data.created desc";

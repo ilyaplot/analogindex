@@ -76,5 +76,6 @@ return array(
             ),
         ),
         'urlManager' => require dirname(__FILE__) . '/url.php',
+        
     ),
 );

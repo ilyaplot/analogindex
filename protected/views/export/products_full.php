@@ -22,7 +22,7 @@ $types = (object) [
 <?php foreach (array_chunk((array) $goods, 5) as $row): ?>
     <ul class="related-products-list">
         <?php foreach ($row as $product): ?>
-            <li>
+            <li style="width: 100px; overflow: hidden;">
                 <?php if (isset($product->primary_image)): ?>
                     <a class="title" href="<?php
                     echo Yii::app()->createAbsoluteUrl("site/goods", [
@@ -79,3 +79,4 @@ $types = (object) [
     </ul>
     <div style="clear: both;"></div>
 <?php endforeach; ?>
+<div style="clear: both;"></div>

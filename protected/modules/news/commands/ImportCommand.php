@@ -8,10 +8,16 @@ class ImportCommand extends CConsoleCommand
     
     public function actionIndex()
     {
+        
+        file_put_contents("/var/www/analogindex/logs/news_empty_source.txt", '');
+        file_put_contents("/var/www/analogindex/logs/news_empty_paragraph.txt", '');
+        file_put_contents("/var/www/analogindex/logs/news_empty_source.txt", '');
+            
         $articlesFilter = new ArticlesFilter();
         echo "Загрузка тэгов".PHP_EOL;
         $criteria = new CDbCriteria();
         $criteria->condition = "disabled = 0";
+        
         self::$tags = Tags::model()->findAll($criteria);
         unset($criteria);
         
@@ -21,16 +27,16 @@ class ImportCommand extends CConsoleCommand
                 "type_data", 
                 "synonims"
             ))->findAll(array(
-            "order"=>"LENGTH(t.name) desc"
+            "order"=>"LENGTH(t.name) desc",
         ));
         
         echo "Загрузка брендов".PHP_EOL;
-        self::$brands = Brands::model()->findAll(array("condition"=>"t.id not in (167)"));
+        self::$brands = Brands::model()->findAll(array("condition"=>"t.id not in (167) and t.name = 'apple'"));
         
         $urlManager = new UrlManager();
 
         foreach (self::$tags as $tag) {
-            
+ 
             $ids = TopicTags::model()->getNewsByTag($tag->name);
             echo $tag->name." (".count($ids).")".PHP_EOL;
             if (empty($ids))
@@ -40,6 +46,8 @@ class ImportCommand extends CConsoleCommand
             
             foreach ($idsArray as $ids) {
                 $news = $this->itemsByIds($ids);
+                
+                
                 if (empty($news)) {
                     continue;
                 }
@@ -108,7 +116,7 @@ class ImportCommand extends CConsoleCommand
             echo PHP_EOL;
             unset($brand, $news, $url, $item);
         }
-        
+
         foreach (self::$goods as $product) {
             
             $memory = (!function_exists('memory_get_usage')) ? '' : round(memory_get_usage()/1024/1024, 2) . 'MB';
@@ -157,16 +165,21 @@ class ImportCommand extends CConsoleCommand
         $criteria->params = ["title"=>$title];
         $criteria->order = "t.topic_date_add desc";
 
+        
+        
         $result = [];
         
         try {
-            $items = Topics::model()->with("topic_content")->findAll($criteria);
+            $items = Topics::model()->with(["topic_content"])->findAll($criteria);
+
             unset ($criteria);
             $ids = [];
             
             foreach ($items as &$item)
             {
+                
                 if (empty($item->topic_content->source_url) || empty($item->topic_content->topic_text)) {
+                    echo "empty {$item->topic_id}".PHP_EOL;
                     unset($item);
                     continue;
                 }
@@ -219,12 +232,13 @@ class ImportCommand extends CConsoleCommand
     
     protected function itemsByIds($ids)
     {
+
         $criteria = new CDbCriteria();
         $criteria->select = "t.topic_id, t.topic_title, t.topic_date_add, t.user_id, t.exported";
         $criteria->addInCondition("t.topic_id", (array) $ids);
         $criteria->compare('t.exported', 0);
         $criteria->order = "t.topic_date_add desc";
-
+        
         try {
             $items = Topics::model()->with("topic_content")->findAll($criteria);
         } catch (CDbException $ex) {
@@ -253,9 +267,11 @@ class ImportCommand extends CConsoleCommand
         
         $result = [];
         $ids = [];
+
         foreach ($items as &$item)
         {
             if (empty($item->topic_content->source_url) || empty($item->topic_content->topic_text)) {
+                echo "EMPTY SOURCE URL {$item->topic_id}".PHP_EOL;
                 continue;
             }
             $ids[] = $item->topic_id;
@@ -270,7 +286,7 @@ class ImportCommand extends CConsoleCommand
             if (!$item->exported) {
                 $connection = Yii::app()->teta;
                 $query = "update ls_topic set exported = 1 where topic_id = {$item->topic_id}";
-                usleep(100);
+                //usleep(100);
 
                 while (true) {
                     try {

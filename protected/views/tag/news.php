@@ -26,14 +26,13 @@
         </div>
         <div class="view_bl-textView">
             <h2 itemprop="name"><?php echo  $item->title ?></h2>
-            <?php if (!empty($item->preview_image)) :?>
+            <?php if (!empty($item->preview_image->image_data)) :?>
             <a class="news-preview" href="<?php echo Yii::app()->createAbsoluteUrl("articles/index", ['type'=>$item->type,'link'=>$item->link, 'id'=>$item->id, 'language'=>  Language::getCurrentZone()]); ?>">
-                <img itemprop="image" src="<?php echo $item->preview_image->getPreviewUrl()?>" class="news_preview" 
-                     alt="<?php echo $item->preview_image->alt?>"/>
+                <?php echo $item->preview_image->image_data->getHtml(NImages::SIZE_ARTICLE_PREVIEW, null, ['itemprop'=>"image", 'class'=>"news_preview"]) ?>
             </a>
             <?php endif; ?>
             <span itemprop="description"><?php echo $item->description?></span>...
-            <?php if (!empty($item->preview_image)) :?>
+            <?php if (!empty($item->preview_image->image_data)) :?>
             <div style="clear: both; "></div>
             <?php endif; ?>
         </div>

@@ -19,6 +19,7 @@ class Topics extends CActiveRecord
         return Yii::app()->teta;
     }
     
+    
     public function relations()
     {
         return [

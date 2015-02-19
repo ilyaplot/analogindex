@@ -33,7 +33,7 @@ class Articles extends CActiveRecord
     public function linkTags($tags)
     {
         $this->has_tags = 0;
-        $transaction = $this->getDbConnection()->beginTransaction();
+        //$transaction = $this->getDbConnection()->beginTransaction();
         try {
             $this->getDbConnection()->createCommand("delete from {{articles_tags}} where article = {$this->id}")->execute();
             foreach ($tags as $tag) {
@@ -46,15 +46,15 @@ class Articles extends CActiveRecord
                 }
             }
         } catch (Exception $ex) {
-            $transaction->rollback();
+            //$transaction->rollback();
             throw $ex;
         }
-        $transaction->commit();
+        //$transaction->commit();
     }
     
     public function linkBrands($brands)
     {
-        $transaction = $this->getDbConnection()->beginTransaction();
+        //$transaction = $this->getDbConnection()->beginTransaction();
         try {
             $this->getDbConnection()->createCommand("delete from {{brands_articles}} where article = {$this->id}")->execute();
             foreach($brands as $brand) {
@@ -66,15 +66,15 @@ class Articles extends CActiveRecord
                 }
             }
         } catch (Exception $ex) {
-            $transaction->rollback();
+            //$transaction->rollback();
             throw $ex;
         }
-        $transaction->commit();
+        //$transaction->commit();
     }
     
     public function linkProducts($products)
     {
-        $transaction = $this->getDbConnection()->beginTransaction();
+        //$transaction = $this->getDbConnection()->beginTransaction();
         try {
             if ($this->type != 'opinion') {
                 $this->getDbConnection()->createCommand("delete from {{goods_articles}} where article = {$this->id}")->execute();
@@ -88,10 +88,10 @@ class Articles extends CActiveRecord
                 }
             }
         } catch (Exception $ex) {
-            $transaction->rollback();
+            //$transaction->rollback();
             throw $ex;
         }
-        $transaction->commit();
+        //$transaction->commit();
     }
     
     /**
@@ -129,17 +129,17 @@ class Articles extends CActiveRecord
 
     public function beforeDelete()
     {
-        $transaction = $this->getDbConnection()->beginTransaction();
+        //$transaction = $this->getDbConnection()->beginTransaction();
         
         try {
             // Удаление 
             $this->getDbConnection()->createCommand("delete from {{articles_tags}} where article = {$this->id}")->execute();
             
         } catch (Exception $ex) {
-            $transaction->rollback();
+            //$transaction->rollback();
             throw $ex;
         }
-        $transaction->commit();
+        //$transaction->commit();
         
         $images = ArticlesImages::model()->findByAttributes(['article'=>$this->id]);
         foreach ($images as $image) {
@@ -176,7 +176,7 @@ class Articles extends CActiveRecord
     
     public function afterSave()
     {
-        GoodsArticles::model()->filter();
+        GoodsArticles::model()->filter($this->id);
         return parent::afterSave();
     }
 }

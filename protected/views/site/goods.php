@@ -121,7 +121,7 @@ $this->widget('application.widgets.BreadcrumbsWidget.BreadcrumbsWidget',['items'
                 </div>
                 <div class="wpcontent">
                     <div class="infoGoodItem-wp-photos" id="item1">
-                        <?php if (!$product->gallery_count) : ?>
+                        <?php if (!$product->getGallery_count(false)) : ?>
                             <div class="infoGoodItem-wp-photos_main">
                                 <img style="width: 450px; height: auto;" src="/assets/img/no_photo.png">
                             </div>
@@ -135,7 +135,7 @@ $this->widget('application.widgets.BreadcrumbsWidget.BreadcrumbsWidget',['items'
                             'product'=>$product->link,
                             'brand'=>$product->brand_data->link,
                             'language'=>Language::getCurrentZone(),
-                        ])?>"><?php echo Yii::t("main", 'Фотогалерея');?> (<?php echo $product->getGalleryCount() ?>)</a>
+                        ])?>"><?php echo Yii::t("main", 'Фотогалерея');?> (<?php echo $product->gallery_count ?>)</a>
                         <?php endif;?>
                        
                     </div>
@@ -156,10 +156,12 @@ $this->widget('application.widgets.BreadcrumbsWidget.BreadcrumbsWidget',['items'
                                             <a href="<?php echo Yii::app()->createAbsoluteUrl("articles/index", ['type'=>$item->type,'link'=>$item->link, 'id'=>$item->id, 'language'=>  Language::getCurrentZone()]);?>" itemprop="url">
                                                 <h2 itemprop="name"><?php echo  $item->title ?></h2>
                                             </a>
-                                            <?php if (!empty($item->preview_image)) :?>
+                                            <?php if (!empty($item->preview_image->image_data)) :?>
                                             <a class="news-preview" href="<?php echo Yii::app()->createAbsoluteUrl("articles/index", ['type'=>$item->type,'link'=>$item->link, 'id'=>$item->id, 'language'=>  Language::getCurrentZone()]); ?>">
-                                                <img itemprop="image" src="<?php echo $item->preview_image->getPreviewUrl()?>" class="news_preview" 
-                                                     alt="<?php echo $item->preview_image->alt?>"/>
+                                                <?php echo $item->preview_image->image_data->getHtml(NImages::SIZE_ARTICLE_PREVIEW, null, [
+                                                    'itemprop'=>"image",
+                                                    'class'=>"news_preview",
+                                                    ]);?>
                                             </a>
                                             <?php endif; ?>
                                             <span itemprop="description"><?php echo $item->description?></span>...
@@ -197,10 +199,12 @@ $this->widget('application.widgets.BreadcrumbsWidget.BreadcrumbsWidget',['items'
                                         <a href="<?php echo Yii::app()->createAbsoluteUrl("articles/index", ['type'=>$item->type,'link'=>$item->link, 'id'=>$item->id, 'language'=>  Language::getCurrentZone()]);?>" itemprop="url">
                                             <h2 itemprop="name"><?php echo  $item->title ?></h2>
                                         </a>
-                                        <?php if (!empty($item->preview_image)) :?>
+                                        <?php if (!empty($item->preview_image->image_data)) :?>
                                         <a class="news-preview" href="<?php echo Yii::app()->createAbsoluteUrl("articles/index", ['type'=>$item->type,'link'=>$item->link, 'id'=>$item->id, 'language'=>  Language::getCurrentZone()]); ?>">
-                                            <img itemprop="image" src="<?php echo $item->preview_image->getPreviewUrl()?>" class="news_preview" 
-                                                 alt="<?php echo $item->preview_image->alt?>"/>
+                                            <?php echo $item->preview_image->image_data->getHtml(NImages::SIZE_ARTICLE_PREVIEW, null, [
+                                                    'itemprop'=>"image",
+                                                    'class'=>"news_preview",
+                                                    ]);?>
                                         </a>
                                         <?php endif; ?>
                                         <span itemprop="description"><?php echo $item->description?></span>...
@@ -237,10 +241,12 @@ $this->widget('application.widgets.BreadcrumbsWidget.BreadcrumbsWidget',['items'
                                         <a href="<?php echo Yii::app()->createAbsoluteUrl("articles/index", ['type'=>$item->type,'link'=>$item->link, 'id'=>$item->id, 'language'=>  Language::getCurrentZone()]);?>" itemprop="url">
                                             <h2 itemprop="name"><?php echo  $item->title ?></h2>
                                         </a>
-                                        <?php if (!empty($item->preview_image)) :?>
+                                        <?php if (!empty($item->preview_image->image_data)) :?>
                                         <a class="news-preview" href="<?php echo Yii::app()->createAbsoluteUrl("articles/index", ['type'=>$item->type,'link'=>$item->link, 'id'=>$item->id, 'language'=>  Language::getCurrentZone()]); ?>">
-                                            <img itemprop="image" src="<?php echo $item->preview_image->getPreviewUrl()?>" class="news_preview" 
-                                                 alt="<?php echo $item->preview_image->alt?>"/>
+                                            <?php echo $item->preview_image->image_data->getHtml(NImages::SIZE_ARTICLE_PREVIEW, null, [
+                                                    'itemprop'=>"image",
+                                                    'class'=>"news_preview",
+                                                    ]);?>
                                         </a>
                                         <?php endif; ?>
                                         <span itemprop="description"><?php echo $item->description?></span>...
@@ -277,10 +283,12 @@ $this->widget('application.widgets.BreadcrumbsWidget.BreadcrumbsWidget',['items'
                                         <a href="<?php echo Yii::app()->createAbsoluteUrl("articles/index", ['type'=>$item->type,'link'=>$item->link, 'id'=>$item->id, 'language'=>  Language::getCurrentZone()]);?>" itemprop="url">
                                             <h2 itemprop="name"><?php echo  $item->title ?></h2>
                                         </a>
-                                        <?php if (!empty($item->preview_image)) :?>
+                                        <?php if (!empty($item->preview_image->image_data)) :?>
                                         <a class="news-preview" href="<?php echo Yii::app()->createAbsoluteUrl("articles/index", ['type'=>$item->type,'link'=>$item->link, 'id'=>$item->id, 'language'=>  Language::getCurrentZone()]); ?>">
-                                            <img itemprop="image" src="<?php echo $item->preview_image->getPreviewUrl()?>" class="news_preview" 
-                                                 alt="<?php echo $item->preview_image->alt?>"/>
+                                            <?php echo $item->preview_image->image_data->getHtml(NImages::SIZE_ARTICLE_PREVIEW, null, [
+                                                    'itemprop'=>"image",
+                                                    'class'=>"news_preview",
+                                                    ]);?>
                                         </a>
                                         <?php endif; ?>
                                         <span itemprop="description"><?php echo $item->description?></span>...

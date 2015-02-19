@@ -24,6 +24,7 @@ class TopicContent extends CActiveRecord
         $content = $this->topic_text_source;
         
         if (empty($content)) {
+            file_put_contents("/var/www/analogindex/logs/news_empty_content.txt", $this->topic_id.PHP_EOL, FILE_APPEND);
             return parent::afterFind();
         }
         
@@ -31,13 +32,19 @@ class TopicContent extends CActiveRecord
         
         
         $p = pq($html)->find("p:last");
+        if (empty($p)) {
+            file_put_contents("/var/www/analogindex/logs/news_empty_paragraph.txt", $this->topic_id.PHP_EOL, FILE_APPEND);
+            echo "EMPTY PARAGPAPH!".PHP_EOL;
+            return false;
+        }
         unset ($content);
         
-        if (preg_match("/<p>[\w]+: <a href=\"http:\/\/[\w]+\.&lt;.*&gt;(?P<link>.*)<\/p>/isu", $p->html(), $matches)) {
+        if (preg_match("/<p>[\w]+: <a href=\"http:\/\/[\w]+\.&lt;.*&gt;(?P<link>.*)<\/p>/isu", pq($p)->html(), $matches)) {
             $link = $matches['link'];
             unset($matches);
         } else {
-            $link = pq($p)->find("a")->attr("href"); 
+            
+            $link = @pq($p)->find("a")->attr("href"); 
         }
         
         if (!empty($link) && (preg_match("/.*Источник:.*/isu", $p->html()) || preg_match("/.*Source:.*/isu", $p->html()))) {
@@ -53,6 +60,7 @@ class TopicContent extends CActiveRecord
                     $link = $matches['link'];
                     unset($matches);
                 } else {
+                    file_put_contents("/var/www/analogindex/logs/news_empty_source.txt", $this->topic_id.PHP_EOL, FILE_APPEND);
                     return false;
                 }
             }
@@ -72,7 +80,7 @@ class TopicContent extends CActiveRecord
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
             curl_exec($ch);
 
-            if (curl_errno($ch) && !in_array(curl_errno($ch), [28,56,47]) ) {
+            if (curl_errno($ch) && !in_array(curl_errno($ch), [28,56,47,35]) ) {
                 echo "Curl error #".curl_errno($ch)." " . curl_error($ch) . PHP_EOL;
                 echo $link.PHP_EOL;
                 echo (string) $p.PHP_EOL;
@@ -87,6 +95,7 @@ class TopicContent extends CActiveRecord
             $this->source_url = $link;
             unset ($ch, $link);
         } else {
+            file_put_contents("/var/www/analogindex/logs/news_empty_source.txt", $this->topic_id.PHP_EOL, FILE_APPEND);
             return false;
         }
         

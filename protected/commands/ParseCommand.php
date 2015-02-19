@@ -12,7 +12,25 @@ class ParseCommand extends CConsoleCommand
     
     public function actionDevspec()
     {
-        $tasks = SourcesDevspec::model()->findAllByAttributes(['downloaded'=>1, 'lang'=>'ru']);
+        //$specifications = Specifications::model()->findList('en');
+        $criteria = new CDbCriteria();
+        $criteria->condition = 't.lang = :lang';
+        $criteria->params = ['lang'=>'en'];
+        $criteria->order = "category_data.key, t.id";
+
+        $specifications = Specifications::model()->with([
+            'category_data'
+        ])->findAll($criteria);
+        
+
+       
+        
+        foreach ($specifications as $specification) {
+            echo (isset($specification->category_data->name) ? $specification->category_data->name : '').":::".$specification->name.PHP_EOL;
+        }
+        exit();
+        
+        $tasks = SourcesDevspec::model()->findAllByAttributes(['downloaded'=>1]);
         foreach ($tasks as $task) {
             $lang = $task->lang;
             $product = $task->product;
@@ -32,18 +50,18 @@ class ParseCommand extends CConsoleCommand
                 
                 $category = $header->find("h2.header")->text();
                 $categoryDescription = $header->find("h3.subheader")->text();
-                echo "##################".PHP_EOL;
-                echo $category.PHP_EOL;
-                echo $categoryDescription.PHP_EOL;
-                echo PHP_EOL;
+                //echo "##################".PHP_EOL;
+                //echo $category.PHP_EOL;
+                //echo $categoryDescription.PHP_EOL;
+                //echo PHP_EOL;
                 $rows = $table->find("tr");
                 foreach ($rows as $row) {
                     $subCategory = pq($row)->find("td:eq(0)");
                     $subCategoryDescription = pq($subCategory)->find("p")->text();
                     pq($subCategory)->find("p")->remove();
                     $subCategory = pq($subCategory)->text();
-                    echo "\t".$subCategory.PHP_EOL;
-                    echo "\t\t".$subCategoryDescription.PHP_EOL;
+                    //echo "\t".$subCategory.PHP_EOL;
+                    //echo "\t\t".$subCategoryDescription.PHP_EOL;
                     $values = pq($row)->find("td:eq(1)")->html();
                     $values = trim($values);
                     if (preg_match("/\<span class=\"(arrow|approximation)\-bullet\"\>\<\/span\>/isu", $values)) {
@@ -53,8 +71,9 @@ class ParseCommand extends CConsoleCommand
                             $values = $values[1];
                         }
                     }
+
+                    //var_dump($values);
                     
-                    var_dump($values);
                     
                     
                 }
@@ -64,8 +83,8 @@ class ParseCommand extends CConsoleCommand
                 $table->remove();
             
             } while (true);
-            echo $task->url.PHP_EOL;
-            exit();
+            //echo $task->url.PHP_EOL;
+            //exit();
             phpQuery::unloadDocuments();
         }
     }

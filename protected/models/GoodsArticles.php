@@ -26,7 +26,7 @@ class GoodsArticles extends CActiveRecord
         ];
     }
     
-    public function filter()
+    public function filter($id = null)
     {
         $transaction = $this->getDbConnection()->beginTransaction();
         try {
@@ -34,16 +34,27 @@ class GoodsArticles extends CActiveRecord
                 . "inner join {{brands}} b on g.brand = b.id "
                 . "inner join {{goods_articles}} gn on gn.goods = g.id "
                 . "inner join {{articles}} n on n.id = gn.article "
-                . "where n.title not like concat('%', b.name, '%', g.name, '%')";
+                . "where n.title not like concat('%', b.name, '%', g.name, '%') ";
+            
+            if (!empty($id)) {
+                $query .= "and n.id = ".$id;
+            }
+
+
             $connection = $this->getDbConnection();
             $ids = $connection->createCommand($query)->queryAll();
-            $in = [];
-            foreach ($ids as $id) {
-                $in[] = $id['id'];
-            }
-            if (!empty($in)) {
-                $query = "update {{goods_articles}} set disabled = 1 where id in (".implode(", ",$in).")";
-                $connection->createCommand($query)->execute();
+            
+            $idsClist = array_chunk($ids, 100);
+            
+            foreach ($idsClist as $ids) {
+                $in = [];
+                foreach ($ids as $id) {
+                    $in[] = $id['id'];
+                }
+                if (!empty($in)) {
+                    $query = "update {{goods_articles}} set disabled = 1 where id in (".implode(", ",$in).")";
+                    $connection->createCommand($query)->execute();
+                }
             }
         } catch (Exception $ex) {
             $transaction->rollback();

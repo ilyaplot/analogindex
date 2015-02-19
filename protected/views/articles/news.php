@@ -5,7 +5,7 @@
                 <div class="infoGoodItem-title-1">
                     <h1 itemprop="name"><?php echo $article->title ?></h1>
                 </div>
-                <div class="infoReviewItem-title-2 clr">
+                <div class="infoR1eviewItem-title-2 clr">
                     <div class="flLeft">
                         <span class="date"><?php echo Yii::app()->dateFormatter->formatDateTime($article->created, 'long'); ?></span>
                         <?php if (!empty($article->tags)): ?>
@@ -51,7 +51,7 @@
                 </div>
             </div>
             <div class="news">
-
+                <hr />
                 <div class="news-content" itemprop="articleBody"><?php echo $article->content ?></div>
                 <div style="clear: both;"></div>
                 <?php  echo $this->renderPartial("_comments")?>

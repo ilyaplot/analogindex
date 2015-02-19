@@ -60,7 +60,7 @@ class SiteController extends Controller
         $criteria->condition = "t.link = :link and t.brand = :brand";
         $criteria->params = array("link" => $link, "brand" => $brand->id);
 
-        $product = Goods::model()->cache(60 * 60)->with(['gallery_count'])->find($criteria);
+        $product = Goods::model()->cache(60 * 60)->find($criteria);
         if (!$product) {
             Yii::app()->request->redirect("/", true, 302);
             exit();
@@ -527,7 +527,30 @@ class SiteController extends Controller
 
     public function actionTest()
     {
-        $this->widget('application.widgets.BreadcrumbsWidget.BreadcrumbsWidget', ['items' => []]);
+        /**
+        $criteria = new CDbCriteria();
+        $criteria->condition = "t.lang = :lang";
+        $criteria->params = ['lang'=>  Yii::app()->language];
+        $criteria->order = 'category_data.key, t.key';
+        $specifications = Specifications::model()->with(['category_data'])->findAll($criteria);
+        foreach ($specifications as $specification) {
+            echo $specification->category_data->name." ".$specification->name."<br />";
+        }
+         * 
+         */
+        $criteria = new CDbCriteria();
+        $criteria->condition = "t.lang = :lang";
+        $criteria->params = ['lang'=>Yii::app()->language];
+        $criteria->order = "t.key";
+        
+        $categories = SpecificationsCategories::model()->with(['specifications'])->findAll($criteria);
+        
+        foreach ($categories as $category) {
+            echo $category->name."<br />";
+            foreach($category->specifications as $specification) {
+                echo "&nbsp;&nbsp;&nbsp;&nbsp;".$specification->key." ".$specification->name."<br />";
+            }
+        }
     }
 
 }
