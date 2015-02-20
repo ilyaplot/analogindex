@@ -21,7 +21,7 @@ class TagController extends Controller
         $pages = new CPagination($newsCount);
         $pages->setPageSize(15);
         $pages->applyLimit($criteria);
-        $newsTags = ArticlesTags::model()->with(['articles_data'])->findAll($criteria);
+        $newsTags = ArticlesTags::model()->cache(60*60*2)->with(['articles_data'])->findAll($criteria);
         $this->render("news", ['newsTags'=>$newsTags, 'tag'=>$tag, 'pages'=>$pages]);
     }
     
@@ -44,7 +44,7 @@ class TagController extends Controller
         $pages = new CPagination($newsCount);
         $pages->setPageSize(15);
         $pages->applyLimit($criteria);
-        $newsTags = ArticlesTags::model()->with(['articles_data'])->findAll($criteria);
+        $newsTags = ArticlesTags::model()->cache(60*60*2)->with(['articles_data'])->findAll($criteria);
         $this->render("news", ['newsTags'=>$newsTags, 'tag'=>$tag, 'pages'=>$pages]);
     }
     
@@ -67,7 +67,7 @@ class TagController extends Controller
         $pages = new CPagination($newsCount);
         $pages->setPageSize(15);
         $pages->applyLimit($criteria);
-        $newsTags = ArticlesTags::model()->with(['articles_data'])->findAll($criteria);
+        $newsTags = ArticlesTags::model()->cache(60*60*2)->with(['articles_data'])->findAll($criteria);
         $this->render("news", ['newsTags'=>$newsTags, 'tag'=>$tag, 'pages'=>$pages]);
     }
     
@@ -90,7 +90,7 @@ class TagController extends Controller
         $pages = new CPagination($newsCount);
         $pages->setPageSize(15);
         $pages->applyLimit($criteria);
-        $newsTags = ArticlesTags::model()->with(['articles_data'])->findAll($criteria);
+        $newsTags = ArticlesTags::model()->cache(60*60*2)->with(['articles_data'])->findAll($criteria);
         $this->render("news", ['newsTags'=>$newsTags, 'tag'=>$tag, 'pages'=>$pages]);
     }
 }

@@ -90,7 +90,15 @@ class ArticlesFilter
                 $alt = mb_substr($this->_model->title, 0, 255, 'UTF-8');
             }
             $url = $image->attr("src");
-            $lazySrc = $image->attr("data-lazy-src");
+            
+            if (preg_match("/blank/isu", $url)) {
+                echo "BLAMK IMAGE: ".$url.PHP_EOL;
+                $url = '';
+                
+            }
+            
+            $lazySrc = !empty($image->attr("data-big-src")) ? $image->attr("data-big-src") : $image->attr("data-lazy-src");
+            
             
             if (!empty($lazySrc)) {
                 $url = $lazySrc;

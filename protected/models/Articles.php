@@ -167,9 +167,7 @@ class Articles extends CActiveRecord
                 'joinType'=>'inner join',
                 'condition'=>'product.disabled = 0',
             ],
-            "preview_image"=>[self::HAS_ONE, "ArticlesImagesCopy", "article", 
-                //'condition'=>'preview_image.has_preview = 1',
-            ],
+            "preview_image"=>[self::HAS_ONE, "ArticlesImagesCopy", "article",],
             'tags'=>[self::HAS_MANY, 'ArticlesTags', 'article'],
         ];
     }

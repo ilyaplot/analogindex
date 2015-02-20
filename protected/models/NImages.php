@@ -328,7 +328,7 @@ class NImages extends CActiveRecord
             $this->copyExist = true;
             return $model->id;
         }
-
+        echo "BEGIN TRANSACTION".PHP_EOL;
         $transaction = $this->getDbConnection()->beginTransaction();
        
         try {

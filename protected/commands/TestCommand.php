@@ -15,7 +15,7 @@ class TestCommand extends CConsoleCommand
         $criteria->order = "id desc";
         $criteria->condition = "has_filtered = 0";
         $criteria->limit = 15;
-        //$criteria->condition = 'id = 142283';
+        //$criteria->condition = 'id = 151121';
         $articles = Articles::model()->findAll($criteria);
         $filter = new ArticlesFilter();
         
@@ -46,18 +46,11 @@ class TestCommand extends CConsoleCommand
         //GoodsArticles::model()->filter();
         echo PHP_EOL;
     }
-    
-    public function actionCopySpecifications()
-    {
-        
-    }
+
     
     public function actionSpec()
     {
-        $specifications = SpecificationsValues::model()->findAll(['condition'=>'lang = \'ru\'']);
-        array_map(function($value){
-            var_dump($value->spec1);
-            var_dump($value->spec9);
-        }, $specifications);
+        $model = new SpecificationsValues();
+        $model->setAttribute('raw', 12);
     }
 }

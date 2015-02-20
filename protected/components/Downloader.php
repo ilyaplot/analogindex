@@ -235,7 +235,7 @@ class Downloader
                 $this->deleteProxy($proxy);
                 echo "Http code {$code} {$url}.".PHP_EOL;
                 @unlink($filename);
-                return $this->downloadFile($url, $filename);
+                return $this->downloadFile($url, $filename, $skipCode);
             }
         }
         return true;
