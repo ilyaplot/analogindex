@@ -328,13 +328,16 @@ class NImages extends CActiveRecord
             $this->copyExist = true;
             return $model->id;
         }
-        echo "BEGIN TRANSACTION".PHP_EOL;
-        $transaction = $this->getDbConnection()->beginTransaction();
+        //echo "BEGIN TRANSACTION".PHP_EOL;
+        //$transaction = $this->getDbConnection()->beginTransaction();
        
         try {
             
             if (!file_exists($filename) || !$this->isImage($filename)) {
-                $transaction->rollback();
+                if (!$this->isNewRecord) {
+                    $this->delete();
+                }
+                //$transaction->rollback();
                 return false;
             }
             
@@ -362,20 +365,26 @@ class NImages extends CActiveRecord
                 
                 if (rename($filename, $this->getNewFilename($filename)) && $this->validate() && $this->save()) {
                     if ($this->createSizes()) {
-                        $transaction->commit();
+                        //$transaction->commit();
                         return $this->getPrimaryKey();
                     }
                 }
             }
-            
-            $transaction->rollback();
+            if (!$this->isNewRecord) {
+                $this->delete();
+            }
+            //$transaction->rollback();
             return false;
         } catch (Exception $ex) {
-            $transaction->rollback();
+            //$transaction->rollback();
+            if (!$this->isNewRecord) {
+                $this->delete();
+            }
             throw $ex;
         }
         
-        $transaction->rollback();
+        //$transaction->rollback();
+        $this->delete();
         return false;
     }
     

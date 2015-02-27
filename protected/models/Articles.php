@@ -77,6 +77,8 @@ class Articles extends CActiveRecord
         //$transaction = $this->getDbConnection()->beginTransaction();
         try {
             if ($this->type != 'opinion') {
+                $this->getDbConnection()->setActive(false);
+                $this->getDbConnection()->setActive(true);
                 $this->getDbConnection()->createCommand("delete from {{goods_articles}} where article = {$this->id}")->execute();
             }
             foreach($products as $product) {

@@ -27,7 +27,7 @@
                             <?php $export->productsfull($tags, Yii::app()->language); ?>
                         
                         <?php endif; ?>
-                        
+                        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
                     </div>
                     <div class="flRight">
                         <script type="text/javascript">

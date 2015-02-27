@@ -51,6 +51,9 @@ class Specifications extends CActiveRecord
                 'on'=>'t.lang = category_data.lang',
                 'joinType'=>'inner join',
             ],
+            'value'=>[self::BELONGS_TO, 'SpecificationsValues', ['key'=>'specification'],
+                'on'=>'t.lang = value.lang',
+            ]
         ];
     }
 }

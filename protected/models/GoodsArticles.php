@@ -28,7 +28,7 @@ class GoodsArticles extends CActiveRecord
     
     public function filter($id = null)
     {
-        $transaction = $this->getDbConnection()->beginTransaction();
+        //$transaction = $this->getDbConnection()->beginTransaction();
         try {
             $query = "select gn.id from {{goods}} g "
                 . "inner join {{brands}} b on g.brand = b.id "
@@ -57,10 +57,10 @@ class GoodsArticles extends CActiveRecord
                 }
             }
         } catch (Exception $ex) {
-            $transaction->rollback();
+            //$transaction->rollback();
             throw $ex;
         }
-        $transaction->commit();
+        //$transaction->commit();
     }
     
     public function relations()

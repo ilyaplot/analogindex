@@ -21,6 +21,8 @@
             <div>
                 <?php $export->productsfull($tags, Yii::app()->language); ?>
             </div>
+            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
             <hr />
             <?php endif;?>
             <div class="news-content" itemprop="articleBody"><?php echo $article->content ?></div>

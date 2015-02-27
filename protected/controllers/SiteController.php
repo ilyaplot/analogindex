@@ -527,28 +527,18 @@ class SiteController extends Controller
 
     public function actionTest()
     {
-        /**
-        $criteria = new CDbCriteria();
-        $criteria->condition = "t.lang = :lang";
-        $criteria->params = ['lang'=>  Yii::app()->language];
-        $criteria->order = 'category_data.key, t.key';
-        $specifications = Specifications::model()->with(['category_data'])->findAll($criteria);
-        foreach ($specifications as $specification) {
-            echo $specification->category_data->name." ".$specification->name."<br />";
-        }
-         * 
-         */
+
         $criteria = new CDbCriteria();
         $criteria->condition = "t.lang = :lang";
         $criteria->params = ['lang'=>Yii::app()->language];
         $criteria->order = "t.key";
         
-        $categories = SpecificationsCategories::model()->with(['specifications'])->findAll($criteria);
+        $categories = SpecificationsCategories::model()->with(['specifications', 'specifications.value'=>['on'=>'value.goods = 2281']])->findAll($criteria);
         
         foreach ($categories as $category) {
             echo $category->name."<br />";
             foreach($category->specifications as $specification) {
-                echo "&nbsp;&nbsp;&nbsp;&nbsp;".$specification->key." ".$specification->name."<br />";
+                echo "&nbsp;&nbsp;&nbsp;&nbsp;".$specification->key." ".$specification->name.(isset($specification->value->raw) ? ":::".$specification->value->raw : '')."<br />";
             }
         }
     }

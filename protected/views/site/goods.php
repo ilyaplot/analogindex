@@ -1,4 +1,5 @@
 <!--<?php echo $product->id?>-->
+<!--<?php echo $product->source_url?>-->
 <script type="text/javascript">
     /**
      * Возвращает строку для подписи к фото на нужном языке

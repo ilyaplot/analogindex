@@ -36,7 +36,7 @@ class ListGoodsWidget extends CWidget
         }
         
         
-        $criteria->group = "t.id, rating.value";
+        $criteria->group = "t.id";
         $criteria->order = "t.updated desc";
         
         
@@ -46,7 +46,7 @@ class ListGoodsWidget extends CWidget
                     ],
                     "primary_image",
                     "primary_image.image_data",
-                    "rating",
+                    //"rating",
                 ])->findAll($criteria);
         if ($this->style)
             $this->style = "_" . $this->style;

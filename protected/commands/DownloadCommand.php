@@ -151,12 +151,9 @@ class DownloadCommand extends CConsoleCommand
                         $pattern = "/url\((?P<url>http:\/\/www\.devicespecifications\.com\/images\/models\/{$model}\/320\/main\.jpg)\);/isu";
                         if (preg_match($pattern, $content, $matches)) {
                                 $model = new NImages();
-                            
+               
                                 $ext = explode(".", $matches['url']);
                                 $ext = end($ext);
-                                $file = new Files();
-                                $file->name = "{$brand} {$product}.{$ext}";
-                                $file->save();
                                 $filename = "/tmp/_analogindex_download_".md5("{$brand} {$product}")."{$ext}";
                                 $downloader->downloadFile($matches['url'], $filename);
                                 if (md5_file($filename)!= $emptyImageHash) {
