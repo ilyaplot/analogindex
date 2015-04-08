@@ -99,12 +99,31 @@ class Export
                 if (!empty($videos)) {
                     echo "<ul>".PHP_EOL;
                     foreach ($videos as $video) {
-
-                        echo "<li>";
-                        echo "<h2>".Yii::t("models", "Видео обзор");
-                        echo " {$video->goods_data->brand_data->name} {$video->goods_data->name}</h2>";
-                        echo $video->getTemplate();
-                        echo "</li>";
+                    ?>
+                        <li>
+                            <?php if (empty($video->title)):?>
+                            <h2><?=Yii::t("models", "Видео обзор");?> <?=$video->goods_data->brand_data->name." ".$video->goods_data->name?></h2>
+                            <?php else: ?>
+                            <h2><?=$video->title?></h2>
+                            <?php endif;?>
+                            <div itemprop="video" itemscope itemtype="http://schema.org/VideoObject">
+                                <div style="display: none;">
+                                    <a itemprop="url" rel="nofollow" href="http://www.youtube.com/watch?v=<?=$video->link?>"></a>
+                                    <span itemprop="name"><?=$video->title?></span>
+                                    <span itemprop="description"><?=$video->description?></span>
+                                    <meta itemprop="duration" content="<?=$video->duration?>"/>
+                                    <meta itemprop="isFamilyFriendly" content="true"/>
+                                    <meta itemprop="uploadDate" content="<?=$video->date_added?>"/>
+                                    <span itemprop="thumbnail" itemscope itemtype="http://schema.org/ImageObject">
+                                        <img itemprop="contentUrl" src="<?=$video->thumbnail?>"/>
+                                        <meta itemprop="width" content="540"/>
+                                        <meta itemprop="height" content="315"/>
+                                    </span>
+                                </div>
+                                <?=$video->getTemplate();?>
+                            </div>
+                        </li>
+                        <?php
                     }
                     echo "</ul>";
                 }

@@ -317,4 +317,26 @@ class SystemCommand extends ConsoleCommand
         }
         echo PHP_EOL;
     }
+    
+    public function actionGetYoutubeSnippets()
+    {
+        
+        $videos = Videos::model()->findAll();
+        foreach($videos as $video) {
+            
+            $snippet = $video->getYoutubeSnippet($video->link);
+            if ($snippet === false) {
+                $video->delete();
+                echo $video->link." deleted".PHP_EOL;
+            } else {
+                $video->title = $snippet->title;
+                $video->description = $snippet->description;
+                $video->duration = $snippet->duration;
+                $video->thumbnail = $snippet->thumbnail;
+                $video->date_added = $snippet->date_added;
+                $video->save();
+                echo $video->link." updated".PHP_EOL;
+            }
+        }
+    }
 }

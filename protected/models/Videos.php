@@ -96,4 +96,46 @@ class Videos extends CActiveRecord
         return $videos;
     }
 
+    public function getYoutubeSnippet($code)
+    {
+        $snipet = [
+            'title'=>'',
+            'description'=>'',
+            'duration'=>'',
+            'thumbnail'=>'',
+            'date_added'=>'',
+        ];
+        
+        $snipet = (object) $snipet;
+        if (empty($language)) {
+            $language = Yii::app()->language;
+        }
+
+        require_once Yii::app()->basePath . '/extensions/google-api-php-client/src/Google_Client.php';
+        require_once Yii::app()->basePath . '/extensions/google-api-php-client/src/contrib/Google_YouTubeService.php';
+        $client = new Google_Client();
+        $client->setDeveloperKey("AIzaSyCm5k_ScE8R_WiSyEBOc3xWGM9oXFg2RRI");
+        $youtube = new Google_YoutubeService($client);
+        
+        try {
+            $searchResponse = $youtube->videos->list(array(
+                'part' => 'snippet,contentDetails',
+                'id' => $code,
+            ));
+            if (!empty($searchResponse['pageInfo']['totalResults']) && $searchResponse['pageInfo']['totalResults'] == 1) {
+                $snipet->title = htmlentities($searchResponse['items'][0]['snippet']['title']);
+                $snipet->description = htmlentities($searchResponse['items'][0]['snippet']['description']);
+                $snipet->duration = $searchResponse['items'][0]['contentDetails']['duration'];
+                $snipet->thumbnail = $searchResponse['items'][0]['snippet']['thumbnails']['medium']['url'];
+                $snipet->date_added = $searchResponse['items'][0]['snippet']['publishedAt'];
+                return $snipet;
+            } else {
+                return false;
+            }
+        } catch (Exception $ex) {
+            return $snipet;
+        }
+        
+        
+    }
 }

@@ -484,9 +484,40 @@ class ArticlesFilter
                 //<embed src="http://www.youtube.com/v/PfeNlhiBXtw?version=3&amp;hl=en_US" width="560" height="340" class="yp" type="application/x-shockwave-flash" wmode="transparent" allowscriptaccess="always"><span style="display:block;margin-top:15px;">
                     foreach (pq($html)->find('embed, iframe') as $embed) {
                         $src = pq($embed)->attr("src");
+                        $patterns = [
+                            "~.*youtube.com/v/(?P<code>[\w\_\-]+).*/~isu",
+                            "~.*youtube.com/embed/(?P<code>[\w\_\-]+).*~isu",
+                            "~.*youtube.com/watch.v.(?P<code>[\w\_\-]+).*~isu",
+                        ];
+                        
                         if (preg_match("/youtube\./isu", $src)) {
-                            echo $src.PHP_EOL;
-                            pq($embed)->replaceWith('<iframe width="540" height="315" src="'.$src.'" frameborder="0" allowfullscreen></iframe>');
+                            $replace = '<iframe width="540" height="315" src="'.$src.'" frameborder="0" allowfullscreen></iframe>';
+                            foreach ($patterns as $pattern) {
+                                if (preg_match($pattern, $src, $matches)) {
+                                    $video = new Videos();
+                                    $snippet = $video->getYoutubeSnippet($matches['code']);
+                                    if ($snippet !== false) {
+                                        $replace = '
+                                        <div itemprop="video" itemscope itemtype="http://schema.org/VideoObject">
+                                            <div style="display: none;">
+                                                <a itemprop="url" rel="nofollow" href="http://www.youtube.com/watch?v='.$matches['code'].'"></a>
+                                                <span itemprop="name">'.$snippet->title.'</span>
+                                                <span itemprop="description">'.$snippet->description.'</span>
+                                                <meta itemprop="duration" content="'.$snippet->duration.'"/>
+                                                <meta itemprop="isFamilyFriendly" content="true"/>
+                                                <meta itemprop="uploadDate" content="'.$snippet->date_added.'"/>
+                                                <span itemprop="thumbnail" itemscope itemtype="http://schema.org/ImageObject">
+                                                    <img itemprop="contentUrl" src="'.$snippet->thumbnail.'"/>
+                                                    <meta itemprop="width" content="540"/>
+                                                    <meta itemprop="height" content="315"/>
+                                                </span>
+                                            </div>
+                                            '.$replace.'
+                                        </div>';
+                                    }
+                                }
+                            }
+                            pq($embed)->replaceWith($replace);
                         } else {
                             pq($embed)->remove();
                         }
