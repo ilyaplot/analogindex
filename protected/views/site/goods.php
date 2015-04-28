@@ -361,7 +361,7 @@ $this->widget('application.widgets.BreadcrumbsWidget.BreadcrumbsWidget',['items'
     </div>
 
     <div class="col-sidebars">
-
+        <?php $this->widget('application.widgets.AbsWidget'); ?>
         <div class="c_sidebars_inner">
             <?php $this->widget('application.widgets.ListGoodsWidget', array("type" => 'pda', 'limit' => 5, 'style' => 'inner')); ?>
         </div>

@@ -52,6 +52,191 @@ class TestCommand extends CConsoleCommand
     {
         
         $criteria = new CDbCriteria();
+        $criteria->condition = "t.characteristic = 12";
+        $characteristics = GoodsCharacteristics::model()->findAll($criteria);
+        foreach ($characteristics as $characteristic) {
+
+            $values = @json_decode($characteristic->value, true);
+
+            if (!is_array($values) || count($values) !== 2) {
+                continue;
+            }
+
+            $model = new SpecificationsValues();
+            $model->goods = $characteristic->goods;
+            $model->lang = $characteristic->lang;
+            $model->raw = json_encode($values);
+            $model->specification = 42;
+            if ($model->validate()) {
+                $model->save();
+            }
+        }
+
+        $criteria = new CDbCriteria();
+        $criteria->condition = "t.characteristic = 8";
+        $characteristics = GoodsCharacteristics::model()->findAll($criteria);
+        foreach ($characteristics as $characteristic) {
+
+            if (empty($characteristic->value)) {
+                continue;
+            }
+
+            $model = new SpecificationsValues();
+            $model->goods = $characteristic->goods;
+            $model->lang = $characteristic->lang;
+            $model->raw = round($characteristic->value);
+            $model->specification = 31;
+            if ($model->validate()) {
+                $model->save();
+            }
+        }
+
+        $criteria = new CDbCriteria();
+        $criteria->condition = "t.characteristic = 9";
+        $characteristics = GoodsCharacteristics::model()->findAll($criteria);
+        foreach ($characteristics as $characteristic) {
+
+            if (empty($characteristic->value)) {
+                continue;
+            }
+
+            $model = new SpecificationsValues();
+            $model->goods = $characteristic->goods;
+            $model->lang = $characteristic->lang;
+            $model->raw = round($characteristic->value);
+            $model->specification = 36;
+            if ($model->validate()) {
+                $model->save();
+            }
+        }
+
+        
+        $criteria = new CDbCriteria();
+        $criteria->condition = "t.characteristic = 22";
+        $characteristics = GoodsCharacteristics::model()->findAll($criteria);
+        foreach ($characteristics as $characteristic) {
+            if (empty($characteristic->value)) {
+                continue;
+            }
+            
+            $model = new SpecificationsValues();
+            $model->goods = $characteristic->goods;
+            $model->lang = $characteristic->lang;
+            $model->raw = intval(str_replace(" mAh", '', $characteristic->value));
+            $model->specification = 78;
+            if ($model->validate()) {
+                $model->save();
+            }
+        }
+
+        $criteria = new CDbCriteria();
+        $criteria->condition = "t.characteristic = 6";
+        $characteristics = GoodsCharacteristics::model()->findAll($criteria);
+        foreach ($characteristics as $characteristic) {
+
+            if (empty($characteristic->value)) {
+                continue;
+            }
+
+            $model = new SpecificationsValues();
+            $model->goods = $characteristic->goods;
+            $model->lang = $characteristic->lang;
+            $model->raw = $characteristic->value;
+            $model->specification = 27;
+            if ($model->validate()) {
+                $model->save();
+            }
+        }
+        
+        
+        $criteria = new CDbCriteria();
+        $criteria->condition = "t.characteristic = 5";
+        $characteristics = GoodsCharacteristics::model()->findAll($criteria);
+        foreach ($characteristics as $characteristic) {
+
+            if (empty($characteristic->value)) {
+                continue;
+            }
+
+            $model = new SpecificationsValues();
+            $model->goods = $characteristic->goods;
+            $model->lang = $characteristic->lang;
+            $model->raw = $characteristic->value;
+            $model->specification = 26;
+            if ($model->validate()) {
+                $model->save();
+            }
+        }
+
+        
+        $criteria = new CDbCriteria();
+        $criteria->condition = "t.characteristic in (32,33,34)";
+        $criteria->order = 't.goods asc';
+        $characteristics = GoodsCharacteristics::model()->findAll($criteria);
+        $specifications = [];
+        foreach ($characteristics as $characteristic) {
+            $values = @json_decode($characteristic->value, true);
+            if (!is_array($values) || empty($values)) {
+                continue;
+            }
+            
+            foreach($values as $value) {
+                if (preg_match("/^GSM.+/isu", $value)) {
+                    $specifications[$characteristic->goods][14][] = $value;
+                    continue;
+                }
+                
+                if (preg_match("/^UMTS.+/isu", $value)) {
+                    $specifications[$characteristic->goods][17][] = $value;
+                    continue;
+                }
+                
+                
+                if (preg_match("/^LTE.+/isu", $value)) {
+                    $specifications[$characteristic->goods][18][] = $value;
+                    continue;
+                }
+                
+                if (preg_match("/^HSDPA.+/isu", $value)) {
+                    $specifications[$characteristic->goods][17][] = $value;
+                    continue;
+                }
+                
+                if (preg_match("/^CDMA.+/isu", $value)) {
+                    $specifications[$characteristic->goods][19][] = $value;
+                    continue;
+                }
+                
+            }
+
+        }
+        
+        foreach ($specifications as $product=>$specification) {
+            foreach ($specification as $key=>$values) {
+                
+                $values = array_unique($values);
+                $model = new SpecificationsValues();
+                $model->goods = $product;
+                $model->lang = 'ru';
+                $model->raw = json_encode($values);
+                $model->specification = $key;
+                if ($model->validate()) {
+                    $model->save();
+                }
+                
+                $model = new SpecificationsValues();
+                $model->goods = $product;
+                $model->lang = 'en';
+                $model->raw = json_encode($values);
+                $model->specification = $key;
+                if ($model->validate()) {
+                    $model->save();
+                }
+            }
+        }
+
+        
+        $criteria = new CDbCriteria();
         $criteria->condition = "t.characteristic = 36";
         $characteristics = GoodsCharacteristics::model()->findAll($criteria);
         foreach ($characteristics as $characteristic) {
@@ -153,7 +338,7 @@ class TestCommand extends CConsoleCommand
             $model = new SpecificationsValues();
             $model->goods = $characteristic->goods;
             $model->lang = $characteristic->lang;
-            $model->raw = doubleval($values[1]);
+            $model->raw = doubleval($values[0]);
             $model->specification = 4;
             if ($model->validate()) {
                 $model->save();
@@ -178,5 +363,4 @@ class TestCommand extends CConsoleCommand
             }
         }
     }
-
 }

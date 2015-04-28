@@ -6,9 +6,9 @@ class ArticlesController extends Controller
     {
         
         if (!$debug) {
-            $article = Articles::model()->with(['tags'])->findByAttributes(['id'=>$id,'link'=>$link, 'lang'=>Yii::app()->language]);
+            $article = Articles::model()->cache(60*60)->findByAttributes(['id'=>$id,'link'=>$link, 'lang'=>Yii::app()->language]);
         } else {
-            $article = Articles::model()->with(['tags'])->findByAttributes(['id'=>$id]);
+            $article = Articles::model()->cache(60*60)->findByAttributes(['id'=>$id]);
         }
         
         $widget_in = [];
@@ -40,7 +40,7 @@ class ArticlesController extends Controller
                 $criteria = new CDbCriteria();
                 $criteria->select = "goods";
                 $criteria->addInCondition("tag", $tag_ids);
-                $product_ids = GoodsTags::model()->findAll($criteria);
+                $product_ids = GoodsTags::model()->cache(60*60)->findAll($criteria);
                 foreach($product_ids as $pid) {
                     $widget_in[] = $pid->goods;
                 }
@@ -78,7 +78,7 @@ class ArticlesController extends Controller
         $criteria = new CDbCriteria();
         $criteria->condition = "t.link = :link and t.brand = :brand";
         $criteria->params = array("link" => $product, "brand" => $brand->id);
-        $product = Goods::model()->find($criteria);
+        $product = Goods::model()->cache(60*60)->find($criteria);
 
         if (!$product) {
             echo "no product";

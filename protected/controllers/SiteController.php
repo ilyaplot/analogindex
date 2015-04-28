@@ -533,7 +533,7 @@ class SiteController extends Controller
         $criteria->params = ['lang'=>Yii::app()->language];
         $criteria->order = "t.key";
         
-        $categories = SpecificationsCategories::model()->with(['specifications', 'specifications.value'=>['on'=>'value.goods = 2281']])->findAll($criteria);
+        $categories = SpecificationsCategories::model()->with(['specifications', 'specifications.value'=>['on'=>'value.goods = 10562']])->findAll($criteria);
         
         foreach ($categories as $category) {
             echo $category->name."<br />";

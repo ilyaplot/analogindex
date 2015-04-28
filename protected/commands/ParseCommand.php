@@ -17,7 +17,6 @@ class ParseCommand extends CConsoleCommand
         $criteria->condition = 't.lang = :lang';
         $criteria->params = ['lang'=>'en'];
         $criteria->order = "category_data.key, t.id";
-
         $specifications = Specifications::model()->with([
             'category_data'
         ])->findAll($criteria);

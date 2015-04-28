@@ -21,7 +21,6 @@
             <div>
                 <?php $export->productsfull($tags, Yii::app()->language); ?>
             </div>
-            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
             <hr />
             <?php endif;?>
             <div class="news-content" itemprop="articleBody"><?php echo $article->content ?></div>
@@ -76,9 +75,11 @@
 
     <div class="col-sidebars">
         <?php if (!empty($tags)): ?>
-        <?php echo $this->renderPartial('_topadvert', ['products'=>$export->ProductsArray($tags, Yii::app()->language, 1)]); ?>
+        <?php //echo $this->renderPartial('_topadvert', ['products'=>$export->ProductsArray($tags, Yii::app()->language, 1)]); ?>
         <?php endif;?>
+        <?php $this->widget('application.widgets.AbsWidget'); ?>
         <div class="informer sidebar-informer">
+            
             <?php 
                 $widget_params = ['style' => 'inner'];
                 if (!empty($widget_in)) {

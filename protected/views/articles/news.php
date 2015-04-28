@@ -27,7 +27,6 @@
                             <?php $export->productsfull($tags, Yii::app()->language); ?>
                         
                         <?php endif; ?>
-                        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
                     </div>
                     <div class="flRight">
                         <script type="text/javascript">
@@ -104,6 +103,7 @@
         </div>
     </div>
     <div class="col-sidebars">
+        <?php $this->widget('application.widgets.AbsWidget'); ?>
         <div class="informer sidebar-informer">
             <?php
             $widget_params = ['style' => 'inner'];
@@ -117,7 +117,7 @@
             <?php $this->widget('application.widgets.ListGoodsWidget', $widget_params); ?>
         </div>
         <?php if (!empty($tags)): ?>
-            <?php echo $this->renderPartial('_topadvert', ['products' => $export->ProductsArray($tags, Yii::app()->language, 1)]); ?>
+            <?php //echo $this->renderPartial('_topadvert', ['products' => $export->ProductsArray($tags, Yii::app()->language, 1)]); ?>
         <?php endif; ?>
     </div>
 </div>

@@ -1,10 +1,10 @@
    <div class="informer-top">
         <div class="informer-t-left"><span class="informer-title"><?php echo $type->name->name?></span></div>
         <div class="informer-t-right">
-            <nav id="informer-top-menu">
+            <nav id="informer-top-menu-<?=time()?>">
                 <ul>
                     <li><a href="#" class="informer-icon-rating"></a></li>
-                    <li id="price_li_informer"><a href="#" class="informer-icon-price"></a>
+                    <li id="price_li_informer-<?=time()?>"><a href="#" class="informer-icon-price"></a>
                         <div class="informer-curr-bl">
                             <a href="#" class="informer_currency-select cur-rub"><span class="drpd_arrow-informer"></span></a>
                             <ul>

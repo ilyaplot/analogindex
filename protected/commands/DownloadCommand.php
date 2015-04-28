@@ -2,6 +2,11 @@
 
 class DownloadCommand extends CConsoleCommand
 {
+    public function actionDroidDev()
+    {
+        
+    }
+    
     
     public function actionDevSpecSitemap()
     {
@@ -178,7 +183,7 @@ class DownloadCommand extends CConsoleCommand
                                     }
                                 } else {
                                     echo "Заглушка, удаляем файл".PHP_EOL;
-                                    $file->delete();
+                                    @unlink($filename);
                                 }
                         }
                     }
