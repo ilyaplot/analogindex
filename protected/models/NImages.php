@@ -420,39 +420,53 @@ class NImages extends CActiveRecord
      */
     public static function AccelRedirect($id, $size) 
     {
-
-        $model = self::model()->cache(60*60*24)->findByPk($id);
+        $key = md5($id."-".$size);
         
-        if (!$model)
-            return false;
+        if (!$headers = Yii::app()->cache->get($key)) {
+            $model = self::model()->cache(60*60)->findByPk($id);
 
-        if (empty(self::$sizes[$size]))
-            return false;
+            if (!$model)
+                return false;
 
-        if (preg_match("/(?P<width>\d+)x(?P<height>\d+)/isu", $size ,$matches)) {
-            $size = $matches['width']."x".$matches['height'];
+            if (empty(self::$sizes[$size]))
+                return false;
 
-            $options = $model->getSizeOptions($size);
-            $options->format = "image/".$options->format;
-            
-            if ((isset($options->notResize) && $options->notResize == true) 
-                    || ($model->width <= $matches['width'] && $model->height <= $matches['height'])) {
-                $size = 'source';
-                $options->format = $model->mime_type;
+            if (preg_match("/(?P<width>\d+)x(?P<height>\d+)/isu", $size ,$matches)) {
+                $size = $matches['width']."x".$matches['height'];
+
+                $options = $model->getSizeOptions($size);
+                $options->format = "image/".$options->format;
+
+                if ((isset($options->notResize) && $options->notResize == true) 
+                        || ($model->width <= $matches['width'] && $model->height <= $matches['height'])) {
+                    $size = 'source';
+                    $options->format = $model->mime_type;
+                }
             }
+
+            $filename = $model->getFilename($size);
+
+            $filesize = ($size == 'source') ? $model->filesize : filesize($filename);
+            $extension = $model->getExtension($size);
+            $filename = str_replace("/inktomia/db/analogindex", '', $filename);
+
+
+            $headers = [
+                "Content-Type: {$options->format}",
+                "Content-Length: ".$filesize,
+                "Content-Disposition: inline; filename=\"{$model->name}.{$extension}\"",
+                "Content-Transfer-Encoding: binary",
+                "Cache-control: public",
+                "X-Accel-Redirect: {$filename}",
+            ];
+            Yii::app()->cache->set($key, $headers, 0);
         }
-
-        $filename = $model->getFilename($size);
-
-        $filesize = ($size == 'source') ? $model->filesize : filesize($filename);
-        $extension = $model->getExtension($size);
-        $filename = str_replace("/inktomia/db/analogindex", '', $filename);
         
-        header("Content-Type: {$options->format}");
-        header("Content-Length: ".$filesize);
-        header("Content-Disposition: inline; filename=\"{$model->name}.{$extension}\""); 
-        header('Content-Transfer-Encoding: binary');
-        header("X-Accel-Redirect: {$filename}");
+        
+        foreach ($headers as $header) {
+            header($header);
+        }
+        
         return true;
     }
     

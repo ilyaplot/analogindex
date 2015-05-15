@@ -82,29 +82,6 @@ $this->widget('application.widgets.BreadcrumbsWidget.BreadcrumbsWidget',['items'
                         <div class="clear"></div>
                     </div>
                     <div class="flRight">
-                        <script type="text/javascript">
-    $(document).ready(function () {
-        $('.item_photos_all .slide img').on('click', function () {
-            $('.infoGoodItem-wp-photos_main img').attr('src', $(this).attr('src'));
-        });
-    });
-
-    (function () {
-        if (window.pluso)
-            if (typeof window.pluso.start == "function")
-                return;
-        if (window.ifpluso == undefined) {
-            window.ifpluso = 1;
-            var d = document, s = d.createElement('script'), g = 'getElementsByTagName';
-            s.type = 'text/javascript';
-            s.charset = 'UTF-8';
-            s.async = true;
-            s.src = ('https:' == window.location.protocol ? 'https' : 'http') + '://share.pluso.ru/pluso-like.js';
-            var h = d[g]('body')[0];
-            h.appendChild(s);
-        }
-    })();</script>
-                        <div class="pluso" data-background="transparent" data-options="small,square,line,horizontal,nocounter,theme=06" data-services="vkontakte,odnoklassniki,facebook,twitter,google" style="margin: 6px 0 0;"></div>
                     </div>
                 </div>
             </div>
