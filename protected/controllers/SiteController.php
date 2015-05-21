@@ -43,113 +43,123 @@ class SiteController extends Controller
     public function actionIndex()
     {
         $this->setPageTitle("Analogindex");
+        $this->layout = 'materialize';
         $this->render("index");
     }
-
+    
+    
     public function actionGoods($language, $type, $brand, $link)
     {
-        $type = GoodsTypes::model()->findByAttributes(array("link" => $type));
-        if (!$type)
-            throw new CHttpException(404, Yii::t("errors", "Страница не найдена"));
-
-        $brand = Brands::model()->findByAttributes(array("link" => $brand));
-        if (!$brand)
-            throw new CHttpException(404, Yii::t("errors", "Страница не найдена"));
-
+        
         $criteria = new CDbCriteria();
-        $criteria->condition = "t.link = :link and t.brand = :brand";
-        $criteria->params = array("link" => $link, "brand" => $brand->id);
+        $criteria->condition = "t.link = :link and brand_data.link = :brand";
+        $criteria->params = array("link" => $link, "brand" => $brand);
+        $product = Goods::model()->cache(60 * 60 * 6)->with(['brand_data', 'type_data'])->find($criteria);
+        
+        if (!$product)
+            throw new CHttpException(404, Yii::t("errors", "Страница не найдена"));
 
-        $product = Goods::model()->cache(60 * 60)->find($criteria);
-        if (!$product) {
-            Yii::app()->request->redirect("/", true, 302);
-            exit();
-        }
-
-        if ($product->type !== $type->id) {
+        if ($product->type_data->link !== $type) {
             $redirect = "/{$product->type_data->link}/{$brand->link}/{$product->link}.html";
             Redirects::model()->deleteAllByAttributes(['from' => $redirect]);
             Yii::app()->request->redirect($redirect, true, 302);
         }
 
-
+        $relatedArticles = [];
+        $relatedCounts = [];
         $articlesCriteria = new CDbCriteria();
-        $articlesCriteria->select = 't.id, t.description, t.created, t.title, t.link, t.type';
+        $articlesCriteria->select = 't.id, t.description, t.created, t.title, t.link, t.type, t.lang';
         $articlesCriteria->condition = 't.lang = :lang and t.type = :type and product.goods = :product';
-        $articlesCriteria->params = [
-            'lang' => Yii::app()->language,
-            'type' => Articles::TYPE_NEWS,
-            'product' => $product->id,
-        ];
-
-        $newsCount = Articles::model()->with(['product'])->count($articlesCriteria);
         $articlesCriteria->limit = 5;
-        $articlesCriteria->order = "t.created desc";
-        $news = Articles::model()->with(['product'])->findAll($articlesCriteria);
+        
+        foreach (Articles::model()->related as $type=>$null) {
+            $articlesCriteria->params = [
+                'lang' => Yii::app()->language,
+                'type' => $type,
+                'product' => $product->id,
+            ];
+            Yii::app()->sourceLanguage = (Yii::app()->language == 'en') ? 'ru' : 'en';
+            $relatedCounts[$type]['title'] = Yii::t('articles', $type . '-many');
+            $relatedCounts[$type]['more'] = Yii::t('articles', $type . '-readall');
+            $relatedCounts[$type]['count'] = Articles::model()->cache(60*60*24)->with(['product'])->count($articlesCriteria);
+            Yii::app()->sourceLanguage = (Yii::app()->language == 'en') ? 'ru' : 'en';
+            
+            $relatedArticles[$type] = Articles::model()->cache(60*60*6)->with(['product'])->findAll($articlesCriteria);
+        }
+        
+        $this->setPageTitle($product->type_data->name->item_name . " " . $product->fullname);
+        $this->addKeywords(array($product->type_data->name->item_name, $product->brand_data->name, $product->name));
 
-        $articlesCriteria->params = [
-            'lang' => Yii::app()->language,
-            'type' => Articles::TYPE_OPINION,
-            'product' => $product->id,
-        ];
-
-        $opinionsCount = Articles::model()->with(['product'])->count($articlesCriteria);
-        $articlesCriteria->limit = 5;
-        $articlesCriteria->order = "t.created desc";
-        $opinions = Articles::model()->with(['product'])->findAll($articlesCriteria);
-
-        $articlesCriteria->params = [
-            'lang' => Yii::app()->language,
-            'type' => Articles::TYPE_HOWTO,
-            'product' => $product->id,
-        ];
-
-        $howtoCount = Articles::model()->with(['product'])->count($articlesCriteria);
-        $articlesCriteria->limit = 5;
-        $articlesCriteria->order = "t.created desc";
-        $howto = Articles::model()->with(['product'])->findAll($articlesCriteria);
-
-        $articlesCriteria->params = [
-            'lang' => Yii::app()->language,
-            'type' => Articles::TYPE_REVIEW,
-            'product' => $product->id,
-        ];
-
-        $reviewsCount = Articles::model()->with(['product'])->count($articlesCriteria);
-        $articlesCriteria->limit = 5;
-        $articlesCriteria->order = "t.created desc";
-        $reviews = Articles::model()->with(['product'])->findAll($articlesCriteria);
-
-        $this->setPageTitle($product->type_data->name->item_name . " " . $brand->name . " " . $product->name);
-        $this->addKeywords(array($product->type_data->name->item_name, $brand->name, $product->name));
-
-        foreach ($product->type_data->keywords as $keyword)
+        foreach ($product->type_data->keywords as $keyword) {
             $this->addKeyword($keyword->keyword);
+        }
 
         foreach ($product->getGeneralCharacteristics() as $characteristic) {
             $this->addDescription($characteristic['characteristic_name'] . " " . $characteristic['value']);
         }
+        $this->scripts[] = 'jquery.lockfixed.min.js';
+        $this->scripts[] = 'floating-div.js';
+        $this->scripts[] = 'gallery.js';
+        $this->scripts[] = 'product.js';
+        $this->layout = 'materialize';
+        $this->breadcrumbs = [
+            [
+                'url' => 'http://analogindex.' . Language::getCurrentZone() . '/',
+                'title' => Yii::t('main', 'Главная'),
+            ],
+            [
+                'url' => Yii::app()->createAbsoluteUrl("site/type", array("type" => $product->type_data->link, "language" => Language::getCurrentZone())),
+                'title' => $product->type_data->name->name,
+            ],
+            [
+                'url' => Yii::app()->createAbsoluteUrl("site/brand", array(
+                    "link" => $product->brand_data->link,
+                    "language" => Language::getCurrentZone(),
+                    "type" => $product->type_data->link,
+                )),
+                'title' => $product->brand_data->name,
+            ],
+            [
+                'url' => Yii::app()->createAbsoluteUrl("site/goods", array(
+                    "link" => $product->link,
+                    "brand" => $product->brand_data->link,
+                    "language" => Language::getCurrentZone(),
+                    "type" => $product->type_data->link,
+                )),
+                'title' => $product->fullname,
+        ]];
+        
+        $images = array_map(function($value) {
+            return $value->image_data;
+        }, $product->cache(60*5)->gallery([
+            'limit' => Goods::IMAGES_LIMIT, 
+            'with' => ['image_data'],
+            'order' => 'gallery.id asc',
+        ]));
+        $firstImage = reset($images);
 
-        $ratingDisabled = 1;
-        if (!Yii::app()->user->isGuest &&
-                !Yii::app()->user->getState("readonly") &&
-                !RatingsGoods::model()->countByAttributes(array("goods" => $product->id, "user" => Yii::app()->user->id))) {
-            $ratingDisabled = 0;
-        }
-
-        $this->render("goods", array(
-            "type" => $type,
-            "brand" => $brand,
-            "product" => $product,
-            "reviews" => $reviews,
-            "opinions" => $opinions,
-            "howto" => $howto,
-            "howto_count" => $howtoCount,
-            "opinions_count" => $opinionsCount,
-            "reviews_count" => $reviewsCount,
-            "news" => $news,
-            "news_count" => $newsCount,
-            "ratingDisabled" => $ratingDisabled,
+        $characteristics = $product->getCharacteristics();
+        $characteristicsLinks = new CharacteristicsLinks($characteristics);
+        $characteristics = $characteristicsLinks->getCharacteristics($product->type_data->link);
+      
+        
+        $criteria = new CDbCriteria();
+        $criteria->order = "priority desc";
+        $criteria->condition = "t.goods = :id and t.lang = :lang";
+        $criteria->params = ['id' => $product->id, 'lang' => Yii::app()->language];
+        $criteria->limit = 3;
+        $relatedVideos = Videos::model()->cache(60*60*24)->findAll($criteria);
+        
+        
+        
+        $this->render("product", array(
+            'firstImage'=>$firstImage,
+            'images'=>$images,
+            'characteristics'=>$characteristics,
+            'product' => $product,
+            'relatedArticles' => $relatedArticles,
+            'relatedCounts' => $relatedCounts,
+            'relatedVideos' => $relatedVideos,
         ));
     }
 
@@ -214,6 +224,40 @@ class SiteController extends Controller
                     //'primary_image.image_data',
                 ])->findAll($criteria);
         $this->pageTitle = $brand->name . (isset($type->name->name) ? ': ' . $type->name->name : null);
+        $this->layout = 'materialize';
+        /*
+
+                <?php if ($type_selected):?>
+                <li itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-1" itemref="breadcrumb-2">
+                    <span itemprop="title"><?php echo $type_selected->name->name?></span>
+                    <span class="divider">/</span>
+                </li>
+                <?php else: ?>
+                <li itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-1" itemref="breadcrumb-2">
+                    <span itemprop="title"><?php echo Yii::t("main", "Производители")?></span>
+                    <span class="divider">/</span>
+                </li>
+                <?php endif;?>
+                <li itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-2">
+                    <span itemprop="title"><?php echo $brand->name?></span>
+                </li>
+            </ul>
+         */
+        $this->breadcrumbs = [
+            [
+                'url'=>'http://analogindex.'.Language::getCurrentZone(),
+                'title'=> Yii::t('main', 'Главная'),
+            ],
+            /*[
+                'url'=>Yii::app()->createAbsoluteUrl('site/type', ['type'=>$type->link, 'language'=>Language::getCurrentZone()]),
+                'title'=>$type->name->name,
+            ]*/
+            [
+                'url'=>'#',
+                'title'=>$brand->name,
+            ]
+        ];
+        
         $this->render("brand", array(
             "brand" => $brand,
             "goods" => $goods,
@@ -272,6 +316,9 @@ class SiteController extends Controller
 
     public function actionType($type, $brands = array(), $os = array(), $screensizes = array(), $cores = array(), $cpufreq = array(), $ram = array(), $processor = array(), $gpu = array())
     {
+        $this->layout = 'materialize';
+        $this->scripts[] = 'grid-to-list.js';
+        
         $brands = !empty($brands) ? explode(".", $brands) : array();
         $os = !empty($os) ? explode(".", $os) : array();
         $screensizes = !empty($screensizes) ? explode(".", $screensizes) : array();
@@ -287,10 +334,10 @@ class SiteController extends Controller
         );
 
         $typeString = $type;
-        if (!$type = GoodsTypes::model()->findByAttributes(array("link" => $typeString)))
+        if (!$typeModel = GoodsTypes::model()->findByAttributes(array("link" => $typeString)))
             throw new CHttpException(404, "Страница не найдена");
 
-        $type = $type->id;
+        $type = $typeModel->id;
 
         if ($filterBrands = Yii::app()->request->getPost("brands")) {
             array_multisort($filterBrands);
@@ -490,7 +537,7 @@ class SiteController extends Controller
         $criteria->addInCondition("t.id", $goodsSelector);
         $criteria->addCondition("t.type = {$type}");
         $pages = new CPagination(Goods::model()->cache(60 * 60)->count($criteria));
-        $pages->pageSize = 10;
+        $pages->pageSize = 12;
         $pages->applyLimit($criteria);
         //$criteria->group = "t.id, rating.value";
         $goods = Goods::model()->cache(60 * 60)->with(array(
@@ -501,6 +548,17 @@ class SiteController extends Controller
                     //"rating"
                 ))->findAll($criteria);
 
+        $this->breadcrumbs = [
+            [
+                'url'=>'http://analogindex.'.Language::getCurrentZone(),
+                'title'=>Yii::t("main", "Главная"),
+            ],
+            [
+                'url'=>Yii::app()->createAbsoluteUrl('site/type', ['type'=>$typeModel->link, 'language'=>Language::getCurrentZone()]),
+                'title'=>$typeModel->name->name,
+            ]
+        ];
+        $this->setPageTitle($typeModel->name->name);
         $this->render("type", array(
             "brands" => $brandsList,
             "os" => $osList,
@@ -522,6 +580,7 @@ class SiteController extends Controller
             /////////////
             "goods" => $goods,
             "pages" => $pages,
+            "type"=>$typeModel,
         ));
     }
 

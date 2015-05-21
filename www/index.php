@@ -5,7 +5,7 @@ $yii = '../framework/yii.php';
 $config = dirname(__FILE__) . '/../protected/config/www.php';
 
 // удалить следующую строку в режиме production
-defined('YII_DEBUG') or define('YII_DEBUG', false);
+defined('YII_DEBUG') or define('YII_DEBUG', true);
 
 date_default_timezone_set('Europe/Moscow');
 

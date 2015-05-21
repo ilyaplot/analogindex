@@ -1,19 +1,6 @@
-<style>
-
-    table.compare {
-        border-collapse: collapse; 
-        margin-bottom: 16px;
-    }
-    
-    table.compare td, table.compare th {
-        padding: 3px; 
-        border: 1px solid black; 
-    }
-
-</style>
 <h2 style="margin-top: 15px;"><?php echo Yii::t("goods", 'Технические характеристики');?></h2>
 <?php foreach ($goodsIndex as $index=>$goods): ?>
-<table class="compare">
+<table class="compare striped">
     <thead>
         <tr>
             <th></th>

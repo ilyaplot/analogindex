@@ -1,4 +1,17 @@
 <?php
+/**
+ * <ul class="pagination">
+				        		<li class="waves-effect pagination-btn"><a href="#!"><i class="mdi-av-fast-rewind"></i></a></li>
+							    <li class="disabled pagination-btn"><a href="#!"><i class="mdi-navigation-chevron-left"></i></a></li>
+							    <li class="hide-on-med-and-down active"><a href="#!">1</a></li>
+							    <li class="hide-on-med-and-down waves-effect"><a href="#!">2</a></li>
+							    <li class="hide-on-med-and-down waves-effect"><a href="#!">3</a></li>
+							    <li class="hide-on-med-and-down waves-effect"><a href="#!">4</a></li>
+							    <li class="hide-on-med-and-down waves-effect"><a href="#!">5</a></li>
+							    <li class="waves-effect pagination-btn"><a href="#!"><i class="mdi-navigation-chevron-right"></i></a></li>
+							    <li class="waves-effect pagination-btn"><a href="#!"><i class="mdi-av-fast-forward"></i></a></li>
+							</ul>
+ */
 class LinkPager extends CLinkPager
 {
     const CSS_FIRST_PAGE='first';
@@ -6,7 +19,7 @@ class LinkPager extends CLinkPager
     const CSS_PREVIOUS_PAGE='pag_prev';
     const CSS_NEXT_PAGE='pag_next';
     const CSS_INTERNAL_PAGE='page';
-    const CSS_HIDDEN_PAGE='hidden';
+    const CSS_HIDDEN_PAGE='disabled';
     const CSS_SELECTED_PAGE='active';
     
     public function run()
@@ -16,9 +29,7 @@ class LinkPager extends CLinkPager
             $buttons=$this->createPageButtons();
             if(empty($buttons))
                     return;
-            echo CHtml::openTag("nav", $this->htmlOptions);
-            echo CHtml::tag('ul',array('class'=>'nav-to-left', 'id'=>'pagination'),implode("\n",$buttons));
-            echo CHtml::closeTag("nav");
+            echo CHtml::tag('ul',array('class'=>'pagination'),implode("\n",$buttons));
             echo $this->footer;
     }
     
@@ -35,8 +46,11 @@ class LinkPager extends CLinkPager
      */
     protected function createPageButton($label,$page,$class,$hidden,$selected)
     {
+            $class='waves-effect pagination-btn';
             if($hidden || $selected)
-                    $class.=' '.($hidden ? $this->hiddenPageCssClass : $this->selectedPageCssClass);
-            return CHtml::link($label,$this->createPageUrl($page), array('class'=>$class));
+                $class.=' '.($hidden ? $this->hiddenPageCssClass : $this->selectedPageCssClass);
+            $html = CHtml::openTag('li',['class'=>$class]);
+            $html.= CHtml::link(' '.$label.' ',$this->createPageUrl($page));
+            return $html.CHtml::closeTag('li');
     }
 }

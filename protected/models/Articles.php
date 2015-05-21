@@ -10,6 +10,13 @@ class Articles extends CActiveRecord
     const TYPE_OPINION = 'opinion'; // Отзыв
     const TYPE_HOWTO = 'howto'; // FAQ
 
+    public $related = [
+        'news'=>[],
+        'review'=>[],
+        'opinion'=>[],
+        'howto'=>[],
+    ];
+    
     public static function model($className = __CLASS__)
     {
         return parent::model($className);
@@ -152,7 +159,62 @@ class Articles extends CActiveRecord
     public function afterFind()
     {
         $this->source_type = $this->type;
+        
         return parent::afterFind();
+    }
+    
+    public function fillRelated()
+    {
+        foreach ($this->related as $type=>$container) {
+            $this->related[$type] = $this->getRelatedArticles($type, $this->lang, 5);
+        }
+    }
+
+    public function getRelatedArticles($type, $lang, $limit)
+    {
+        $tags = [];
+        foreach ($this->tags as $tag) {
+            $tags[] = $tag->tag_data->id;
+        }
+        $tags = array_unique($tags);
+        asort($tags);
+        $key = md5("_related_articles_".implode(",",$tags)."_{$lang}_{$limit}");
+        
+        if (!$related = Yii::app()->cache->get($key)) {
+
+            $connection = $this->getDbConnection();
+            $query = "select 
+                a.id
+            from 
+                ai_articles a
+            where 
+                a.id in (select article from ai_articles_tags where tag in (".implode(",", $tags)."))
+                and a.lang = :lang
+                and a.type = :type
+            group by a.id
+            order by a.created desc
+            limit 5";
+            
+            $params = [
+                'lang' => $lang,
+                'type' => $type
+            ];
+            
+            $relatedRows = $connection->createCommand($query)->queryAll(true, $params);
+            $relatedIds = [];
+            foreach ($relatedRows as $row) {
+                $relatedIds[] = $row['id'];
+            }
+            $criteria = new CDbCriteria();
+            $criteria->addInCondition('id', $relatedIds);
+            $criteria->select = "id, title, description, link, created, type, lang";
+            $criteria->limit = 5;
+            $criteria->order = 'created desc';
+            $related = self::model()->findAll($criteria);
+            
+            Yii::app()->cache->set($key, $related, 60 * 60 * 24);
+        }
+        return $related;
     }
 
     public function relations()
@@ -177,7 +239,7 @@ class Articles extends CActiveRecord
         GoodsArticles::model()->filter($this->id);
         return parent::afterSave();
     }
-
+    /*
     public function getRelatedArticles($type)
     {
         if (!$result = Yii::app()->cache->get(md5("related_{$type}_{$this->id}"))) {
@@ -202,7 +264,7 @@ class Articles extends CActiveRecord
             foreach ($data as $tag) {
                 $ids[$tag->id] = $tag->id;
             }
-            
+
             $criteria = new CDbCriteria();
             $criteria->select = "t.type, t.link, t.id, t.lang, t.title, t.created, t.description";
             $criteria->addInCondition('id', $ids);
@@ -213,5 +275,7 @@ class Articles extends CActiveRecord
         }
         return $result;
     }
+     * 
+     */
 
 }

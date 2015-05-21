@@ -1,23 +1,4 @@
-            <ul class="breadcrumbs breadcrumb">
-                <li itemscope itemtype="http://data-vocabulary.org/Breadcrumb" itemref="breadcrumb-1">
-                    <span itemprop="title"><a itemprop="url" href="http://analogindex.<?php echo Language::getCurrentZone() ?>/"><?php echo Yii::t('main', 'Главная')?></a></span>
-                    <span class="divider">/</span>
-                </li>
-                <?php if ($type_selected):?>
-                <li itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-1" itemref="breadcrumb-2">
-                    <span itemprop="title"><?php echo $type_selected->name->name?></span>
-                    <span class="divider">/</span>
-                </li>
-                <?php else: ?>
-                <li itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-1" itemref="breadcrumb-2">
-                    <span itemprop="title"><?php echo Yii::t("main", "Производители")?></span>
-                    <span class="divider">/</span>
-                </li>
-                <?php endif;?>
-                <li itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-2">
-                    <span itemprop="title"><?php echo $brand->name?></span>
-                </li>
-            </ul>
+            
             <div class="manufacture-categories clr">
                 <?php if($brand->logo):?>
                 <div class="mnf_logo">

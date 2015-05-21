@@ -38,14 +38,6 @@ class Goods extends CActiveRecord
             "primary_image" => array(self::HAS_ONE, "GoodsImagesCopy", "goods",
                 "order" => "primary_image.priority desc, primary_image.id asc",
             ),
-            "reviews" => array(self::HAS_MANY, "Reviews", "goods",
-                "order" => "reviews.priority desc",
-                "on" => "reviews.lang = '" . Yii::app()->language . "'",
-            ),
-            //"videos" => array(self::HAS_MANY, "Videos", "goods",
-            //    "order" => "priority desc",
-            //    "on" => "videos.lang = '" . Yii::app()->language . "'",
-            //),
             "synonims" => array(self::HAS_MANY, "GoodsSynonims", "goods",
                 "select" => "synonims.id, synonims.name, synonims.visibled",
             ),
@@ -57,6 +49,7 @@ class Goods extends CActiveRecord
                 "select" => "AVG(rating.value) as value",
             ),
             "comments" => array(self::HAS_MANY, "CommentsGoods", "goods"),
+            "primary_video" => array(self::HAS_ONE, "Videos", "goods", 'condition'=>'primary_video.disabled = 0 and primary_video.type = 1 and primary_video.lang = :lang', 'params'=>['lang'=>Yii::app()->language]),
         );
     }
 
@@ -173,7 +166,7 @@ class Goods extends CActiveRecord
         return isset($image->image_data) ? $image->image_data : null;
     }
 
-    public function getVideos($render = true, $lang = '')
+    public function getVideos($render = true, $lang = '', $limit=3)
     {
         if (empty($lang)) {
             $lang = Yii::app()->language;
@@ -184,7 +177,7 @@ class Goods extends CActiveRecord
         $criteria->order = "priority desc";
         $criteria->condition = "t.goods = :id and t.lang = :lang";
         $criteria->params = ['id' => $this->id, 'lang' => $lang];
-
+        $criteria->limit = $limit;
         $this->videos = Videos::model()->findAll($criteria);
         //}
 
@@ -454,6 +447,22 @@ class Goods extends CActiveRecord
         return Gallery::model()->cache(60 * 60)->with([
                     'image_data' => ['joinType' => 'inner join'],
                 ])->count($criteria);
+    }
+
+    public function getFullname()
+    {
+        $name = !empty($this->brand_data->name) ? "{$this->brand_data->name} {$this->name}" : $this->name;
+        return htmlentities($name);
+    }
+
+    public function getUrl()
+    {
+        return Yii::app()->createAbsoluteUrl("site/goods", [
+            'link' => $this->link,
+            'brand' => $this->brand_data->link,
+            'type' => $this->type_data->link,
+            'language' => Language::getCurrentZone(),
+        ]);
     }
 
 }

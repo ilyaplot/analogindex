@@ -9,7 +9,7 @@ class GalleryController extends Controller
      * @param int $page
      * @throws CHttpException
      */
-    public function actionProduct($brand, $product, $page = null, $link = null, $id = null)
+    public function actionProduct($brand, $product, $page = null, $link = null, $id = null, $debug=false)
     {
         $criteria = new CDbCriteria();
         $criteria->condition = "t.link = :product and brand_data.link = :brand";
@@ -135,8 +135,6 @@ class GalleryController extends Controller
         if ($currentImage == null) {
             $currentImage = reset($gallery);
         }
-        // Строки по 6 элементов
-        $gallery = array_chunk($gallery, 6);
 
         $this->pageTitle = Yii::t("main", "Фотогалерея") . " " . $product->brand_data->name . " " . $product->name;
         if (Yii::app()->language == 'ru') {
@@ -173,9 +171,52 @@ class GalleryController extends Controller
                 $this->addDescription($characteristic['characteristic_name'] . ": " . $characteristic['value'] . ",");
             }
         }
+        
+        $this->layout = 'materialize';
 
-
-        $this->render('index', [
+        $this->breadcrumbs = [
+            [
+                'url'=>'http://analogindex.'.Language::getCurrentZone(),
+                'title'=>Yii::t('main', 'Главная'),
+            ],
+            [
+                'url'=>Yii::app()->createAbsoluteUrl("site/type", array("type" => $product->type_data->link)),
+                'title'=>$product->type_data->name->name,
+            ],
+            [
+                'url'=>Yii::app()->createAbsoluteUrl("site/brand", array(
+                    "link" => $product->brand_data->link,
+                    "language" => Language::getCurrentZone(),
+                    "type" => $product->type_data->link,
+                )),
+                'title'=>$product->brand_data->name,
+            ],
+            [
+                'url'=>Yii::app()->createAbsoluteUrl("site/goods", array(
+                    'link' => $product->link,
+                    'brand' => $product->brand_data->link,
+                    'type' => $product->type_data->link,
+                    'language' => Language::getCurrentZone(),
+                )),
+                'title'=>$product->fullname,
+            ],
+            [
+                'url'=>Yii::app()->createAbsoluteUrl("gallery/product", [
+                    'product' => $product->link,
+                    'brand' => $product->brand_data->link,
+                    'language' => Language::getCurrentZone(),
+                ]),
+                'title'=>Yii::t("main", "Фотогалерея")
+            ]
+        ];
+        
+        $this->scripts[] = 'set-equal2.js';
+        $this->scripts[] = 'set-equal3.js';
+        
+        $characteristicsLinks = new CharacteristicsLinks($characteristics);
+        $characteristics = $characteristicsLinks->getCharacteristics($product->type_data->link);
+        
+        $this->render('image', [
             'pages' => $pages,
             'gallery' => $gallery,
             'product' => $product,

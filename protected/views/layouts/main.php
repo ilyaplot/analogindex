@@ -17,7 +17,11 @@
 
         
         <link rel="shortcut icon" href="/assets/img/favicon.ico" />
+            <link href="/assets/css/reset.css" rel="stylesheet" type="text/css" />
+    <link href="/assets/css/style.min.css" rel="stylesheet" type="text/css" />
         
+    <script type="text/javascript" src="/assets/js/selectivizr-min.js"></script>
+    <script type="text/javascript" src="/assets/js/scripts.js"></script>
         
     </head>
     <body>
@@ -26,12 +30,6 @@
                 <section class="container">
                     <div class="auth-login">
                         <div class="flRight">
-                            <!--<?php if (Yii::app()->user->isGuest): ?>
-                                <a class="auth_link-in" href="<?php echo Yii::app()->createUrl("user/login") ?>"><?php echo Yii::t('main', 'Вход'); ?></a> / 
-                                <a href="<?php echo Yii::app()->createUrl("user/registration") ?>" class="auth_link-out"><?php echo Yii::t('main', 'Регистрация'); ?></a> /
-                            <?php else: ?>
-                                <?php echo Yii::app()->user->getState("name") ?> <a class="auth_link-in" href="<?php echo Yii::app()->createUrl("user/logout") ?>"><?php echo Yii::t('main', 'Выход'); ?></a> /
-                            <?php endif; ?>-->
                             <?php echo Yii::t('main', '<a href="http://analogindex.com/lang.html">English version</a>') ?>
                         </div>
                         <div class="clear"></div>
@@ -53,7 +51,6 @@
                             <div class="clear"></div>
                         </div>
                     </div>
-
                     <?php $this->widget('application.widgets.MainNavWidget.MainNavWidget'); ?>
                 </section>
             </header><!-- /header -->
@@ -154,9 +151,5 @@
         </div>
     </body>
     
-    <link href="/assets/css/reset.css" rel="stylesheet" type="text/css" />
-    <link href="/assets/css/style.min.css" rel="stylesheet" type="text/css" />
-        
-    <script type="text/javascript" src="/assets/js/selectivizr-min.js"></script>
-    <script type="text/javascript" src="/assets/js/scripts.js"></script>
+
 </html>

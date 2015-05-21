@@ -106,7 +106,7 @@ class CackleSync {
             $url = $comment['chan']['channel'];
         }
 
-        if ($comment['author']!=null){
+        if (!empty($comment['author'])){
             $author_name = ($comment['author']['name']) ? $comment['author']['name'] : "";
             $author_www = ($comment['author']['www']) ? $comment['author']['www']: "" ;
             $author_avatar = ($comment['author']['avatar']) ? $comment['author']['avatar']: "" ;
@@ -154,9 +154,9 @@ class CackleSync {
 	    $q->execute(
                 array(
                     ':channel'=>($cackle_api->cackle_get_param("cackle_encoding") == 1) ? iconv("utf-8", "CP1251",$url) : $url,
-                    ':author_name'=>($cackle_api->cackle_get_param("cackle_encoding") == 1) ? iconv("utf-8", "CP1251",$author_name) : $author_name,
-                    ':author_email'=>($cackle_api->cackle_get_param("cackle_encoding") == 1) ? iconv("utf-8", "CP1251",$author_email) : $author_email ,
-                    ':author_avatar'=>($cackle_api->cackle_get_param("cackle_encoding") == 1) ? iconv("utf-8", "CP1251",$author_avatar) : $author_avatar ,
+                    ':author_name'=>($cackle_api->cackle_get_param("cackle_encoding") == 1) ? iconv("utf-8", "CP1251",@$author_name) : @$author_name,
+                    ':author_email'=>($cackle_api->cackle_get_param("cackle_encoding") == 1) ? iconv("utf-8", "CP1251",@$author_email) : @$author_email ,
+                    ':author_avatar'=>($cackle_api->cackle_get_param("cackle_encoding") == 1) ? iconv("utf-8", "CP1251",@$author_avatar) : @$author_avatar ,
                     ':date'=>$date,
                     ':ip'=>$ip,
                     ':comment'=>($cackle_api->cackle_get_param("cackle_encoding") == 1) ? iconv("utf-8", "CP1251",$message) : $message,

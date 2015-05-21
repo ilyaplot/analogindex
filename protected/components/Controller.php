@@ -6,8 +6,12 @@ class Controller extends CController
     public $pageDescription;
     public $pageKeywords;
 
-    protected $keywordsArray = array();
-    protected $descriptionArray = array();
+    protected $keywordsArray = [];
+    protected $descriptionArray = [];
+    
+    public $breadcrumbs = [];
+    
+    public $scripts = [];
     
     public function beforeAction($action)
     {
@@ -21,7 +25,7 @@ class Controller extends CController
 
         $cs = Yii::app()->getClientScript();
         
-        $cs->registerCoreScript('jquery');
+        //$cs->registerCoreScript('jquery');
 
 
         return parent::beforeAction($action);
