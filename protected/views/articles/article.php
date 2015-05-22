@@ -1,42 +1,43 @@
 <link type="text/css" rel="stylesheet" href="/assets/css/all.css"/>
 <div class="row content-wrapper">
     <div class="col s12 m12 l8 content-left">
-        <div class="content-in">
+        <div class="content-in" itemscope itemtype="http://schema.org/NewsArticle">
             <div class="ref-items">
-                <div class="news" itemscope="" itemtype="http://schema.org/NewsArticle">
-                    <h1><?php echo $article->title ?></h1>
+                <div class="news">
+                    <h1 itemprop="headline"><?php echo $article->title ?></h1>
+                    <span style="display: none;" itemprop="datePublished"><?=$article->created?></span>
                     <span class="date"><?php echo Yii::app()->dateFormatter->formatDateTime($article->created, 'long'); ?></span>
+                    <?php if (isset($article->primary_image)): ?>
+                    <span style="display: none;"><?=$article->preview_image->image_data->getHtml(NImages::SIZE_ARTICLE_PREVIEW,null,['itemprop'=>'image']); ?></span>
+                    <?php endif; ?>
                     <?php if (!empty($widgets['related_products'])): ?>
                         <hr />
                         <h5><?= Yii::t("goods", 'Упомянутые аппараты') ?></h5>
-                        <?php foreach ($widgets['related_products'] as $product): ?>
-                            <ul class="ref-list">
-                                <li>
-                                    <ul>
-                                        <li>
-                                            <?php if (isset($product->primary_image)): ?>
-                                                <a class="title" href="<?= $product->url ?>">
-                                                    <?php echo $product->primary_image->image_data->getHtml(NImages::SIZE_PRODUCT_LIST); ?>
-                                                    <br /><strong><?= $product->fullname ?></strong>
-                                                </a>
-                                            <?php endif; ?>
-                                        </li>
-                                        <?php if ($product->getGalleryCount()): ?>
-                                            <li>
-                                                <a href="<?=
-                                                Yii::app()->createAbsoluteUrl("gallery/product", [
-                                                    'product' => $product->link,
-                                                    'brand' => $product->brand_data->link,
-                                                    'language' => Language::getCurrentZone(),
-                                                ])
-                                                ?>"><?php echo Yii::t("main", 'Фотогалерея'); ?></a>
-                                            </li>
-                                        <?php endif; ?>
-                                        <!-- @todo: Добавить ссылки на articles-->
-                                    </ul>
-                                </li>
-                            </ul>
-                        <?php endforeach; ?>
+                        <div class="row">
+                            <?php foreach ($widgets['related_products'] as $product): ?>
+                                <div class="col l3 m3 s3">
+                                    <?php if (isset($product->primary_image)): ?>
+                                        <a class="title center-align" href="<?= $product->url ?>" style="width: 95px; height: 95px;">
+                                            <?php echo $product->primary_image->image_data->getHtml(NImages::SIZE_PRODUCT_LIST); ?>
+                                        </a>
+                                    <br />
+                                    <?php endif; ?>
+                                    <strong><a href="<?=$product->url?>"><?= $product->fullname ?></a></strong>
+                                    <?php if ($product->getGalleryCount()): ?>
+                                        <div>
+                                            <a href="<?=
+                                            Yii::app()->createAbsoluteUrl("gallery/product", [
+                                                'product' => $product->link,
+                                                'brand' => $product->brand_data->link,
+                                                'language' => Language::getCurrentZone(),
+                                            ])
+                                            ?>"><?php echo Yii::t("main", 'Фотогалерея'); ?></a>
+                                        </div>
+                                    <?php endif; ?>
+                                    <!-- @todo: Добавить ссылки на articles-->
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
                     <?php endif; ?>
                 </div><!-- There was DIV -->
             </div>
@@ -48,8 +49,8 @@
                 <hr />
                 <?php
                 include_once(Yii::getPathOfAlias('ext') . '/cackle_comments.php');
-                $channel = Yii::app()->request->requestUri; 
-                $a = new Cackle(true,$channel);
+                $channel = Yii::app()->request->requestUri;
+                $a = new Cackle(true, $channel);
                 ?>
             </div>
             <div class="table">
@@ -80,45 +81,45 @@
                     <?php endforeach; ?>
                 <?php endif; ?>
             </div> <!-- END of VIDEO Content -->
-            <?php foreach ($article->related as $type=>$relatedNews):?>
-            <?php if (!empty($relatedNews)):?>
-            <div>
-                <hr />
-                <h3><?php 
-                    Yii::app()->sourceLanguage = (Yii::app()->language == 'en') ? 'ru' : 'en';
-                    echo Yii::t('articles', $type . '-related');
-                    Yii::app()->sourceLanguage = (Yii::app()->language == 'en') ? 'ru' : 'en'; 
-                ?></h3>
-                <table style="margin-bottom: 15px;">
-                    <tbody>
-                        <?php foreach ($relatedNews as $news):?>
+            <?php foreach ($article->related as $type => $relatedNews): ?>
+                <?php if (!empty($relatedNews)): ?>
+                    <div>
+                        <hr />
+                        <h3><?php
+                            Yii::app()->sourceLanguage = (Yii::app()->language == 'en') ? 'ru' : 'en';
+                            echo Yii::t('articles', $type . '-related');
+                            Yii::app()->sourceLanguage = (Yii::app()->language == 'en') ? 'ru' : 'en';
+                            ?></h3>
+                        <table style="margin-bottom: 15px;">
+                            <tbody>
+                                <?php foreach ($relatedNews as $news): ?>
 
-                        <tr>
-                            <td style="padding-top: 12px;" itemscope itemtype="http://schema.org/NewsArticle">
-                                <span itemprop="datePublished" style="display: none;"><?php echo $news->created?></span>
-                                <a href="<?php echo Yii::app()->createAbsoluteUrl("articles/index", ['type'=>$news->type,'link'=>$news->link, 'id'=>$news->id, 'language'=>  Language::getZoneForLang($news->lang)]);?>" itemprop="url">
-                                    <h3 itemprop="name"><?php echo $news->title ?></h3>
-                                </a>
-                                <small>
-                                    <?php echo Yii::app()->dateFormatter->formatDateTime($news->created, 'long'); ?>
-                                </small>
-                                <?php if (!empty($news->preview_image->image_data)) :?>
-                                <a style="width: 130px; max-height: 130px; margin: 7px; text-align: center; display: table-cell; vertical-align: middle; float: left;" href="<?php echo Yii::app()->createAbsoluteUrl("articles/index", ['type'=>$news->type,'link'=>$news->link, 'id'=>$news->id, 'language'=>  Language::getCurrentZone()]); ?>">
-                                    <?php echo $news->preview_image->image_data->getHtml(NImages::SIZE_ARTICLE_PREVIEW);?>
-                                </a>
-                                <?php endif; ?>
-                                <p itemprop="description"><?php echo $news->description ?>...</p>
-                                <?php if (!empty($news->preview_image)) :?>
-                                <div style="clear: both;"></div>
-                                <?php endif;?>
-                            </td>
-                        </tr>
-                        <?php endforeach;?>
-                    </tbody>
-                </table>
-            </div>
-            <?php endif;?>
-            <?php endforeach;?>
+                                    <tr>
+                                        <td style="padding-top: 12px;" itemscope itemtype="http://schema.org/NewsArticle">
+                                            <span itemprop="datePublished" style="display: none;"><?php echo $news->created ?></span>
+                                            <a href="<?php echo Yii::app()->createAbsoluteUrl("articles/index", ['type' => $news->type, 'link' => $news->link, 'id' => $news->id, 'language' => Language::getZoneForLang($news->lang)]); ?>" itemprop="url">
+                                                <h3 itemprop="headline"><?php echo $news->title ?></h3>
+                                            </a>
+                                            <small>
+                                                <?php echo Yii::app()->dateFormatter->formatDateTime($news->created, 'long'); ?>
+                                            </small>
+                                            <?php if (!empty($news->preview_image->image_data)) : ?>
+                                                <a style="width: 130px; max-height: 130px; margin: 7px; text-align: center; display: table-cell; vertical-align: middle; float: left;" href="<?php echo Yii::app()->createAbsoluteUrl("articles/index", ['type' => $news->type, 'link' => $news->link, 'id' => $news->id, 'language' => Language::getCurrentZone()]); ?>">
+                                                    <?php echo $news->preview_image->image_data->getHtml(NImages::SIZE_ARTICLE_PREVIEW,null,['itemprop'=>'image']); ?>
+                                                </a>
+                                            <?php endif; ?>
+                                            <p itemprop="description"><?php echo $news->description ?>...</p>
+                                            <?php if (!empty($news->preview_image)) : ?>
+                                                <div style="clear: both;"></div>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
+            <?php endforeach; ?>
             <div>
                 <?php if (!empty($widgets['related_trends'])): ?>
                     <?php foreach ($widgets['related_trends'] as $trend): ?>
@@ -126,7 +127,7 @@
                     <?php endforeach; ?>
                 <?php endif; ?>
             </div>
-            
+
             <div>
                 <ul class="tags">
                     <?php foreach ($article->tags as $tag): ?>
@@ -212,7 +213,7 @@
                      data-ad-slot="3509091535"
                      data-ad-format="auto"></ins>
                 <script>
-                (adsbygoogle = window.adsbygoogle || []).push({});
+                    (adsbygoogle = window.adsbygoogle || []).push({});
                 </script>
             </div>
         </div>	

@@ -13,7 +13,6 @@
         <!--<link type="text/css" rel="stylesheet" href="/assets/css/all.css"/>-->
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
         
-        
         <title><?= $this->pageTitle ?></title>
     </head>
     <body>
@@ -28,10 +27,11 @@
                 <div class="col s12">
                     <div class="center-align">
                         <!-- materialize_analogindex_top -->
+                        <?php $rnd = mt_rand(1,5)?>
                         <ins class="adsbygoogle"
                              style="display:block"
-                             data-ad-client="ca-pub-7891165885018162"
-                             data-ad-slot="7160561934"
+                             data-ad-client="ca-pub-<?=($rnd <= 3) ? 9796705629555003 : 7891165885018162?>"
+                             data-ad-slot="<?=($rnd <= 3) ? 8430964235 : 7160561934?>"
                              data-ad-format="auto"></ins>
                         <script>
                         (adsbygoogle = window.adsbygoogle || []).push({});

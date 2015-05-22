@@ -45,8 +45,11 @@ function setEqualHeight2(items)
 
 $(document).ready(function () {
 
-    setEqualHeight($(".item-cat"));
-    setEqualHeight2($(".nav-arrow"));
+    setTimeout(function(){
+        setEqualHeight($(".item-cat"));
+        setEqualHeight2($(".nav-arrow"));
+    }, 1000);
+    
 
     // setEqualWidth($(".item-cat1"));  
 

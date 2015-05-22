@@ -1,148 +1,70 @@
-<h1 class="title">Поиск</h1>
-
-                <div class="bl_sort clr">
-                    <span class="bl_sort-t">Сортировка:</span>
-                    <span class="bl_sort-link"><a class="active" href="#">по релевантности</a></span>
-                    <span class="bl_sort-link"><a href="#">по рейтингу</a></span>
-                    <span class="bl_sort-link"><a href="#">по цене</a></span>
-                    <span class="bl_sort-link"><a href="#">по наименованию</a></span>
+<link rel="stylesheet" href="/assets/css/style_list.css" />
+<div class="row content-wrapper">
+    <div class="col s12">
+        <!--<div class="row">
+            <div class="col s12 sort-by">
+                <div class="bl_sort-goods">
+                    <span class="sort-goods-text">Сортировка:</span>
+                    <a href="#" class="">по рейтингу</a>
+                    <a href="#" class="l">по цене</a>
+                    <a href="#" class="activated">по наименованию</a>
                 </div>
+            </div>
+        </div>-->
+        <div class="row">
+            <div class="col s12 gallery">
+                <div class="gallery-title">
+                    <h2><?=Yii::t("main", "Поиск");?></h2>
+                    <div>
+                        <div class="catalogList-sortLinks">
+                            <a class="sorting-cols active" href="#">колонками</a>
+                            <a class="sorting-rows" href="#">списком</a>
+                        </div>
+                    </div>
+                </div>
+                <?php foreach ($goods as $key => $product): ?>
+                <div class="col s6 m6 l4 item-cat" itemscope="" itemtype="http://schema.org/ImageObject">
+                    <a href="<?=$product->url?>" class="center-align">
+                        <?php if ($product->primary_image): ?>
+                            <?php echo $product->primary_image->image_data->getHtml(NImages::SIZE_PRODUCT_GALLERY, null, ['itemprop'=>'thumbnail']); ?>
+                        <?php else : ?>
+                            <img itemprop="thumbnail" src="/assets/img/photo/informers/1.png" alt="<?php echo $product->fullname ?>" />
+                        <?php endif; ?>
+                    </a>
+                    <br />
+                    <div class="item-subscribe">
+                        <ul>
+                            <li><a href="<?=$product->url?>" itemprop="contentUrl"><?=$product->fullname?></a></li>
+                        </ul>
+                    </div>
+                    <div class="left-align">
+                        <ul>
+                            <?php foreach ($product->getGeneralCharacteristics() as $characteristic): ?>
+                            <li><strong><?=$characteristic['characteristic_name']?>:</strong> <?=$characteristic['value']; ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
 
-                <ul class="search_result-bl clr">
-                    <?php foreach ($goods as $key=>$product) : ?>
-                    <li>
-                        <div class="flLeft">
-                            <div class="search_result-id"><?php echo $key+1+$pages->getCurrentPage()*10?>.</div>
-                            <div class="search_result-photo">
-                                <a href="<?php echo Yii::app()->createUrl("site/goods", array('link'=>$product->link, 'brand'=>$product->brand_data->link, 'type'=>$product->type_data->link, 'language'=>Language::getCurrentZone()))?>">
-                                    <?php if ($product->primary_image):?>
-                                        <?php echo $product->primary_image->image_data->getHtml(NImages::SIZE_PRODUCT_SEARCH);?>
-                                    <?php else :?>
-                                        <img src="/assets/img/photo/informers/1.png" alt="<?php echo $product->brand_data->name." ".$product->name ?>" />
-                                    <?php endif;?>
-                                    
-                                </a>
-                            </div>
-                            <div class="search_result-desc">
-                                <h2 class="search_result-nameItem">
-                                    <a href="<?php echo Yii::app()->createUrl("site/goods", array('link'=>$product->link, 'brand'=>$product->brand_data->link, 'type'=>$product->type_data->link, 'language'=>  Language::getCurrentZone()))?>">
-                                        <?php echo $product->brand_data->name ." ". $product->name?>
-                                    </a>
-                                </h2>
-                                <p class="search_result-text">
-                                    <?php foreach ($product->getGeneralCharacteristics() as $characteristic):?>
-                                        <?php echo $characteristic['characteristic_name'].": ".$characteristic['value'].PHP_EOL; ?><br />
-                                    <?php endforeach;?>
-                                </p>
-                            </div>
-                            <div class="clear"></div>
-                        </div>
-                        <div class="flRight">
-                            <div class="search_result-p_r">
-                                <!--<div class="search_result-price">15 000 р.</div>
-                                <div class="search_result-rating">
-                                    <ul class="rating">
-                                         <li class="full"><a href="#">1</a></li>
-                                         <li class=""><a href="#">2</a></li>
-                                         <li class=""><a href="#">3</a></li>
-                                         <li class=""><a href="#">4</a></li>
-                                         <li class=""><a href="#">5</a></li>
-                                      </ul>
-                                </div>-->
-                            </div>
-                        </div>
-                    </li>
-                    <?php endforeach; ?>
-                    <!--
-                    <li>
-                        <div class="flLeft">
-                            <div class="search_result-id">2.</div>
-                            <div class="search_result-photo"><a href="#"><img src="img/photo/sam1.png"></a></div>
-                            <div class="search_result-desc">
-                                <h2 class="search_result-nameItem"><a href="#">Samsung Galaxy Note 8.0 N5100 16Gb</a></h2>
-                                <p class="search_result-text">Операционная система iOS экран 9.7", 2048x1536, емкостный, мультитач встроенная память 128 Гб еспроводная связь Wi-Fi, Bluetooth, 3G, LTE навигация GPS вес 478 г тыловая камера 5 млн пикс.</p>
-                            </div>
-                            <div class="clear"></div>
-                        </div>
-                        <div class="flRight">
-                            <div class="search_result-p_r">
-                                <div class="search_result-price">15 000 р.</div>
-                                <div class="search_result-rating">
-                                    <ul class="rating">
-                                         <li class="full"><a href="#">1</a></li>
-                                         <li class=""><a href="#">2</a></li>
-                                         <li class=""><a href="#">3</a></li>
-                                         <li class=""><a href="#">4</a></li>
-                                         <li class=""><a href="#">5</a></li>
-                                      </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="flLeft">
-                            <div class="search_result-id">3.</div>
-                            <div class="search_result-photo"><a href="#"><img src="img/photo/ipad.png"></a></div>
-                            <div class="search_result-desc">
-                                <h2 class="search_result-nameItem"><a href="#">Apple iPad mini 16Gb Wi-Fi</a></h2>
-                                <p class="search_result-text">Операционная система iOS экран 9.7", 2048x1536, емкостный, мультитач встроенная память 128 Гб еспроводная связь Wi-Fi, Bluetooth, 3G, LTE навигация GPS вес 478 г тыловая камера 5 млн пикс.</p>
-                            </div>
-                            <div class="clear"></div>
-                        </div>
-                        <div class="flRight">
-                            <div class="search_result-p_r">
-                                <div class="search_result-price">15 000 р.</div>
-                                <div class="search_result-rating">
-                                    <ul class="rating">
-                                         <li class="full"><a href="#">1</a></li>
-                                         <li class=""><a href="#">2</a></li>
-                                         <li class=""><a href="#">3</a></li>
-                                         <li class=""><a href="#">4</a></li>
-                                         <li class=""><a href="#">5</a></li>
-                                      </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="flLeft">
-                            <div class="search_result-id">4.</div>
-                            <div class="search_result-photo"><a href="#"><img src="img/photo/sam2.png"></a></div>
-                            <div class="search_result-desc">
-                                <h2 class="search_result-nameItem"><a href="#">Samsung Galaxy Tab 2 10.1 P5100 16Gb</a></h2>
-                                <p class="search_result-text">Операционная система iOS экран 9.7", 2048x1536, емкостный, мультитач встроенная память 128 Гб еспроводная связь Wi-Fi, Bluetooth, 3G, LTE навигация GPS вес 478 г тыловая камера 5 млн пикс.</p>
-                            </div>
-                            <div class="clear"></div>
-                        </div>
-                        <div class="flRight">
-                            <div class="search_result-p_r">
-                                <div class="search_result-price">15 000 р.</div>
-                                <div class="search_result-rating">
-                                    <ul class="rating">
-                                         <li class="full"><a href="#">1</a></li>
-                                         <li class=""><a href="#">2</a></li>
-                                         <li class=""><a href="#">3</a></li>
-                                         <li class=""><a href="#">4</a></li>
-                                         <li class=""><a href="#">5</a></li>
-                                      </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
-                    -->
-                </ul>
-
-                <?php 
-                    $this->widget('LinkPager', array(
-                        'currentPage'=>$pages->getCurrentPage(),
-                        'itemCount'=>$pages->getItemCount(),
-                        'pageSize'=>10,
-                        'maxButtonCount'=>8,
-                        'header'=>'',
-                        'htmlOptions'=>array('class'=>'pagination'),
-                        'firstPageLabel'=>Yii::t("main", "Первая"),
-                        'lastPageLabel'=>Yii::t("main", "Последняя")." (".ceil($pages->getItemCount()/10).")",
-                        'nextPageLabel'=>Yii::t("main", "Следующая"),
-                        'prevPageLabel'=>Yii::t("main", "Предыдущая"),
-                    ));
+        <div class="row">
+            <div class="col s12">
+                <?php
+                $this->widget('LinkPager', array(
+                    'currentPage' => $pages->getCurrentPage(),
+                    'itemCount' => $pages->getItemCount(),
+                    'pageSize' => 12,
+                    'maxButtonCount' => 8,
+                    'header' => '',
+                    'firstPageLabel' => '<i class="mdi-av-fast-rewind"></i>',
+                    'lastPageLabel' => '<i class="mdi-av-fast-forward"></i>',
+                    'nextPageLabel' => '<i class="mdi-navigation-chevron-right"></i>',
+                    'prevPageLabel' => '<i class="mdi-navigation-chevron-left"></i>',
+                ));
                 ?>
+            </div>
+        </div>
+    </div>
+</div>

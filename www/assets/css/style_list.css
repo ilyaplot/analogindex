@@ -21,7 +21,7 @@ a:hover {
 a:active {
 }
 
-a.activated {
+a.active {
     color: white !important;
     /*  text-decoration: underline; */
     border-radius: 1px;
@@ -177,7 +177,7 @@ nav .nav-wrapper ul li a:hover{
 .mnf-name a{
     color: black;
     font-size: 34px;
-    padding: 15px 0 20px;
+    padding: 35px 35px 20px;
 }
 
 small {

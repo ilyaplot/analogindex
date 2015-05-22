@@ -26,15 +26,15 @@
                 <div class="col s6 m6 l4 item-cat" itemscope="" itemtype="http://schema.org/ImageObject">
                     <a href="<?=$product->url?>" class="center-align">
                         <?php if ($product->primary_image): ?>
-                            <?php echo $product->primary_image->image_data->getHtml(NImages::SIZE_PRODUCT_GALLERY); ?>
+                            <?php echo $product->primary_image->image_data->getHtml(NImages::SIZE_PRODUCT_GALLERY, null, ['itemprop'=>'thumbnail']); ?>
                         <?php else : ?>
-                            <img src="/assets/img/photo/informers/1.png" alt="<?php echo $product->fullname ?>" />
+                            <img itemprop="thumbnail" src="/assets/img/photo/informers/1.png" alt="<?php echo $product->fullname ?>" />
                         <?php endif; ?>
                     </a>
                     <br />
                     <div class="item-subscribe">
                         <ul>
-                            <li><a href="<?=$product->url?>"><?=$product->fullname?></a></li>
+                            <li><a href="<?=$product->url?>" itemprop="contentUrl"><?=$product->fullname?></a></li>
                         </ul>
                     </div>
                     <div class="left-align">

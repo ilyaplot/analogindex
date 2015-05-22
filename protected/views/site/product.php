@@ -79,12 +79,13 @@
                 <div class="clear"></div>
                 <div class="infoGoodItem-wp-photos_all">
                     <?php foreach ($images as $image): ?>
-                        <div class="slide">
+                        <div class="slide" itemscope="" itemtype="http://schema.org/ImageObject">
                             <a rel="lightbox" title="<?= $product->fullname ?>"  href="<?php echo $image->createUrl(NImages::SIZE_PRODUCT_BIG); ?>" data-lightbox="roadtrip">
                                 <?=
                                 $image->getHtml(NImages::SIZE_PRODUCT_LIST, null, [
                                     'class' => 'preview',
                                     'data-preview' => $image->createUrl(NImages::SIZE_PRODUCT_PREVIEW),
+                                    'itemprop' => 'thumbnail'
                                 ]);
                                 ?>
                             </a>
@@ -101,7 +102,7 @@
                         'language' => Language::getCurrentZone(),
                     ])
                     ?>"><?= Yii::t("main", 'Фотогалерея'); ?> (<?= $product->gallery_count ?>)</a>
-                <?php endif; ?>
+                        <?php endif; ?>
 
             </div>
             <!-- ГАЛЕРЕЯ КОНЕЦ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
@@ -152,28 +153,30 @@
                         <h3 class="infoGoodItem-infoTitle"><?= $relatedCounts[$type]['title'] ?></h3>
                         <?php Yii::app()->sourceLanguage = (Yii::app()->language == 'en') ? 'ru' : 'en'; ?>
                         <div id="GoodItem-<?= $type ?>">
-                            <div class="view_bl" itemscope="" itemtype="http://schema.org/NewsArticle">
+                            <div class="view_bl" >
                                 <?php foreach ($articles as $article): ?>
-                                    <div class="view_bl-head clr">
-                                        <div class="view_bl-head-l flRight">
-                                            <div class="view_bl-date right">
-                                                <?= Yii::app()->dateFormatter->formatDateTime($article->created, 'long'); ?>
-                                            </div>
+                                    <div itemscope="" itemtype="http://schema.org/NewsArticle">
+                                        <div class="view_bl-head clr">
+                                            <div class="view_bl-head-l flRight">
+                                                <div class="view_bl-date right">
+                                                    <?= Yii::app()->dateFormatter->formatDateTime($article->created, 'long'); ?>
+                                                </div>
 
-                                            <span itemprop="datePublished" style="display: none;"><?= $article->created ?></span>
+                                                <span itemprop="datePublished" style="display: none;"><?= $article->created ?></span>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="view_bl-textView">
-                                        <a href="<?= Yii::app()->createAbsoluteUrl("articles/index", ['type' => $article->type, 'link' => $article->link, 'id' => $article->id, 'language' => Language::getZoneForLang($article->lang)]); ?>" itemprop="url">
-                                            <h4 itemprop="name"><?= $article->title ?></h4>
-                                        </a>
-                                        <?php if (!empty($article->preview_image->image_data)) : ?>
-                                            <a class="news-preview" href="<?= Yii::app()->createAbsoluteUrl("articles/index", ['type' => $article->type, 'link' => $article->link, 'id' => $article->id, 'language' => Language::getZoneForLang($article->lang)]); ?>">
-                                                <img title="<?= $article->title ?>" itemprop="image" class="news_preview" src="<?= $article->preview_image->image_data->createUrl(NImages::SIZE_ARTICLE_PREVIEW); ?>" alt="<?= $article->title ?>">                                            
+                                        <div class="view_bl-textView">
+                                            <a href="<?= Yii::app()->createAbsoluteUrl("articles/index", ['type' => $article->type, 'link' => $article->link, 'id' => $article->id, 'language' => Language::getZoneForLang($article->lang)]); ?>" itemprop="url">
+                                                <h4 itemprop="name"><?= $article->title ?></h4>
                                             </a>
-                                        <?php endif; ?>
-                                        <span itemprop="description"><?= $article->description ?></span>...
-                                        <div style="clear: both;"></div>
+                                            <?php if (!empty($article->preview_image->image_data)) : ?>
+                                                <a class="news-preview" href="<?= Yii::app()->createAbsoluteUrl("articles/index", ['type' => $article->type, 'link' => $article->link, 'id' => $article->id, 'language' => Language::getZoneForLang($article->lang)]); ?>">
+                                                    <img title="<?= $article->title ?>" itemprop="image" class="news_preview" src="<?= $article->preview_image->image_data->createUrl(NImages::SIZE_ARTICLE_PREVIEW); ?>" alt="<?= $article->title ?>">                                            
+                                                </a>
+                                            <?php endif; ?>
+                                            <span itemprop="description"><?= $article->description ?></span>...
+                                            <div style="clear: both;"></div>
+                                        </div>
                                     </div>
                                 <?php endforeach; ?>
 
@@ -191,14 +194,15 @@
             <?php if (!empty($relatedVideos)): ?>
                 <div class="infoGoodItem-wp-video" id="item-videos">
                     <section class="infoGoodItem_content views-list">
-                        <h3 class="infoGoodItem-infoTitle">Видео</h3>
+                        <h3 class="infoGoodItem-infoTitle"><?=Yii::t("main", "Видео");?></h3>
                         <?php foreach ($relatedVideos as $video): ?>
+                        <?php if (empty($video->title)) continue; ?>
                             <h5><?= $video->title ?></h5>
-                            <div itemprop="video" class="video-container" itemscope="" itemtype="http://schema.org/VideoObject">
+                            <div class="video-container" itemscope="" itemtype="http://schema.org/VideoObject">
                                 <div style="display: none;">
                                     <a itemprop="url" rel="nofollow" href="http://www.youtube.com/watch?v=YhHZq_Ta6a8"></a>
                                     <span itemprop="name"><?= $video->title ?></span>
-                                    <span itemprop="description"><?= $video->description ?></span>
+                                    <span itemprop="description"><?= !empty($video->description) ? $video->description : 'video description' ?></span>
                                     <span itemprop="duration"><?= $video->duration ?></span>
                                     <meta itemprop="isFamilyFriendly" content="true"/>
                                     <meta itemprop="uploadDate" content="<?= $video->date_added ?>"/>
@@ -215,13 +219,13 @@
                     </section>
                 </div>
             <?php endif; ?>
-            
+
             <div id="item-comments">
                 <hr />
                 <?php
                 include_once(Yii::getPathOfAlias('ext') . '/cackle_comments.php');
-                $channel = Yii::app()->request->requestUri; 
-                $a = new Cackle(true,$channel);
+                $channel = Yii::app()->request->requestUri;
+                $a = new Cackle(true, $channel);
                 ?>
             </div>
             <!-- VIDEO КОНЕЦ +++++++++++++++++++++++++++++++++++++++++ -->
@@ -238,7 +242,7 @@
                  data-ad-slot="3509091535"
                  data-ad-format="auto"></ins>
             <script>
-            (adsbygoogle = window.adsbygoogle || []).push({});
+                (adsbygoogle = window.adsbygoogle || []).push({});
             </script>
         </div>
         <!--
@@ -388,6 +392,6 @@
 
         </div>	-->	    	
     </div>
-   
+
 </div>
 <!--  Конец контента -->

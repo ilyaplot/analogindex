@@ -28,4 +28,5 @@ return array(
     'Тренды'=>'Trends',
     'Комментарии'=>'Comments',
     'Видео'=>'Videos',
+    'Поиск'=>'Search',
 );

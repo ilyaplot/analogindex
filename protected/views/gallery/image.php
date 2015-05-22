@@ -105,9 +105,9 @@
         <div class="row">
             <div class="col s12 gallery center-align">
                 <?php foreach ($gallery as $item): ?>
-                <div class="col s6 m4 l2 center-align valign-wrapper z-depth-1" itemtype="http://schema.org/ImageObject" style="display: table-cell !important; vertical-align: middle; text-align: center; height: 120px; overflow: hidden;">
-                    <a itemtype="contentUrl" class="valign-wrapper" style="height: 112px;" href="<?= $item->self_url ?>#gallery">
-                        <?=$item->image_data->getHtml(NImages::SIZE_PRODUCT_GALLERY, null, ["itemtype" => "thumbnail", 'class'=>'valign']); ?>
+                <div class="col s6 m4 l2 center-align valign-wrapper z-depth-1" itemscope itemtype="http://schema.org/ImageObject" style="display: table-cell !important; vertical-align: middle; text-align: center; height: 120px; overflow: hidden;">
+                    <a class="valign-wrapper" style="height: 112px;" href="<?= $item->self_url ?>#gallery" itemprop="contentUrl">
+                        <?=$item->image_data->getHtml(NImages::SIZE_PRODUCT_GALLERY, null, ["itemprop" => "thumbnail", 'class'=>'valign']); ?>
                     </a>
                 </div>
                 <?php endforeach; ?>

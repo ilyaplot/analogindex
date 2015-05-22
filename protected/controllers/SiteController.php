@@ -190,30 +190,17 @@ class SiteController extends Controller
             if (!$type)
                 throw new CHttpException(404, Yii::t("errors", "Страница не найдена"));
         }
-        $view = Yii::app()->request->getParam("view");
-        $views = array(
-            1 => array(
-                "limit" => 18,
-                "template" => "_brand_catalog_1",
-                "id" => 1,
-            ),
-            2 => array(
-                "id" => 2,
-                "limit" => 5,
-                "template" => "_brand_catalog_2"
-            ),
-        );
-        $view = isset($views[$view]) ? $views[$view] : $views[1];
+
         $criteria = new CDbCriteria();
         $criteria->compare("t.brand", $brand->id);
         if (isset($type->id)) {
             $criteria->compare("t.type", $type->id);
         }
         $goodsCount = Goods::model()->cache(60 * 60 * 48)->count($criteria);
-        $criteria->limit = $view['limit'];
+        $criteria->limit = 12;
         $criteria->order = "t.updated desc";
         $pages = new CPagination($goodsCount);
-        $pages->setPageSize($view['limit']);
+        $pages->setPageSize(12);
         $pages->applyLimit($criteria);
         $goods = Goods::model()->cache(60 * 60 * 2)->with([
                     'type_data' => [
@@ -225,44 +212,37 @@ class SiteController extends Controller
                 ])->findAll($criteria);
         $this->pageTitle = $brand->name . (isset($type->name->name) ? ': ' . $type->name->name : null);
         $this->layout = 'materialize';
-        /*
 
-                <?php if ($type_selected):?>
-                <li itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-1" itemref="breadcrumb-2">
-                    <span itemprop="title"><?php echo $type_selected->name->name?></span>
-                    <span class="divider">/</span>
-                </li>
-                <?php else: ?>
-                <li itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-1" itemref="breadcrumb-2">
-                    <span itemprop="title"><?php echo Yii::t("main", "Производители")?></span>
-                    <span class="divider">/</span>
-                </li>
-                <?php endif;?>
-                <li itemprop="child" itemscope itemtype="http://data-vocabulary.org/Breadcrumb" id="breadcrumb-2">
-                    <span itemprop="title"><?php echo $brand->name?></span>
-                </li>
-            </ul>
-         */
+        if (isset($type->link)) {
+            $breadcrumb = [
+                'url'=>Yii::app()->createAbsoluteUrl('site/type', ['type'=>$type->link, 'language'=>Language::getCurrentZone()]),
+                'title'=>$type->name->name,
+            ];
+        } else {
+            $breadcrumb = [
+                'title'=>Yii::t("main", "Производители"),
+                'url'=>'#',
+            ];
+        }
+        
         $this->breadcrumbs = [
             [
                 'url'=>'http://analogindex.'.Language::getCurrentZone(),
                 'title'=> Yii::t('main', 'Главная'),
             ],
-            /*[
-                'url'=>Yii::app()->createAbsoluteUrl('site/type', ['type'=>$type->link, 'language'=>Language::getCurrentZone()]),
-                'title'=>$type->name->name,
-            ]*/
+            $breadcrumb,
             [
-                'url'=>'#',
+                'url'=>Yii::app()->request->requestUri,
                 'title'=>$brand->name,
             ]
         ];
+        
+        
         
         $this->render("brand", array(
             "brand" => $brand,
             "goods" => $goods,
             "pages" => $pages,
-            "view" => $view,
             "type_selected" => isset($type->link) ? $type : null,
         ));
     }
@@ -277,7 +257,7 @@ class SiteController extends Controller
 
 
         $pages = new CPagination(10000000000000);
-        $pages->pageSize = 10;
+        $pages->pageSize = 12;
         //$searchCriteria->select = 'id';
         if ($paramType)
             $searchCriteria->filters = array('type' => $paramType);
@@ -310,7 +290,18 @@ class SiteController extends Controller
                         //"rating"
                     ))->findAll($criteria);
         }
-
+        
+        $this->layout = 'materialize';
+        $this->breadcrumbs = [
+            [
+                'title'=>Yii::t("main", "Главная"),
+                'url'=>'http://analogindex.'.Language::getCurrentZone(),
+            ],
+            [
+                'title'=>Yii::t("main", "Поиск"),
+                'url'=>Yii::app()->request->requestUri,
+            ]
+        ];
         $this->render("search", array("goods" => $goods, "pages" => $pages));
     }
 
