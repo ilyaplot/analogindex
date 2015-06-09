@@ -5,13 +5,9 @@ class ArticlesController extends Controller
 
     public function actionIndex($type, $link, $id, $debug = false)
     {
-        $debug = 1;
-        
-        if (!$debug) {
-            $article = Articles::model()->cache(60 * 60)->findByAttributes(['id' => $id, 'link' => $link, 'lang' => Yii::app()->language]);
-        } else {
-            $article = Articles::model()->cache(60 * 60)->findByAttributes(['id' => $id]);
-        }
+
+        $article = Articles::model()->cache(60 * 60)->findByAttributes(['id' => $id, 'link' => $link, 'lang' => Yii::app()->language]);
+
         
 
         $relatedProducts = [];
@@ -91,11 +87,9 @@ class ArticlesController extends Controller
             
             $article->fillRelated();
 
-            if ($debug) {
-                $this->layout = 'materialize';
-            }
+            $this->layout = 'materialize';
             
-            $this->render((($debug) ? 'article' : $article->type), [
+            $this->render('article', [
                 'article' => $article,
                 'widgets' => $widgets,
             ]);

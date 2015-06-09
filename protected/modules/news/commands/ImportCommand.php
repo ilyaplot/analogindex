@@ -9,10 +9,6 @@ class ImportCommand extends CConsoleCommand
     public function actionIndex()
     {
         
-        file_put_contents("/var/www/analogindex/logs/news_empty_source.txt", '');
-        file_put_contents("/var/www/analogindex/logs/news_empty_paragraph.txt", '');
-        file_put_contents("/var/www/analogindex/logs/news_empty_source.txt", '');
-            
         $articlesFilter = new ArticlesFilter();
         echo "Загрузка тэгов".PHP_EOL;
         $criteria = new CDbCriteria();

@@ -109,7 +109,7 @@ class Downloader
         $ch = curl_init($this->host);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
-        curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.".rand(100, 900)." Safari/537.".rand(10, 90));
+        curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.56 (KHTML, like Gecko) Chrome/36.0.1916.".rand(100, 900)." Safari/537.".rand(10, 90));
         curl_setopt($ch, CURLOPT_AUTOREFERER, true);
         
         if (!empty($this->referer)) {
@@ -205,7 +205,7 @@ class Downloader
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
         curl_setopt($ch, CURLOPT_USERAGENT, 
-                "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.".rand(100, 900)." Safari/537.".rand(10, 90));
+                "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/527.36 (KHTML, like Gecko) Chrome/31.0.1916.".rand(100, 900)." Safari/537.".rand(10, 90));
         curl_setopt($ch, CURLOPT_REFERER, $this->referer);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
@@ -256,7 +256,7 @@ class Downloader
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
         curl_setopt($ch, CURLOPT_USERAGENT, 
-                "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.".rand(100, 900)." Safari/537.".rand(10, 90));
+                "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/536.36 (KHTML, like Gecko) Chrome/31.0.1916.".rand(100, 900)." Safari/537.".rand(10, 90));
         curl_setopt($ch, CURLOPT_REFERER, $this->referer);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
@@ -295,6 +295,7 @@ class Downloader
      */
     public function sendMessage()
     {
+        return 1;
         $to = "ilyaplot@gmail.com";
         $subject = "Закончились прокси!";
         $message = "Empty proxy list for {$this->host}!";

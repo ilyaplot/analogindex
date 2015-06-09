@@ -11,12 +11,12 @@ class Articles extends CActiveRecord
     const TYPE_HOWTO = 'howto'; // FAQ
 
     public $related = [
-        'news'=>[],
-        'review'=>[],
-        'opinion'=>[],
-        'howto'=>[],
+        'news' => [],
+        'review' => [],
+        'opinion' => [],
+        'howto' => [],
     ];
-    
+
     public static function model($className = __CLASS__)
     {
         return parent::model($className);
@@ -159,13 +159,13 @@ class Articles extends CActiveRecord
     public function afterFind()
     {
         $this->source_type = $this->type;
-        
+
         return parent::afterFind();
     }
-    
+
     public function fillRelated()
     {
-        foreach ($this->related as $type=>$container) {
+        foreach ($this->related as $type => $container) {
             $this->related[$type] = $this->getRelatedArticles($type, $this->lang, 5);
         }
     }
@@ -174,12 +174,15 @@ class Articles extends CActiveRecord
     {
         $tags = [];
         foreach ($this->tags as $tag) {
+            if (empty($tag->tag_data->id)) {
+                continue;
+            }
             $tags[] = $tag->tag_data->id;
         }
         $tags = array_unique($tags);
         asort($tags);
-        $key = md5("_related_articles_".implode(",",$tags)."_{$lang}_{$limit}");
-        
+        $key = md5("_related_articles_{$type}_" . implode(",", $tags) . "_{$lang}_{$limit}");
+
         if (!$related = Yii::app()->cache->get($key)) {
 
             $connection = $this->getDbConnection();
@@ -188,30 +191,33 @@ class Articles extends CActiveRecord
             from 
                 ai_articles a
             where 
-                a.id in (select article from ai_articles_tags where tag in (".implode(",", $tags)."))
+                a.id in (select article from ai_articles_tags where tag in (" . implode(",", $tags) . "))
                 and a.lang = :lang
                 and a.type = :type
             group by a.id
             order by a.created desc
             limit 5";
-            
+
             $params = [
                 'lang' => $lang,
                 'type' => $type
             ];
-            
-            $relatedRows = $connection->createCommand($query)->queryAll(true, $params);
-            $relatedIds = [];
-            foreach ($relatedRows as $row) {
-                $relatedIds[] = $row['id'];
+
+            if (!empty($tags)) {
+                $relatedRows = $connection->createCommand($query)->queryAll(true, $params);
+                $relatedIds = [];
+                foreach ($relatedRows as $row) {
+                    $relatedIds[] = $row['id'];
+                }
+                $criteria = new CDbCriteria();
+                $criteria->addInCondition('id', $relatedIds);
+                $criteria->select = "id, title, description, link, created, type, lang";
+                $criteria->limit = 5;
+                $criteria->order = 'created desc';
+                $related = self::model()->findAll($criteria);
+            } else {
+                $related = [];
             }
-            $criteria = new CDbCriteria();
-            $criteria->addInCondition('id', $relatedIds);
-            $criteria->select = "id, title, description, link, created, type, lang";
-            $criteria->limit = 5;
-            $criteria->order = 'created desc';
-            $related = self::model()->findAll($criteria);
-            
             Yii::app()->cache->set($key, $related, 60 * 60 * 24);
         }
         return $related;
@@ -231,6 +237,7 @@ class Articles extends CActiveRecord
             ],
             "preview_image" => [self::HAS_ONE, "ArticlesImagesCopy", "article",],
             'tags' => [self::HAS_MANY, 'ArticlesTags', 'article'],
+            'content_videos' => [self::HAS_MANY, 'Videos', 'article'],
         ];
     }
 
@@ -239,43 +246,5 @@ class Articles extends CActiveRecord
         GoodsArticles::model()->filter($this->id);
         return parent::afterSave();
     }
-    /*
-    public function getRelatedArticles($type)
-    {
-        if (!$result = Yii::app()->cache->get(md5("related_{$type}_{$this->id}"))) {
-            $tagsArray = [];
-            foreach ($this->tags as $tag) {
-                if (empty($tag->tag_data)) {
-                    continue;
-                }
-                $tagsArray[$tag->tag_data->id] = $tag->tag_data->id;
-            }
-
-            $criteria = new CDbCriteria();
-            $criteria->addInCondition('tag_data.id', $tagsArray);
-            $criteria->compare("articles_data.lang", $this->lang);
-            $criteria->compare("articles_data.type", $type);
-            $criteria->order = "field(tag_data.type, 'product', 'brand', 'os', 'word'), articles_data.created desc";
-            $criteria->limit = 10;
-            $criteria->group = "articles_data.id";
-            $criteria->select = "articles_data.id as id";
-            $data = ArticlesTags::model()->cache(60 * 60)->with(['articles_data', 'tag_data'])->findAll($criteria);
-            $ids = [];
-            foreach ($data as $tag) {
-                $ids[$tag->id] = $tag->id;
-            }
-
-            $criteria = new CDbCriteria();
-            $criteria->select = "t.type, t.link, t.id, t.lang, t.title, t.created, t.description";
-            $criteria->addInCondition('id', $ids);
-            $criteria->order = 't.created';
-            $criteria->limit = 10;
-            $result = self::model()->findAll($criteria);
-            Yii::app()->cache->set(md5("related_{$type}_{$this->id}"), $result);
-        }
-        return $result;
-    }
-     * 
-     */
 
 }

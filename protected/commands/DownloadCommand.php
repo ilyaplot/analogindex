@@ -2,12 +2,114 @@
 
 class DownloadCommand extends CConsoleCommand
 {
-    public function actionDroidDev()
+
+    public function actionCrawl2()
     {
-        
+
+        $crawler = new Crawler();
+
+        $crawler->setCallback(function($docInfo) {
+            $url = $docInfo->url;
+            $content = $docInfo->content;
+
+            if (!preg_match("/goodsdetail.aspx/isu", $url)) {
+                return true;
+            }
+
+            if (empty($content)) {
+                return true;
+            }
+
+            echo $url . PHP_EOL;
+
+            $connection = Yii::app()->db;
+            $query = "insert into splav (url, content) values (:url, :content) on duplicate key update content = :content";
+            $connection->createCommand($query)->execute(['url' => $url, 'content' => $content]);
+        });
+
+        $crawler->setURL("http://www.splav.ru/");
+        $crawler->setUserAgentString("Mozilla/5.0 (compatible; YandexBot/3.0; +http://yandex.com/bots)");
+        $crawler->setWorkingDirectory(Yii::app()->getRuntimePath());
+        $crawler->addContentTypeReceiveRule("#text/html#");
+        $crawler->addURLFilterRule("#\.(jpg|jpeg|gif|png)$# i");
+
+        //$crawler->addProxy("122.224.169.90", "8080");
+        /*         * foreach (explode("\n",file_get_contents("/var/www/analogindex/proxylist.txt")) as $proxy) {
+          $proxy = explode(":", $proxy);
+          $crawler->addProxy($proxy[0], $proxy[1]);
+          }
+         * 
+         */
+        //$crawler->setRequestLimit(1);
+        $crawler->goMultiProcessed(10);
+        //$crawler->go();
+        $report = $crawler->getProcessReport();
+
+        echo "Summary:" . PHP_EOL;
+        echo "Links followed: " . $report->links_followed . PHP_EOL;
+        echo "Documents received: " . $report->files_received . PHP_EOL;
+        echo "Bytes received: " . $report->bytes_received . " bytes" . PHP_EOL;
+        echo "Process runtime: " . $report->process_runtime . " sec" . PHP_EOL;
     }
-    
-    
+
+    public function actionCrawl()
+    {
+
+        $crawler = new Crawler();
+
+        $crawler->setCallback(function($docInfo) {
+            $url = $docInfo->url;
+            $content = $docInfo->content;
+
+            echo "Page requested: " . $docInfo->url . PHP_EOL;
+            flush();
+
+            if (preg_match("/users/isu", $url) || empty($content)) {
+                return true;
+            }
+
+
+            $connection = Yii::app()->db;
+            $query = "insert into novatour (url, content) values (:url, :content) on duplicate key update content = :content";
+            $connection->createCommand($query)->execute(['url' => $url, 'content' => $content]);
+        });
+
+        $crawler->setURL("http://www.novatour.ru/");
+        $crawler->setUserAgentString("Mozilla/5.0 (compatible; YandexBot/3.0; +http://yandex.com/bots)");
+        $crawler->setWorkingDirectory(Yii::app()->getRuntimePath());
+        $crawler->addContentTypeReceiveRule("#text/html#");
+        $crawler->addURLFilterRule("#(\.jpg|\.jpeg|\.gif|\.png|\.js|Services|search|users|Club)# i");
+
+        foreach (explode("\n", file_get_contents("/var/www/analogindex/proxylist.txt")) as $proxy) {
+            $proxy = explode(":", $proxy);
+            if (!empty($proxy[0]) && !empty($proxy[1])) {
+                $crawler->addProxy($proxy[0], $proxy[1]);
+            }
+        }
+
+
+        $crawler->enableCookieHandling(true);
+        // Important for resumable scripts/processes! 
+        $crawler->enableResumption();
+
+        if (!file_exists("/tmp/mycrawlerid_for_php.net.tmp")) {
+            $crawler_ID = $crawler->getCrawlerId();
+            file_put_contents("/tmp/mycrawlerid_for_php.net.tmp", $crawler_ID);
+        } else {
+            $crawler_ID = file_get_contents("/tmp/mycrawlerid_for_php.net.tmp");
+            $crawler->resume($crawler_ID);
+        }
+        $crawler->goMultiProcessed(10);
+        unlink("/tmp/mycrawlerid_for_php.net.tmp"); 
+        $report = $crawler->getProcessReport();
+
+        echo "Summary:" . PHP_EOL;
+        echo "Links followed: " . $report->links_followed . PHP_EOL;
+        echo "Documents received: " . $report->files_received . PHP_EOL;
+        echo "Bytes received: " . $report->bytes_received . " bytes" . PHP_EOL;
+        echo "Process runtime: " . $report->process_runtime . " sec" . PHP_EOL;
+    }
+
     public function actionDevSpecSitemap()
     {
         $downloader = new Downloader("http://www.devicespecifications.com/", 20);
@@ -15,16 +117,16 @@ class DownloadCommand extends CConsoleCommand
         $html = phpQuery::newDocumentHTML($content);
         $brands = pq($html)->find("table.link-table a");
         foreach ($brands as $brand) {
-            
-            if (!$brandModel = Brands::model()->findByAttributes(['name'=>pq($brand)->text()])) {
+
+            if (!$brandModel = Brands::model()->findByAttributes(['name' => pq($brand)->text()])) {
                 $brandModel = new Brands();
                 $brandModel->name = pq($brand)->text();
                 if ($brandModel->validate()) {
                     $brandModel->save();
-                    echo "Добавлен бренд {$brandModel->name}".PHP_EOL;
+                    echo "Добавлен бренд {$brandModel->name}" . PHP_EOL;
                 }
             }
-            
+
             $content = $downloader->getContent(pq($brand)->attr("href"));
             $brand = pq($brand)->text();
             $brandHtml = phpQuery::newDocumentHTML($content);
@@ -41,7 +143,7 @@ class DownloadCommand extends CConsoleCommand
                     $productModel->source_url = $href;
                     if ($productModel->validate()) {
                         $productModel->save();
-                        echo "Добавлен продукт {$brand} {$product}".PHP_EOL;
+                        echo "Добавлен продукт {$brand} {$product}" . PHP_EOL;
                     } else {
                         var_dump($productModel->getErrors());
                     }
@@ -67,19 +169,19 @@ class DownloadCommand extends CConsoleCommand
                             $sourceModel->save();
                         }
                     } else {
-                        echo "Не валидная ссылка {$href}".PHP_EOL;
+                        echo "Не валидная ссылка {$href}" . PHP_EOL;
                     }
                 }
             }
         }
     }
-    
+
     public function actionDevspec()
     {
         $downloader = new Downloader("http://www.devicespecifications.com/", 10);
-        $tasks = SourcesDevspec::model()->findAllByAttributes(['downloaded'=>0]);
+        $tasks = SourcesDevspec::model()->findAllByAttributes(['downloaded' => 0]);
         $emptyImageHash = md5_file("/var/www/analogindex/devspec-empty.jpg");
-        
+
         foreach ($tasks as $task) {
             phpQuery::unloadDocuments();
             $url = $task->url;
@@ -87,125 +189,120 @@ class DownloadCommand extends CConsoleCommand
             $product = $task->product;
             $criteria = new CDbCriteria();
             $criteria->condition = "t.name = :product and brand_data.name = :brand";
-            $criteria->params = ['product'=>$product, 'brand'=>$brand];
+            $criteria->params = ['product' => $product, 'brand' => $brand];
             $productModel = Goods::model()->with(['brand_data', 'images'])->find($criteria);
-            
+
             if (empty($productModel->brand_data->id)) {
-                echo "Не найден продукт {$brand} {$product}.".PHP_EOL;
+                echo "Не найден продукт {$brand} {$product}." . PHP_EOL;
                 $task->downloaded = 2;
                 $task->save();
                 continue;
             }
 
-            
+
             if (preg_match("/^http:\/\/www\.devicespecifications\.com\/(?P<lang>\w{2})\/model\/(?P<model>\w{8})$/isu", $url, $matches)) {
                 $lang = $matches['lang'];
                 $model = $matches['model'];
-                
-                
+
+
                 $content = $downloader->getContent($url);
                 if (!empty($content)) {
                     $task->writeContent($content);
                     $task->downloaded = 1;
                     $task->save();
                 } else {
-                    echo "Empty content {$url}".PHP_EOL;
+                    echo "Empty content {$url}" . PHP_EOL;
                     $task->downloaded = 2;
                     $task->save();
                     continue;
                 }
-                
-                $html = phpQuery::newDocumentHTML($content); 
-                
-               
-                    // Есть кнопка галереи
-                    if (pq($html)->find("a[href='http://www.devicespecifications.com/{$lang}/model-gallery/{$model}']")->length() > 0) {
-                        echo "Photo gallery exists.".PHP_EOL;
-                        $imagesContent = $downloader->getContent("http://www.devicespecifications.com/{$lang}/model-gallery/{$model}", false);
-                        if (!empty($imagesContent)) {
-                            $imagesHtml = phpQuery::newDocumentHTML($imagesContent);
-                            $images = pq($imagesHtml)->find(".gallery-container > img");
-                            
-                            foreach($images as $image) {
-                                $model = new NImages();
-                                $ext = explode(".", pq($image)->attr("src"));
-                                $ext = end($ext);
-                                $filename = "/tmp/_analogindex_download_".md5("{$brand} {$product}")."{$ext}";
-                                $downloader->downloadFile(pq($image)->attr("src"), $filename);
-                                if ($id = $model->create($filename, 'goods', "{$brand} {$product}.jpeg", pq($image)->attr("src"), "{$brand} {$product}")) {
-                                    if ($model->copyExist == true) {
-                                        unlink($filename);
-                                    }
-                                   
-                                    
-                                    $gi = new GoodsImagesCopy();
-                                    $gi->goods = $productModel->id;
-                                    $gi->image = $id;
 
-                                    if ($gi->validate()) {
-                                        $gi->save();
-                                        echo "Добавлено изображение для товара {$brand} {$product}".PHP_EOL;
-                                    }
+                $html = phpQuery::newDocumentHTML($content);
+
+
+                // Есть кнопка галереи
+                if (pq($html)->find("a[href='http://www.devicespecifications.com/{$lang}/model-gallery/{$model}']")->length() > 0) {
+                    echo "Photo gallery exists." . PHP_EOL;
+                    $imagesContent = $downloader->getContent("http://www.devicespecifications.com/{$lang}/model-gallery/{$model}", false);
+                    if (!empty($imagesContent)) {
+                        $imagesHtml = phpQuery::newDocumentHTML($imagesContent);
+                        $images = pq($imagesHtml)->find(".gallery-container > img");
+
+                        foreach ($images as $image) {
+                            $model = new NImages();
+                            $ext = explode(".", pq($image)->attr("src"));
+                            $ext = end($ext);
+                            $filename = "/tmp/_analogindex_download_" . md5("{$brand} {$product}") . "{$ext}";
+                            $downloader->downloadFile(pq($image)->attr("src"), $filename);
+                            if ($id = $model->create($filename, 'goods', "{$brand} {$product}.jpeg", pq($image)->attr("src"), "{$brand} {$product}")) {
+                                if ($model->copyExist == true) {
+                                    unlink($filename);
                                 }
 
+
+                                $gi = new GoodsImagesCopy();
+                                $gi->goods = $productModel->id;
+                                $gi->image = $id;
+
+                                if ($gi->validate()) {
+                                    $gi->save();
+                                    echo "Добавлено изображение для товара {$brand} {$product}" . PHP_EOL;
+                                }
                             }
-
-                        }
-                        //  Нет галереи, одна картинка
-                    } else {
-                        $pattern = "/url\((?P<url>http:\/\/www\.devicespecifications\.com\/images\/models\/{$model}\/320\/main\.jpg)\);/isu";
-                        if (preg_match($pattern, $content, $matches)) {
-                                $model = new NImages();
-               
-                                $ext = explode(".", $matches['url']);
-                                $ext = end($ext);
-                                $filename = "/tmp/_analogindex_download_".md5("{$brand} {$product}")."{$ext}";
-                                $downloader->downloadFile($matches['url'], $filename);
-                                if (md5_file($filename)!= $emptyImageHash) {
-                                    if ($id = $model->create($filename, 'goods', "{$brand} {$product}.jpeg", $matches['url'], "{$brand} {$product}")) {
-                                        if ($model->copyExist == true) {
-                                            unlink($filename);
-                                        }
-
-                                        if (!$id) {
-                                            echo "NOT ID";
-                                            continue;
-                                        }
-
-                                        $gi = new GoodsImagesCopy();
-                                        $gi->goods = $productModel->id;
-                                        $gi->image = $id;
-
-                                        if ($gi->validate()) {
-                                            $gi->save();
-                                            echo "Добавлено изображение для товара {$brand} {$product}";
-                                        }
-                                    }
-                                } else {
-                                    echo "Заглушка, удаляем файл".PHP_EOL;
-                                    @unlink($filename);
-                                }
                         }
                     }
-                    
-                
+                    //  Нет галереи, одна картинка
+                } else {
+                    $pattern = "/url\((?P<url>http:\/\/www\.devicespecifications\.com\/images\/models\/{$model}\/320\/main\.jpg)\);/isu";
+                    if (preg_match($pattern, $content, $matches)) {
+                        $model = new NImages();
+
+                        $ext = explode(".", $matches['url']);
+                        $ext = end($ext);
+                        $filename = "/tmp/_analogindex_download_" . md5("{$brand} {$product}") . "{$ext}";
+                        $downloader->downloadFile($matches['url'], $filename);
+                        if (md5_file($filename) != $emptyImageHash) {
+                            if ($id = $model->create($filename, 'goods', "{$brand} {$product}.jpeg", $matches['url'], "{$brand} {$product}")) {
+                                if ($model->copyExist == true) {
+                                    unlink($filename);
+                                }
+
+                                if (!$id) {
+                                    echo "NOT ID";
+                                    continue;
+                                }
+
+                                $gi = new GoodsImagesCopy();
+                                $gi->goods = $productModel->id;
+                                $gi->image = $id;
+
+                                if ($gi->validate()) {
+                                    $gi->save();
+                                    echo "Добавлено изображение для товара {$brand} {$product}";
+                                }
+                            }
+                        } else {
+                            echo "Заглушка, удаляем файл" . PHP_EOL;
+                            @unlink($filename);
+                        }
+                    }
+                }
             } else {
-                echo "Url {$url} не подходит под регулярное выражение.".PHP_EOL;
+                echo "Url {$url} не подходит под регулярное выражение." . PHP_EOL;
                 $task->downloaded = 2;
                 $task->save();
                 continue;
             }
-            echo date("Y-m-d H:i:s ")."{$brand} {$product} {$lang} ".PHP_EOL;
-            
+            echo date("Y-m-d H:i:s ") . "{$brand} {$product} {$lang} " . PHP_EOL;
         }
     }
 
     public function actionIrecommendSitemap()
     {
         $downloader = new Downloader("http://irecommend.ru/", 50);
-        
+
         $lastPage = SourcesIrecommend::model()->getLastUrl("phones");
-        
+
         $list = [];
         $page = "http://irecommend.ru/taxonomy/term/55/reviews";
         $content = $downloader->getContent($page);
@@ -213,30 +310,30 @@ class DownloadCommand extends CConsoleCommand
         $last = pq($html)->find("li.pager-last > a")->attr("href");
         $last = preg_replace("/.*reviews\?page=(?P<last>\d+)/isu", "$1", $last);
         phpQuery::unloadDocuments();
-        
+
         $list = array_merge($list, $this->_getIrecommendUrlList($content));
-                
+
         if (!$last) {
-            echo "Не удалось получить список страниц".PHP_EOL;
+            echo "Не удалось получить список страниц" . PHP_EOL;
             exit();
         }
 
-        for($i = 1; $i < $last; $i++) {
+        for ($i = 1; $i < $last; $i++) {
             $content = $downloader->getContent("http://irecommend.ru/taxonomy/term/55/reviews?page={$i}");
             $list = array_merge($list, $this->_getIrecommendUrlList($content));
             if (in_array($lastPage, $list)) {
-            //    break;
+                //    break;
             }
-            
-            if (SourcesIrecommend::model()->checkExists('phones', $list[count($list)-1])) {
+
+            if (SourcesIrecommend::model()->checkExists('phones', $list[count($list) - 1])) {
                 break;
             }
-            
-            echo "{$i} of {$last}".PHP_EOL;
+
+            echo "{$i} of {$last}" . PHP_EOL;
         }
 
         $list = array_unique($list);
-        foreach($list as $url) {
+        foreach ($list as $url) {
             $source = new SourcesIrecommend();
             $source->url = $url;
             $source->type = "phones";
@@ -249,12 +346,12 @@ class DownloadCommand extends CConsoleCommand
                 }
             }
         }
-        
-        
+
+
         $downloader = new Downloader("http://irecommend.ru/", 50);
-        
+
         $lastPage = SourcesIrecommend::model()->getLastUrl("tablets");
-        
+
         $list = [];
         $page = "http://irecommend.ru/taxonomy/term/88/reviews?tid=228032";
         $content = $downloader->getContent($page);
@@ -262,30 +359,30 @@ class DownloadCommand extends CConsoleCommand
         $last = pq($html)->find("li.pager-last > a")->attr("href");
         $last = preg_replace("/.*reviews\?page=(?P<last>\d+)\&.*/isu", "$1", $last);
         phpQuery::unloadDocuments();
-        
+
         $list = array_merge($list, $this->_getIrecommendUrlList($content));
-                
+
         if (!$last) {
-            echo "Не удалось получить список страниц".PHP_EOL;
+            echo "Не удалось получить список страниц" . PHP_EOL;
             exit();
         }
 
-        for($i = 1; $i < $last; $i++) {
+        for ($i = 1; $i < $last; $i++) {
             $content = $downloader->getContent("http://irecommend.ru/taxonomy/term/88/reviews?page={$i}&tid=228032");
             $list = array_merge($list, $this->_getIrecommendUrlList($content));
             if (in_array($lastPage, $list)) {
                 //break;
             }
-            
-            if (SourcesIrecommend::model()->checkExists('phones', $list[count($list)-1])) {
+
+            if (SourcesIrecommend::model()->checkExists('phones', $list[count($list) - 1])) {
                 //break;
             }
-            
-            echo "{$i} of {$last}".PHP_EOL;
+
+            echo "{$i} of {$last}" . PHP_EOL;
         }
-        
+
         $list = array_unique($list);
-        foreach($list as $url) {
+        foreach ($list as $url) {
             $source = new SourcesIrecommend();
             $source->url = $url;
             $source->type = "tablets";
@@ -298,9 +395,8 @@ class DownloadCommand extends CConsoleCommand
                 }
             }
         }
-
     }
-    
+
     public function actionIrecommend()
     {
         $criteria = new CDbCriteria();
@@ -310,7 +406,7 @@ class DownloadCommand extends CConsoleCommand
         $urls = SourcesIrecommend::model()->findAll($criteria);
         $downloader = new Downloader("http://irecommend.ru/", 5);
         foreach ($urls as $url) {
-            echo $url->url.PHP_EOL;
+            echo $url->url . PHP_EOL;
             if ($downloader->downloadFile($url->url, $url->getFilename(), [403, 404]) == true) {
                 $url->downloaded = 1;
                 $url->size = filesize($url->getFilename());
@@ -330,14 +426,13 @@ class DownloadCommand extends CConsoleCommand
         $result = [];
         $html = phpQuery::newDocumentHTML($content);
         $list = pq($html)->find("div.list-reviews");
-        foreach($list as $block) {
-            $result[] = "http://irecommend.ru".pq($block)->find("h3.review-head > a")->attr("href");
+        foreach ($list as $block) {
+            $result[] = "http://irecommend.ru" . pq($block)->find("h3.review-head > a")->attr("href");
         }
         phpQuery::unloadDocuments();
         return $result;
     }
-    
-    
+
     public function actionPhonearenaRss()
     {
         $feed = "http://www.phonearena.com/rss/rss_phones.php";
@@ -355,9 +450,9 @@ class DownloadCommand extends CConsoleCommand
                 $counter++;
             }
         }
-        echo "Добавлено {$counter} URL.".PHP_EOL;
+        echo "Добавлено {$counter} URL." . PHP_EOL;
     }
-    
+
     public function actionPhonearenaBrands()
     {
         $page = "http://www.phonearena.com/phones/manufacturers";
@@ -365,22 +460,21 @@ class DownloadCommand extends CConsoleCommand
         $content = $downloader->getContent($page);
         $html = phpQuery::newDocumentHTML($content);
         $items = pq($html)->find("div.s_block_4_s115");
-        foreach($items as $item) {
+        foreach ($items as $item) {
             $brand = pq($item)->find("span.title")->text();
             $image = pq($item)->find("a.s_thumb > img")->attr("src");
             if (!empty($brand) && !empty($image)) {
-                if ($brand = Brands::model()->findByAttributes(['name'=>$brand, 'logo'=>0])) {
+                if ($brand = Brands::model()->findByAttributes(['name' => $brand, 'logo' => 0])) {
                     $filename = tempnam("/tmp", "_analogindex_brand");
-                    echo $filename.PHP_EOL;
+                    echo $filename . PHP_EOL;
                     if ($downloader->downloadFile($image, $filename)) {
                         $brand->setFile($filename);
-                        echo $brand->name.PHP_EOL;
+                        echo $brand->name . PHP_EOL;
                         sleep(1);
                     }
                 }
             }
         }
-
     }
 
     public function actionPhonearena()
@@ -388,28 +482,28 @@ class DownloadCommand extends CConsoleCommand
         $downloader = new Downloader("http://www.phonearena.com/", 10);
         $list = PhonearenaUrls::model()->getDownloadList();
         foreach ($list as $item) {
-            sleep(rand(1,3));
+            sleep(rand(1, 3));
             if (!preg_match("/.*\/fullspecs$/isu", $item->fullurl)) {
                 $item->fullurl .= "/fullspecs";
             }
-            
+
             $content = $downloader->getContent($item->fullurl);
-            
+
             if ($content) {
                 $item->setContent($content);
-                echo $item->id." ".$item->fullurl.PHP_EOL;
+                echo $item->id . " " . $item->fullurl . PHP_EOL;
                 if ($url = preg_replace("/(.*)\/fullspecs$/isu", "$1/photos", $item->fullurl)) {
-                    sleep(rand(1,2));
+                    sleep(rand(1, 2));
                     $content = $downloader->getContent($url);
                     if ($content) {
                         $item->setPhotos($content);
-                        echo $item->id." ".$url.PHP_EOL;
+                        echo $item->id . " " . $url . PHP_EOL;
                     }
                 }
             }
         }
     }
-    
+
     public function actionAntutu($type = 1)
     {
         $types = array(

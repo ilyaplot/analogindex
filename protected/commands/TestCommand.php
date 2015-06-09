@@ -11,31 +11,11 @@ class TestCommand extends CConsoleCommand
 
     public function actionFilter()
     {
-        //exit(0);
+
         $criteria = new CDbCriteria();
         $criteria->order = "id desc";
-        $criteria->condition = "has_filtered = 0";
-        $criteria->limit = 15;
-        $criteria->condition = 'id = 167747';
-        $articles = Articles::model()->findAll($criteria);
-        $filter = new ArticlesFilter();
-
-        foreach ($articles as $article) {
-            echo date("Y-m-d H:i:s ") . $article->id . PHP_EOL;
-            $article = $filter->filter($article);
-            $article->save();
-        }
-        //GoodsArticles::model()->filter();
-        echo PHP_EOL;
-    }
-
-    public function actionFilterThread()
-    {
-        //exit(0);
-        $criteria = new CDbCriteria();
-        $criteria->condition = "has_filtered = 0 and id > " . rand(1, 145330);
-        $criteria->limit = 15;
-        //$criteria->condition = 'id = 74170';
+        //$criteria->condition = "has_filtered = 0";
+        $criteria->limit = 50000;
         $articles = Articles::model()->findAll($criteria);
         $filter = new ArticlesFilter();
 
@@ -50,7 +30,7 @@ class TestCommand extends CConsoleCommand
 
     public function actionSpec()
     {
-        
+
         $criteria = new CDbCriteria();
         $criteria->condition = "t.characteristic = 12";
         $characteristics = GoodsCharacteristics::model()->findAll($criteria);
@@ -110,7 +90,7 @@ class TestCommand extends CConsoleCommand
             }
         }
 
-        
+
         $criteria = new CDbCriteria();
         $criteria->condition = "t.characteristic = 22";
         $characteristics = GoodsCharacteristics::model()->findAll($criteria);
@@ -118,7 +98,7 @@ class TestCommand extends CConsoleCommand
             if (empty($characteristic->value)) {
                 continue;
             }
-            
+
             $model = new SpecificationsValues();
             $model->goods = $characteristic->goods;
             $model->lang = $characteristic->lang;
@@ -147,8 +127,8 @@ class TestCommand extends CConsoleCommand
                 $model->save();
             }
         }
-        
-        
+
+
         $criteria = new CDbCriteria();
         $criteria->condition = "t.characteristic = 5";
         $characteristics = GoodsCharacteristics::model()->findAll($criteria);
@@ -168,7 +148,7 @@ class TestCommand extends CConsoleCommand
             }
         }
 
-        
+
         $criteria = new CDbCriteria();
         $criteria->condition = "t.characteristic in (32,33,34)";
         $criteria->order = 't.goods asc';
@@ -179,41 +159,39 @@ class TestCommand extends CConsoleCommand
             if (!is_array($values) || empty($values)) {
                 continue;
             }
-            
-            foreach($values as $value) {
+
+            foreach ($values as $value) {
                 if (preg_match("/^GSM.+/isu", $value)) {
                     $specifications[$characteristic->goods][14][] = $value;
                     continue;
                 }
-                
+
                 if (preg_match("/^UMTS.+/isu", $value)) {
                     $specifications[$characteristic->goods][17][] = $value;
                     continue;
                 }
-                
-                
+
+
                 if (preg_match("/^LTE.+/isu", $value)) {
                     $specifications[$characteristic->goods][18][] = $value;
                     continue;
                 }
-                
+
                 if (preg_match("/^HSDPA.+/isu", $value)) {
                     $specifications[$characteristic->goods][17][] = $value;
                     continue;
                 }
-                
+
                 if (preg_match("/^CDMA.+/isu", $value)) {
                     $specifications[$characteristic->goods][19][] = $value;
                     continue;
                 }
-                
             }
-
         }
-        
-        foreach ($specifications as $product=>$specification) {
-            foreach ($specification as $key=>$values) {
-                
+
+        foreach ($specifications as $product => $specification) {
+            foreach ($specification as $key => $values) {
+
                 $values = array_unique($values);
                 $model = new SpecificationsValues();
                 $model->goods = $product;
@@ -223,7 +201,7 @@ class TestCommand extends CConsoleCommand
                 if ($model->validate()) {
                     $model->save();
                 }
-                
+
                 $model = new SpecificationsValues();
                 $model->goods = $product;
                 $model->lang = 'en';
@@ -235,7 +213,7 @@ class TestCommand extends CConsoleCommand
             }
         }
 
-        
+
         $criteria = new CDbCriteria();
         $criteria->condition = "t.characteristic = 36";
         $characteristics = GoodsCharacteristics::model()->findAll($criteria);
@@ -254,13 +232,13 @@ class TestCommand extends CConsoleCommand
                 $model->save();
             }
         }
-  
-        $products = Goods::model()->with(['brand_data'=>['joinType'=>'inner join']])->findAll();
+
+        $products = Goods::model()->with(['brand_data' => ['joinType' => 'inner join']])->findAll();
         foreach ($products as $product) {
             if (empty($product->name) || empty($product->brand_data->name)) {
                 continue;
             }
-            
+
             $model = new SpecificationsValues();
             $model->goods = $product->id;
             $model->lang = 'ru';
@@ -270,7 +248,7 @@ class TestCommand extends CConsoleCommand
             if ($model->validate()) {
                 $model->save();
             }
-            
+
             $model = new SpecificationsValues();
             $model->goods = $product->id;
             $model->lang = 'en';
@@ -280,7 +258,7 @@ class TestCommand extends CConsoleCommand
             if ($model->validate()) {
                 $model->save();
             }
-            
+
             $model = new SpecificationsValues();
             $model->goods = $product->id;
             $model->lang = 'ru';
@@ -290,7 +268,7 @@ class TestCommand extends CConsoleCommand
             if ($model->validate()) {
                 $model->save();
             }
-            
+
             $model = new SpecificationsValues();
             $model->goods = $product->id;
             $model->lang = 'en';
@@ -301,9 +279,9 @@ class TestCommand extends CConsoleCommand
                 $model->save();
             }
         }
-        
-  
-        
+
+
+
         $criteria = new CDbCriteria();
         $criteria->condition = "t.characteristic = 3";
         $characteristics = GoodsCharacteristics::model()->findAll($criteria);
@@ -311,7 +289,7 @@ class TestCommand extends CConsoleCommand
             if (!$characteristic->value) {
                 continue;
             }
-            
+
             $model = new SpecificationsValues();
             $model->goods = $characteristic->goods;
             $model->lang = $characteristic->lang;
@@ -321,9 +299,9 @@ class TestCommand extends CConsoleCommand
                 $model->save();
             }
         }
-        
-      
-        
+
+
+
         $criteria = new CDbCriteria();
         $criteria->condition = "t.characteristic = 4";
         $characteristics = GoodsCharacteristics::model()->findAll($criteria);
@@ -363,4 +341,5 @@ class TestCommand extends CConsoleCommand
             }
         }
     }
+
 }

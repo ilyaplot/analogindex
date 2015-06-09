@@ -33,6 +33,7 @@ class Videos extends CActiveRecord
                 "select" => "AVG(rating.value) as value",
             ),
             'goods_data' => [self::BELONGS_TO, "Goods", "goods"],
+            'article_data' => [self::BELONGS_TO, "Articles", "article"],
         );
     }
 
@@ -40,16 +41,16 @@ class Videos extends CActiveRecord
     {
         return array();
     }
-    
+
     public function rules()
     {
         return [
-            ['link', 'unique', 'allowEmpty'=>false, 
-                'attributeName'=>'link', 
-                'className'=>'Videos', 
-                'criteria'=>[
-                    'condition'=>'goods = :goods and lang = :lang', 
-                    'params'=>['goods'=>  $this->goods, 'lang'=>  $this->lang]
+            ['link', 'unique', 'allowEmpty' => false,
+                'attributeName' => 'link',
+                'className' => 'Videos',
+                'criteria' => [
+                    'condition' => 'goods = :goods and lang = :lang',
+                    'params' => ['goods' => $this->goods, 'lang' => $this->lang]
                 ],
             ]
         ];
@@ -82,7 +83,6 @@ class Videos extends CActiveRecord
                 'maxResults' => $limit,
                 'regionCode' => ($language == 'ru') ? 'ru' : 'us',
             ));
-            
         } catch (Exception $ex) {
             return array();
         }
@@ -96,17 +96,29 @@ class Videos extends CActiveRecord
         return $videos;
     }
 
-    public function getYoutubeSnippet($code)
+    public function getYoutubeSnippet($code, $update = false)
     {
+        if ($this->duration != '0000-00-00 00:00:00' && !empty($this->title) && !$update) {
+            $snipet = [
+                'title' => $this->title,
+                'description' => $this->description,
+                'duration' => $this->duration,
+                'thumbnail' => $this->thumbnail,
+                'date_added' => $this->date_added,
+            ];
+            return (object) $snipet;
+        }
+
         $snipet = [
-            'title'=>'',
-            'description'=>'',
-            'duration'=>'',
-            'thumbnail'=>'',
-            'date_added'=>'',
+            'title' => '',
+            'description' => '',
+            'duration' => '',
+            'thumbnail' => '',
+            'date_added' => '',
         ];
-        
+
         $snipet = (object) $snipet;
+        
         if (empty($language)) {
             $language = Yii::app()->language;
         }
@@ -116,7 +128,7 @@ class Videos extends CActiveRecord
         $client = new Google_Client();
         $client->setDeveloperKey("AIzaSyCm5k_ScE8R_WiSyEBOc3xWGM9oXFg2RRI");
         $youtube = new Google_YoutubeService($client);
-        
+
         try {
             $searchResponse = $youtube->videos->list(array(
                 'part' => 'snippet,contentDetails',
@@ -135,7 +147,18 @@ class Videos extends CActiveRecord
         } catch (Exception $ex) {
             return $snipet;
         }
-        
-        
     }
+
+    public function beforeSave()
+    {
+        if (($this->isNewRecord || empty($this->duration)) && $snipet = $this->getYoutubeSnippet($this->link)) {
+            $this->title = $snipet->title;
+            $this->description = $snipet->description;
+            $this->duration = $snipet->duration;
+            $this->thumbnail = $snipet->thumbnail;
+            $this->date_added = $snipet->date_added;
+        }
+        return parent::beforeSave();
+    }
+
 }

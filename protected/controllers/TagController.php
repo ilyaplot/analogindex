@@ -4,6 +4,7 @@ class TagController extends Controller
 {    
     public function actionNews($type, $tag)
     {
+        $this->layout = 'materialize';
         $criteria = new CDbCriteria();
         $criteria->condition = "type = :type and link = :link and disabled = 0";
         $criteria->params = ['type'=>$type, 'link'=>$tag];
@@ -27,6 +28,7 @@ class TagController extends Controller
     
     public function actionOpinion($type, $tag)
     {
+        $this->layout = 'materialize';
         $criteria = new CDbCriteria();
         $criteria->condition = "type = :type and link = :link and disabled = 0";
         $criteria->params = ['type'=>$type, 'link'=>$tag];
@@ -50,6 +52,7 @@ class TagController extends Controller
     
     public function actionHowto($type, $tag)
     {
+        $this->layout = 'materialize';
         $criteria = new CDbCriteria();
         $criteria->condition = "type = :type and link = :link and disabled = 0";
         $criteria->params = ['type'=>$type, 'link'=>$tag];
@@ -73,6 +76,7 @@ class TagController extends Controller
     
     public function actionReview($type, $tag)
     {
+        $this->layout = 'materialize';
         $criteria = new CDbCriteria();
         $criteria->condition = "type = :type and link = :link and disabled = 0";
         $criteria->params = ['type'=>$type, 'link'=>$tag];

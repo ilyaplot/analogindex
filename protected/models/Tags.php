@@ -53,7 +53,6 @@ class Tags extends CActiveRecord
     public function relations()
     {
         return [
-            'reviews' => [self::HAS_MANY, 'ReviewsTags', 'tag'],
             'goods' => [self::HAS_ONE, 'GoodsTags', 'tag'],
             'brand' => [self::HAS_ONE, 'BrandsTags', 'tag'],
         ];

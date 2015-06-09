@@ -47,4 +47,13 @@ class ArticlesImagesCopy extends CActiveRecord
     {
         return isset($this->image_data) ? $this->image_data->createUrl(NImages::SIZE_ARTICLE_PREVIEW) : false;
     }
+    
+    public function getFilename()
+    {
+        //$this->getExtension($size)
+        //$this->image_data->getStoragePath()
+        
+        
+        return isset($this->image_data) ? $this->image_data->getStoragePath().$this->image_data->id.'.jpeg' : false;
+    }
 }
